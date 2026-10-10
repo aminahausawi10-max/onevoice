@@ -1,0 +1,67 @@
+{
+  "user": {
+    "id": 1,
+    "name": "Alex Morgan",
+    "phone": "+1 (415) 555-2671",
+    "email": "demo@onevoice.app"
+  },
+  "wallet": {
+    "balance": 24.99,
+    "currency": "USD"
+  },
+  "transactions": [
+    {
+      "id": 1,
+      "type": "topup",
+      "amount": 15,
+      "balance_after": 15,
+      "description": "Initial Welcome Calling Credit",
+      "created_at": "10/10/2026, 10:03:53 PM"
+    },
+    {
+      "id": 2,
+      "type": "topup",
+      "amount": 10,
+      "balance_after": 25,
+      "description": "Wallet Top-Up via In-App Payment",
+      "created_at": "10/10/2026, 11:06:17 PM"
+    },
+    {
+      "id": 3,
+      "type": "call_deduction",
+      "amount": -0.012,
+      "balance_after": 24.99,
+      "description": "Call to United States (60s)",
+      "created_at": "10/10/2026, 11:08:14 PM"
+    }
+  ],
+  "call_logs": [
+    {
+      "id": 1,
+      "destination_number": "+44 20 7946 0991",
+      "destination_country": "United Kingdom",
+      "duration_seconds": 142,
+      "cost": 0.0426,
+      "status": "completed",
+      "created_at": "10/10/2026, 10:33:53 PM"
+    },
+    {
+      "id": 2,
+      "destination_number": "+234 803 123 4567",
+      "destination_country": "Nigeria",
+      "duration_seconds": 85,
+      "cost": 0.1062,
+      "status": "completed",
+      "created_at": "10/9/2026, 11:03:53 PM"
+    },
+    {
+      "id": 3,
+      "destination_number": "+14155552671",
+      "destination_country": "United States",
+      "duration_seconds": 60,
+      "cost": 0.012,
+      "status": "completed",
+      "created_at": "10/10/2026, 11:08:14 PM"
+    }
+  ]
+}
