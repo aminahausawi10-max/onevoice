@@ -1,8 +1,13 @@
 /**
- * ONE VOICE - Core Application Controller
- * Handles Multilingual Routing (EN/HA), User Registration, Login,
- * OTP Verification (6-digit), Dashboard, Contacts, Settings, Audio DTMF,
- * Live Calling Simulator, Wallet Management, and Secure Logout.
+ * ONE VOICE - Single Page Application Router & Controller
+ * Implements Dedicated Page Navigation for:
+ * - Home (Dashboard)
+ * - Make Call (Dialer)
+ * - Contacts
+ * - Wallet
+ * - Call Rates
+ * - Settings
+ * - Auth Pages (Register, Login, OTP, Forgot/Reset)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -10,6 +15,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // State Management
     // ----------------------------------------------------
     let currentUser = null;
+    let currentPage = 'welcome';
     let otpCountdownTimer = null;
     let otpSecondsLeft = 300;
     let pendingLoginIdentifier = '';
@@ -26,35 +32,29 @@ document.addEventListener('DOMContentLoaded', () => {
     let cachedRates = [];
 
     // ----------------------------------------------------
-    // DOM Elements - Views & Containers
+    // DOM Elements - Navigation & Shell
     // ----------------------------------------------------
-    const viewWelcome = document.getElementById('welcome-section');
-    const viewRegister = document.getElementById('view-register');
-    const viewRegSuccess = document.getElementById('view-reg-success');
-    const viewLogin = document.getElementById('view-login');
-    const viewOtp = document.getElementById('view-otp');
-    const viewForgotPassword = document.getElementById('view-forgot-password');
-    const viewResetPassword = document.getElementById('view-reset-password');
-    const viewDashboard = document.getElementById('dashboard-section');
-    const contactsView = document.getElementById('contacts-view');
-    const settingsView = document.getElementById('settings-view');
-
-    // Navigation elements
+    const allPages = document.querySelectorAll('.app-page');
+    const allPageButtons = document.querySelectorAll('.nav-page-btn');
     const publicNavLinks = document.getElementById('public-nav-links');
     const authNavLinks = document.getElementById('auth-nav-links');
     const publicAuthBtns = document.getElementById('public-auth-btns');
     const authUserBtns = document.getElementById('auth-user-btns');
+    const mobileDock = document.getElementById('mobile-dock');
     const navMemberBadge = document.getElementById('nav-member-badge');
     const navBalanceDisplay = document.getElementById('nav-balance');
     const brandLogo = document.getElementById('nav-brand-logo');
 
-    // Dashboard info elements
+    // Dashboard & Profile Elements
     const dashUserName = document.getElementById('dash-user-name');
     const dashMemberId = document.getElementById('dash-member-id');
     const dashWalletBalance = document.getElementById('dash-wallet-balance');
     const dashLangBadge = document.getElementById('dash-language-badge');
+    const userDisplayName = document.getElementById('user-display-name');
+    const userMemberDisplay = document.getElementById('user-member-display');
+    const dialerBalancePill = document.getElementById('dialer-balance-pill');
 
-    // Phone / Dialer Elements
+    // Dialer Elements
     const dialDisplay = document.getElementById('dial-number');
     const dialCountry = document.getElementById('dial-country');
     const callingOverlay = document.getElementById('calling-overlay');
@@ -68,12 +68,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const backspaceBtn = document.getElementById('btn-dial-backspace');
     const dialClearBtn = document.getElementById('btn-dial-clear');
     
-    // Wallet & Table Elements
+    // Wallet & Tables
     const walletBalanceEl = document.getElementById('wallet-balance');
     const ratesGrid = document.getElementById('rates-grid');
     const ratesSearch = document.getElementById('rates-search');
     const transactionsList = document.getElementById('transactions-body');
     const callLogsList = document.getElementById('call-logs-body');
+    const homeCallLogsList = document.getElementById('home-call-logs-body');
     const contactsContainer = document.getElementById('contacts-list-container');
 
     // Modals
@@ -82,43 +83,86 @@ document.addEventListener('DOMContentLoaded', () => {
     const addContactModal = document.getElementById('add-contact-modal');
 
     // ----------------------------------------------------
-    // 1. View Navigation Controller
+    // 1. Dedicated Multi-Page Routing Engine
     // ----------------------------------------------------
-    function hideAllAuthViews() {
-        [viewRegister, viewRegSuccess, viewLogin, viewOtp, viewForgotPassword, viewResetPassword].forEach(v => {
-            if (v) v.classList.remove('active');
+    function navigateToPage(pageName) {
+        if (!pageName) return;
+
+        // If user is not authenticated and tries to access protected page
+        const protectedPages = ['home', 'contacts', 'settings'];
+        if (!currentUser && protectedPages.includes(pageName)) {
+            showToast('Please sign in to access this page', 'warning');
+            pageName = 'login';
+        }
+
+        const targetEl = document.getElementById('page-' + pageName);
+        if (!targetEl) {
+            console.warn(`Target page "page-${pageName}" not found`);
+            return;
+        }
+
+        // Hide all pages and show target page
+        allPages.forEach(p => p.classList.remove('active'));
+        targetEl.classList.add('active');
+        currentPage = pageName;
+
+        // Update active class on all navigation buttons (desktop + mobile dock)
+        allPageButtons.forEach(btn => {
+            if (btn.getAttribute('data-page') === pageName) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        // Scroll cleanly to the top of the newly loaded page
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+
+        // Lazy load page-specific data
+        if (pageName === 'contacts') {
+            loadContacts();
+        } else if (pageName === 'wallet' || pageName === 'home') {
+            loadWalletData();
+            loadCallLogs();
+            loadTransactions();
+        } else if (pageName === 'rates') {
+            loadRates();
+        } else if (pageName === 'dialer') {
+            if (dialerBalancePill) dialerBalancePill.textContent = userWalletBalance.toFixed(2);
+        }
+
+        // Update URL hash without jumping
+        try {
+            history.pushState(null, '', `#${pageName}`);
+        } catch (e) {}
+    }
+
+    // Attach click listener to ALL page navigation buttons
+    document.addEventListener('click', (e) => {
+        const btn = e.target.closest('[data-page]');
+        if (btn) {
+            e.preventDefault();
+            const pageName = btn.getAttribute('data-page');
+            navigateToPage(pageName);
+        }
+    });
+
+    // Handle browser back/forward buttons
+    window.addEventListener('popstate', () => {
+        const hash = window.location.hash.replace('#', '') || (currentUser ? 'home' : 'welcome');
+        navigateToPage(hash);
+    });
+
+    // Brand logo navigation
+    if (brandLogo) {
+        brandLogo.addEventListener('click', (e) => {
+            e.preventDefault();
+            navigateToPage(currentUser ? 'home' : 'welcome');
         });
     }
 
-    function showView(name) {
-        hideAllAuthViews();
-
-        if (name === 'welcome') {
-            if (viewWelcome) viewWelcome.style.display = 'grid';
-            if (viewDashboard) viewDashboard.classList.remove('active');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        } else if (name === 'dashboard') {
-            if (viewWelcome) viewWelcome.style.display = 'none';
-            if (viewDashboard) viewDashboard.classList.add('active');
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        } else {
-            // An auth page view
-            if (viewWelcome) viewWelcome.style.display = 'none';
-            if (viewDashboard) viewDashboard.classList.remove('active');
-
-            if (name === 'register' && viewRegister) viewRegister.classList.add('active');
-            if (name === 'reg-success' && viewRegSuccess) viewRegSuccess.classList.add('active');
-            if (name === 'login' && viewLogin) viewLogin.classList.add('active');
-            if (name === 'otp' && viewOtp) viewOtp.classList.add('active');
-            if (name === 'forgot' && viewForgotPassword) viewForgotPassword.classList.add('active');
-            if (name === 'reset' && viewResetPassword) viewResetPassword.classList.add('active');
-
-            window.scrollTo({ top: 120, behavior: 'smooth' });
-        }
-    }
-
     // ----------------------------------------------------
-    // 2. Localization & Language Setup (EN / HA)
+    // 2. Localization (English / Hausa)
     // ----------------------------------------------------
     if (window.locManager) {
         window.locManager.applyTranslations();
@@ -136,42 +180,40 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ----------------------------------------------------
-    // 3. Navigation Event Listeners
+    // 3. User Authentication State Setup
     // ----------------------------------------------------
-    if (brandLogo) {
-        brandLogo.addEventListener('click', (e) => {
-            e.preventDefault();
-            if (currentUser) {
-                showView('dashboard');
-            } else {
-                showView('welcome');
-            }
-        });
+    function setAuthenticatedUI(user) {
+        if (!user) return;
+        currentUser = user;
+
+        if (publicNavLinks) publicNavLinks.style.display = 'none';
+        if (authNavLinks) authNavLinks.style.display = 'flex';
+        if (publicAuthBtns) publicAuthBtns.style.display = 'none';
+        if (authUserBtns) authUserBtns.style.display = 'flex';
+        if (mobileDock) mobileDock.style.display = 'flex';
+
+        if (navMemberBadge) navMemberBadge.textContent = user.member_id || 'OV-784920';
+        if (dashUserName) dashUserName.textContent = user.name;
+        if (dashMemberId) dashMemberId.textContent = user.member_id || 'OV-784920';
+        if (userDisplayName) userDisplayName.textContent = user.name;
+        if (userMemberDisplay) userMemberDisplay.textContent = `Member ID: ${user.member_id || 'OV-784920'}`;
+
+        if (dashLangBadge) {
+            dashLangBadge.textContent = (user.language === 'ha') ? 'Hausa (ha)' : 'English (en)';
+        }
+        const settingsLang = document.getElementById('settings-language');
+        if (settingsLang && user.language) settingsLang.value = user.language;
+        const settingsName = document.getElementById('settings-name');
+        if (settingsName && user.name) settingsName.value = user.name;
     }
 
-    // Welcome Page Action Triggers
-    const heroBtnCreate = document.getElementById('hero-btn-create-account');
-    const heroBtnLogin = document.getElementById('hero-btn-login');
-    const navBtnLogin = document.getElementById('nav-btn-login');
-    const navBtnRegister = document.getElementById('nav-btn-register');
-
-    if (heroBtnCreate) heroBtnCreate.addEventListener('click', () => showView('register'));
-    if (heroBtnLogin) heroBtnLogin.addEventListener('click', () => showView('login'));
-    if (navBtnLogin) navBtnLogin.addEventListener('click', () => showView('login'));
-    if (navBtnRegister) navBtnRegister.addEventListener('click', () => showView('register'));
-
-    // Auth cross-links
-    const linkToLogin = document.getElementById('link-to-login');
-    const linkToRegister = document.getElementById('link-to-register');
-    const linkForgot = document.getElementById('link-forgot-password');
-    const linkForgotBack = document.getElementById('link-forgot-back-to-login');
-    const btnSuccessLogin = document.getElementById('btn-success-goto-login');
-
-    if (linkToLogin) linkToLogin.addEventListener('click', (e) => { e.preventDefault(); showView('login'); });
-    if (linkToRegister) linkToRegister.addEventListener('click', (e) => { e.preventDefault(); showView('register'); });
-    if (linkForgot) linkForgot.addEventListener('click', (e) => { e.preventDefault(); showView('forgot'); });
-    if (linkForgotBack) linkForgotBack.addEventListener('click', (e) => { e.preventDefault(); showView('login'); });
-    if (btnSuccessLogin) btnSuccessLogin.addEventListener('click', () => showView('login'));
+    function setUnauthenticatedUI() {
+        currentUser = null;
+        if (publicNavLinks) publicNavLinks.style.display = 'flex';
+        if (authNavLinks) authNavLinks.style.display = 'none';
+        if (publicAuthBtns) publicAuthBtns.style.display = 'flex';
+        if (authUserBtns) authUserBtns.style.display = 'none';
+    }
 
     // ----------------------------------------------------
     // 4. Registration Submission
@@ -216,12 +258,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast('Account created successfully!', 'success');
                     const succId = document.getElementById('success-member-id');
                     if (succId) succId.textContent = `Member ID: ${data.member_id}`;
-                    showView('reg-success');
+                    navigateToPage('reg-success');
                 } else {
                     showToast(data.message || 'Registration failed', 'error');
                 }
             } catch (err) {
-                showToast('Network or server error during registration', 'error');
+                showToast('Network error during registration', 'error');
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'Register';
@@ -247,31 +289,27 @@ document.addEventListener('DOMContentLoaded', () => {
                 const res = await fetch('api/auth.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'login',
-                        identifier: id,
-                        password: pass
-                    })
+                    body: JSON.stringify({ action: 'login', identifier: id, password: pass })
                 });
                 const data = await res.json();
 
                 if (data.success && data.otp_sent) {
                     pendingLoginIdentifier = id;
-                    const otpTargetDisplay = document.getElementById('otp-target-display');
-                    if (otpTargetDisplay) otpTargetDisplay.textContent = id;
+                    const otpTarget = document.getElementById('otp-target-display');
+                    if (otpTarget) otpTarget.textContent = id;
 
                     showToast(data.message, 'success');
                     if (data.debug_hint) {
                         setTimeout(() => showToast(`🔑 ${data.debug_hint}`, 'info'), 1000);
                     }
 
-                    showView('otp');
+                    navigateToPage('otp');
                     startOtpTimer(data.expires_in_seconds || 300);
                 } else {
                     showToast(data.message || 'Invalid credentials', 'error');
                 }
             } catch (err) {
-                showToast('Unable to connect to login server', 'error');
+                showToast('Server connection error during login', 'error');
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'Send OTP & Login';
@@ -280,7 +318,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------
-    // 6. OTP Countdown Timer & Resend
+    // 6. OTP Timer & Resend
     // ----------------------------------------------------
     function startOtpTimer(seconds = 300) {
         if (otpCountdownTimer) clearInterval(otpCountdownTimer);
@@ -294,7 +332,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (otpSecondsLeft <= 0) {
                 clearInterval(otpCountdownTimer);
-                showToast('OTP has expired. Please click Resend OTP.', 'warning');
+                showToast('OTP has expired. Please request a new code.', 'warning');
             }
             otpSecondsLeft--;
         };
@@ -324,13 +362,13 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (err) {
                 showToast('Failed to resend code', 'error');
             } finally {
-                setTimeout(() => { btnResendOtp.disabled = false; }, 5000);
+                setTimeout(() => { btnResendOtp.disabled = false; }, 4000);
             }
         });
     }
 
     // ----------------------------------------------------
-    // 7. OTP Verification Submission (Step 2 -> Enter Dashboard)
+    // 7. OTP Verification (Step 2 -> Enter Home Dashboard)
     // ----------------------------------------------------
     const formOtp = document.getElementById('form-otp-verify');
     if (formOtp) {
@@ -358,8 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (otpCountdownTimer) clearInterval(otpCountdownTimer);
                     setAuthenticatedUI(currentUser);
                     showToast(data.message, 'success');
-                    showView('dashboard');
-                    loadContacts();
+                    navigateToPage('home');
                 } else {
                     showToast(data.message || 'OTP verification failed', 'error');
                 }
@@ -392,9 +429,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     setTimeout(() => showToast(`🔑 ${data.debug_hint}`, 'info'), 1000);
                 }
                 pendingLoginIdentifier = id;
-                showView('reset');
+                navigateToPage('reset');
             } catch (err) {
-                showToast('Unable to send password recovery code', 'error');
+                showToast('Unable to send recovery code', 'error');
             }
         });
     }
@@ -427,9 +464,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await res.json();
                 if (data.success) {
                     showToast(data.message, 'success');
-                    showView('login');
+                    navigateToPage('login');
                 } else {
-                    showToast(data.message || 'Password reset failed', 'error');
+                    showToast(data.message || 'Reset failed', 'error');
                 }
             } catch (err) {
                 showToast('Failed to reset password', 'error');
@@ -438,79 +475,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------
-    // 9. Authenticated UI State Setup
+    // 9. Logout
     // ----------------------------------------------------
-    function setAuthenticatedUI(user) {
-        if (!user) return;
-        currentUser = user;
-
-        if (publicNavLinks) publicNavLinks.style.display = 'none';
-        if (authNavLinks) authNavLinks.style.display = 'flex';
-        if (publicAuthBtns) publicAuthBtns.style.display = 'none';
-        if (authUserBtns) authUserBtns.style.display = 'flex';
-
-        if (navMemberBadge) navMemberBadge.textContent = user.member_id || 'OV-784920';
-        if (dashUserName) dashUserName.textContent = user.name;
-        if (dashMemberId) dashMemberId.textContent = user.member_id || 'OV-784920';
-
-        const userDisplay = document.getElementById('user-display-name');
-        if (userDisplay) userDisplay.textContent = user.name;
-        const memberDisplay = document.getElementById('user-member-display');
-        if (memberDisplay) memberDisplay.textContent = `Member ID: ${user.member_id || 'OV-784920'}`;
-
-        if (dashLangBadge) {
-            dashLangBadge.textContent = (user.language === 'ha') ? 'Hausa (ha)' : 'English (en)';
-        }
-    }
-
-    function setUnauthenticatedUI() {
-        currentUser = null;
-        if (publicNavLinks) publicNavLinks.style.display = 'flex';
-        if (authNavLinks) authNavLinks.style.display = 'none';
-        if (publicAuthBtns) publicAuthBtns.style.display = 'flex';
-        if (authUserBtns) authUserBtns.style.display = 'none';
-    }
-
-    // ----------------------------------------------------
-    // 10. Dashboard 9-Feature Action Handlers
-    // ----------------------------------------------------
-    const dashBtnMakeCall = document.getElementById('dash-btn-make-call');
-    const dashBtnContacts = document.getElementById('dash-btn-contacts');
-    const dashBtnSettings = document.getElementById('dash-btn-settings');
-    const dashBtnLogout = document.getElementById('dash-btn-logout');
-    const navBtnLogout = document.getElementById('btn-trigger-logout');
-
-    if (dashBtnMakeCall) {
-        dashBtnMakeCall.addEventListener('click', () => {
-            if (viewWelcome) viewWelcome.style.display = 'grid';
-            document.getElementById('dialer-card').scrollIntoView({ behavior: 'smooth' });
-        });
-    }
-
-    if (dashBtnContacts) {
-        dashBtnContacts.addEventListener('click', () => {
-            if (contactsView) {
-                contactsView.style.display = contactsView.style.display === 'none' ? 'block' : 'none';
-                contactsView.scrollIntoView({ behavior: 'smooth' });
-            }
-        });
-    }
-
-    if (dashBtnSettings) {
-        dashBtnSettings.addEventListener('click', () => {
-            if (settingsView) {
-                settingsView.style.display = settingsView.style.display === 'none' ? 'block' : 'none';
-                settingsView.scrollIntoView({ behavior: 'smooth' });
-            }
-        });
-    }
-
-    // Logout Trigger
-    if (dashBtnLogout) dashBtnLogout.addEventListener('click', () => openLogoutModal());
-    if (navBtnLogout) navBtnLogout.addEventListener('click', () => openLogoutModal());
-
     window.openLogoutModal = () => { if (logoutModal) logoutModal.classList.add('active'); };
     window.closeLogoutModal = () => { if (logoutModal) logoutModal.classList.remove('active'); };
+
+    const navBtnLogout = document.getElementById('btn-trigger-logout');
+    if (navBtnLogout) navBtnLogout.addEventListener('click', window.openLogoutModal);
 
     const btnConfirmLogout = document.getElementById('btn-confirm-logout');
     if (btnConfirmLogout) {
@@ -526,12 +497,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
             setUnauthenticatedUI();
             showToast('Your session has ended safely. Goodbye!', 'info');
-            showView('welcome');
+            navigateToPage('welcome');
         });
     }
 
     // ----------------------------------------------------
-    // 11. Contacts Management
+    // 10. Contacts Management
     // ----------------------------------------------------
     async function loadContacts() {
         try {
@@ -548,7 +519,7 @@ document.addEventListener('DOMContentLoaded', () => {
         contactsContainer.innerHTML = '';
 
         if (!contacts || contacts.length === 0) {
-            contactsContainer.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:20px;">No saved contacts yet.</p>`;
+            contactsContainer.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:30px;">No saved contacts yet. Click "+ Add New Contact" to create one.</p>`;
             return;
         }
 
@@ -566,21 +537,20 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
                 </div>
                 <div style="display:flex; gap:10px;">
-                    <button class="clay-btn clay-btn-primary" style="padding:8px 16px; font-size:0.85rem;" data-dial="${c.phone}">
+                    <button class="clay-btn clay-btn-primary" style="padding:8px 18px; font-size:0.85rem;" data-dial="${c.phone}">
                         📞 Call
                     </button>
-                    <button class="clay-action-icon-btn" style="width:36px; height:36px; font-size:0.9rem;" data-delete="${c.id}" title="Delete">
+                    <button class="clay-action-icon-btn" style="width:38px; height:38px; font-size:0.9rem;" data-delete="${c.id}" title="Delete">
                         🗑️
                     </button>
                 </div>
             `;
 
-            // Call contact
+            // Call contact directly on Dialer Page
             item.querySelector('button[data-dial]').addEventListener('click', () => {
                 currentDialNumber = c.phone;
                 updateDialDisplay();
-                if (viewWelcome) viewWelcome.style.display = 'grid';
-                document.getElementById('dialer-card').scrollIntoView({ behavior: 'smooth' });
+                navigateToPage('dialer');
                 showToast(`Calling ${c.name} (${c.phone})...`, 'info');
                 setTimeout(() => startCall(), 500);
             });
@@ -634,7 +604,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------
-    // 12. Settings Updates
+    // 11. Settings Form
     // ----------------------------------------------------
     const formUpdateProfile = document.getElementById('form-update-profile');
     if (formUpdateProfile) {
@@ -651,7 +621,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast('Profile & preferences saved!', 'success');
+                    showToast('Profile and preferences updated!', 'success');
                     if (currentUser) {
                         currentUser.name = name;
                         currentUser.language = lang;
@@ -662,7 +632,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             } catch (err) {
-                showToast('Failed to update profile', 'error');
+                showToast('Failed to save settings', 'error');
             }
         });
     }
@@ -700,7 +670,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------
-    // 13. Interactive Phone Dialer & Web Audio DTMF
+    // 12. Interactive Phone Dialer & DTMF Engine
     // ----------------------------------------------------
     const dialKeys = document.querySelectorAll('.clay-dial-key');
     dialKeys.forEach(btn => {
@@ -860,7 +830,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------
-    // 14. Rates Calculator
+    // 13. Rates Calculator
     // ----------------------------------------------------
     async function loadRates(searchQuery = '') {
         try {
@@ -909,8 +879,7 @@ document.addEventListener('DOMContentLoaded', () => {
             card.querySelector('button').addEventListener('click', () => {
                 currentDialNumber = r.dial_code;
                 updateDialDisplay();
-                if (viewWelcome) viewWelcome.style.display = 'grid';
-                document.getElementById('dialer-card').scrollIntoView({ behavior: 'smooth' });
+                navigateToPage('dialer');
                 showToast(`Dial code for ${r.country_name} (${r.dial_code}) loaded`, 'info');
             });
 
@@ -927,7 +896,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------
-    // 15. Wallet Top-Up
+    // 14. Wallet Management
     // ----------------------------------------------------
     async function loadWalletData() {
         try {
@@ -946,6 +915,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (walletBalanceEl) walletBalanceEl.textContent = formatted;
         if (dashWalletBalance) dashWalletBalance.textContent = formatted;
         if (navBalanceDisplay) navBalanceDisplay.textContent = formatted;
+        if (dialerBalancePill) dialerBalancePill.textContent = balance.toFixed(2);
     }
 
     const topupChips = document.querySelectorAll('.topup-chip-btn');
@@ -1037,25 +1007,34 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function renderCallLogs(calls) {
-        if (!callLogsList) return;
-        callLogsList.innerHTML = '';
-        calls.forEach(c => {
-            const tr = document.createElement('tr');
-            const mins = Math.floor(c.duration_seconds / 60);
-            const secs = c.duration_seconds % 60;
-            tr.innerHTML = `
-                <td><strong>${c.destination_country}</strong></td>
-                <td style="font-family:var(--font-mono);">${c.destination_number}</td>
-                <td>${mins}m ${secs}s</td>
-                <td style="color:var(--clay-coral-dark); font-weight:700; font-family:var(--font-mono);">-$${parseFloat(c.cost).toFixed(3)}</td>
-                <td><span class="clay-badge badge-mint">${c.status || 'completed'}</span></td>
-            `;
-            callLogsList.appendChild(tr);
-        });
+        const renderTo = (container, list) => {
+            if (!container) return;
+            container.innerHTML = '';
+            if (!list || list.length === 0) {
+                container.innerHTML = `<tr><td colspan="5" style="text-align:center;">No calls recorded</td></tr>`;
+                return;
+            }
+            list.forEach(c => {
+                const tr = document.createElement('tr');
+                const mins = Math.floor(c.duration_seconds / 60);
+                const secs = c.duration_seconds % 60;
+                tr.innerHTML = `
+                    <td><strong>${c.destination_country}</strong></td>
+                    <td style="font-family:var(--font-mono);">${c.destination_number}</td>
+                    <td>${mins}m ${secs}s</td>
+                    <td style="color:var(--clay-coral-dark); font-weight:700; font-family:var(--font-mono);">-$${parseFloat(c.cost).toFixed(3)}</td>
+                    <td><span class="clay-badge badge-mint">${c.status || 'completed'}</span></td>
+                `;
+                container.appendChild(tr);
+            });
+        };
+
+        renderTo(callLogsList, calls);
+        renderTo(homeCallLogsList, calls.slice(0, 5));
     }
 
     // ----------------------------------------------------
-    // 16. Toast Helper
+    // 15. Toast Notifications
     // ----------------------------------------------------
     function showToast(message, type = 'info') {
         let container = document.getElementById('toast-container');
@@ -1085,7 +1064,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------
-    // Initial Session Check & Boot
+    // 16. App Boot & Session Restore
     // ----------------------------------------------------
     async function initSession() {
         try {
@@ -1093,11 +1072,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
             if (data.success && data.authenticated && data.user) {
                 setAuthenticatedUI(data.user);
+                const initialHash = window.location.hash.replace('#', '') || 'home';
+                navigateToPage(initialHash);
             } else {
                 setUnauthenticatedUI();
+                const initialHash = window.location.hash.replace('#', '') || 'welcome';
+                navigateToPage(initialHash);
             }
         } catch (err) {
             setUnauthenticatedUI();
+            navigateToPage('welcome');
         }
     }
 

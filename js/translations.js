@@ -16,11 +16,12 @@ const i18n = {
         dashboard: "Dashboard",
         memberId: "Member ID",
         
-        // Navigation
-        navWebDialer: "Web Dialer",
-        navRates: "Call Rates",
-        navWallet: "My Wallet",
+        // Navigation Bar Buttons
+        navHome: "Home",
+        navDialer: "Make Call",
         navContacts: "Contacts",
+        navWallet: "My Wallet",
+        navRates: "Call Rates",
         navSettings: "Settings",
         navSupport: "Support",
         navHelp: "Help & FAQ",
@@ -65,14 +66,14 @@ const i18n = {
         seconds: "seconds",
         otpRateNotice: "Security notice: OTP verification attempts are strictly rate-limited.",
         
-        // Dashboard
+        // Dashboard Home
         welcomeBack: "Welcome back",
         activeCallingCredit: "Available Calling Credit",
         recentCalls: "Recent Call Detail Records",
         walletTransactions: "Wallet Transactions",
         topUpNow: "Instant Top-Up",
         
-        // Settings
+        // Settings Page
         settingsTitle: "Account Settings & Security",
         editProfile: "Edit Profile",
         changeEmail: "Change Email Address",
@@ -85,7 +86,7 @@ const i18n = {
         newPassword: "New Password",
         saveChanges: "Save Changes",
         
-        // Contacts
+        // Contacts Page
         contactsTitle: "Saved Contacts",
         addContact: "Add New Contact",
         contactName: "Contact Name",
@@ -119,14 +120,15 @@ const i18n = {
         dashboard: "Dandalin Asusu",
         memberId: "Lambar Zama Mamba",
         
-        // Navigation
-        navWebDialer: "Kiran Yanar Gizo",
-        navRates: "Farashin Kira",
-        navWallet: "Walat Dina",
-        navContacts: "Lambobin Sadarwa",
+        // Navigation Bar Buttons
+        navHome: "Babban Dandali",
+        navDialer: "Yi Kira",
+        navContacts: "Lambobi",
+        navWallet: "Walat",
+        navRates: "Farashi",
         navSettings: "Saituna",
         navSupport: "Tallafi",
-        navHelp: "Taimako da Tambayoyi",
+        navHelp: "Taimako",
         
         // Actions
         makeCall: "Yi Kira",
@@ -168,14 +170,14 @@ const i18n = {
         seconds: "daƙiƙa",
         otpRateNotice: "Gargaɗin Tsaro: An iyakance yawan ƙoƙarin tantance lambar OTP don tsaron asusunka.",
         
-        // Dashboard
+        // Dashboard Home
         welcomeBack: "Barka da dawowa",
         activeCallingCredit: "Ragowar Kuɗin Kira a Walat",
         recentCalls: "Tarihin Kiran Kwanan Nan",
         walletTransactions: "Ma'amalolin Walat",
         topUpNow: "Sanya Kuɗi Nan Take",
         
-        // Settings
+        // Settings Page
         settingsTitle: "Saitunan Asusu da Tsaro",
         editProfile: "Gyara Bayanai",
         changeEmail: "Sauya Adireshin Imel",
@@ -188,7 +190,7 @@ const i18n = {
         newPassword: "Sabuwar Kalmar Sirri",
         saveChanges: "Ajiye Canje-canje",
         
-        // Contacts
+        // Contacts Page
         contactsTitle: "Lambobin Sadarwa da Aka Ajiye",
         addContact: "Ƙara Sabuwar Lamba",
         contactName: "Sunan Mai Lamba",
@@ -250,7 +252,6 @@ class LocalizationManager {
             }
         });
 
-        // Dispatch language change event
         window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang: this.currentLang } }));
     }
 }
