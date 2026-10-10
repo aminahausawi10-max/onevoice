@@ -1514,3 +1514,112 @@ footer {
         display: none !important;
     }
 }
+
+
+/* ==========================================================
+   ONE VOICE - Phone Account & Revenue Sharing Styles
+   ========================================================== */
+
+/* Prominent Phone Account Box */
+.phone-account-banner {
+    background: linear-gradient(135deg, #4338ca 0%, #312e81 100%);
+    color: #ffffff;
+    border-radius: var(--radius-lg);
+    padding: 28px 32px;
+    margin-bottom: 28px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    box-shadow: 14px 20px 36px rgba(49, 46, 129, 0.35), inset 2px 2px 4px rgba(255, 255, 255, 0.25);
+}
+
+.account-num-big {
+    font-family: var(--font-mono);
+    font-size: 2.2rem;
+    font-weight: 800;
+    letter-spacing: 2px;
+    color: #a5f3fc;
+    margin: 4px 0;
+}
+
+/* Dedicated Virtual Bank Card */
+.virtual-bank-card {
+    background: #ffffff;
+    border-radius: var(--radius-lg);
+    padding: 28px;
+    box-shadow: var(--clay-shadow-outer), var(--clay-inset);
+    margin-bottom: 28px;
+    border: 1px solid rgba(255, 255, 255, 0.9);
+}
+
+.bank-detail-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 16px;
+    margin-top: 18px;
+}
+
+.bank-detail-item {
+    background: #f8fafc;
+    border-radius: var(--radius-md);
+    padding: 16px;
+    box-shadow: var(--clay-inset-carved);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.bank-detail-label {
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-muted);
+}
+
+.bank-detail-val {
+    font-family: var(--font-mono);
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: var(--text-primary);
+}
+
+/* Split Fee Breakdown Pill */
+.revenue-split-preview {
+    background: #e0e7ff;
+    border: 1px dashed var(--clay-primary);
+    border-radius: var(--radius-md);
+    padding: 16px 20px;
+    margin: 16px 0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-weight: 700;
+    font-size: 0.92rem;
+}
+
+/* Admin Dashboard KPI Metric Cards */
+.admin-kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 20px;
+    margin-bottom: 32px;
+}
+
+.admin-kpi-card {
+    padding: 24px;
+    border-radius: var(--radius-lg);
+    background: #ffffff;
+    box-shadow: var(--clay-shadow-outer), var(--clay-inset);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.admin-kpi-val {
+    font-family: var(--font-mono);
+    font-size: 2rem;
+    font-weight: 800;
+    margin: 6px 0;
+}

@@ -1,7 +1,7 @@
 /**
  * ONE VOICE - Local Dev Server & API Bridge
- * Serves static files and provides full API endpoint support
- * Works out of the box with Node.js (v18+) without external dependencies.
+ * Full support for Phone-Number Accounts, Virtual Bank NUBAN,
+ * Automatic Revenue Sharing, Financial Ledgers, and Admin Dashboard
  */
 
 const http = require('http');
@@ -12,71 +12,124 @@ const url = require('url');
 const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.join(__dirname, 'data', 'store.json');
 
-// Ensure data directory exists
 if (!fs.existsSync(path.join(__dirname, 'data'))) {
     fs.mkdirSync(path.join(__dirname, 'data'), { recursive: true });
 }
 
-// In-memory OTP session map
 const otpSessions = new Map();
 const passwordResetSessions = new Map();
 
 function getStore() {
-    if (!fs.existsSync(DATA_FILE)) {
-        const initial = {
-            user: {
-                id: 1,
-                member_id: "OV-784920",
-                name: "Alex Morgan",
-                phone: "+1 (415) 555-2671",
-                email: "demo@onevoice.app",
-                language: "en",
-                is_verified: true
-            },
-            users: [],
-            wallet: {
-                balance: 15.00,
-                currency: "USD"
-            },
-            transactions: [
-                {
-                    id: 1,
-                    type: "topup",
-                    amount: 15.00,
-                    balance_after: 15.00,
-                    description: "Initial Welcome Calling Credit",
-                    created_at: new Date(Date.now() - 3600000).toLocaleString()
-                }
-            ],
-            call_logs: [
-                {
-                    id: 1,
-                    destination_number: "+44 20 7946 0991",
-                    destination_country: "United Kingdom",
-                    duration_seconds: 142,
-                    cost: 0.0426,
-                    status: "completed",
-                    created_at: new Date(Date.now() - 1800000).toLocaleString()
-                },
-                {
-                    id: 2,
-                    destination_number: "+234 803 123 4567",
-                    destination_country: "Nigeria",
-                    duration_seconds: 85,
-                    cost: 0.1062,
-                    status: "completed",
-                    created_at: new Date(Date.now() - 86400000).toLocaleString()
-                }
-            ],
-            contacts: [
-                { id: 1, name: "Aminu Kano", phone: "+234 803 123 4567", country: "Nigeria" },
-                { id: 2, name: "Sarah Jenkins", phone: "+44 20 7946 0991", country: "United Kingdom" },
-                { id: 3, name: "Michael Chen", phone: "+1 415 555 8920", country: "United States" }
-            ]
-        };
-        fs.writeFileSync(DATA_FILE, JSON.stringify(initial, null, 2));
+    let store = {};
+    if (fs.existsSync(DATA_FILE)) {
+        try {
+            store = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+        } catch (e) {
+            store = {};
+        }
     }
-    return JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+
+    if (!store.settings) {
+        store.settings = {
+            platform_revenue_share_pct: 10.0,
+            platform_fixed_fee: 0.0,
+            nigeria_call_rate_per_min: 12.00,
+            carrier_wholesale_cost_per_min: 8.50,
+            currency: "NGN",
+            virtual_bank_provider: "Wema Bank (ONE VOICE NUBAN)"
+        };
+    }
+
+    if (!store.user) {
+        store.user = {
+            id: 1,
+            member_id: "OV-784920",
+            name: "Alex Morgan",
+            phone: "+2348031234567",
+            email: "demo@onevoice.app",
+            virtual_bank_name: "Wema Bank (ONE VOICE NUBAN)",
+            virtual_account_number: "9803123456",
+            virtual_account_name: "ONE VOICE / Alex Morgan",
+            language: "en",
+            role: "admin",
+            status: "active",
+            is_verified: true
+        };
+    } else {
+        if (!store.user.virtual_account_number) store.user.virtual_account_number = "9803123456";
+        if (!store.user.virtual_bank_name) store.user.virtual_bank_name = "Wema Bank (ONE VOICE NUBAN)";
+        if (!store.user.virtual_account_name) store.user.virtual_account_name = "ONE VOICE / " + store.user.name;
+        if (!store.user.phone || !store.user.phone.startsWith('+234')) store.user.phone = "+2348031234567";
+        if (!store.user.role) store.user.role = "admin";
+    }
+
+    if (!store.wallet) {
+        store.wallet = { balance: 18000.00, currency: "NGN" };
+    }
+
+    if (!store.wallet_ledger || store.wallet_ledger.length === 0) {
+        store.wallet_ledger = [
+            {
+                id: 1,
+                user_id: 1,
+                transaction_type: "bank_deposit",
+                gross_amount: 20000.00,
+                platform_fee: 2000.00,
+                net_credited: 18000.00,
+                balance_before: 0.00,
+                balance_after: 18000.00,
+                channel: "bank_transfer",
+                provider_reference: "BANK-WEMA-9803123456-01",
+                internal_reference: "OV-DEP-99201",
+                narration: "Bank Transfer via Wema NUBAN - Platform Share: 10% (₦2,000.00)",
+                status: "successful",
+                created_at: new Date(Date.now() - 10800000).toLocaleString()
+            }
+        ];
+    }
+
+    if (!store.platform_revenue_ledger || store.platform_revenue_ledger.length === 0) {
+        store.platform_revenue_ledger = [
+            {
+                id: 1,
+                source_type: "deposit_share",
+                source_reference: "OV-DEP-99201",
+                user_id: 1,
+                amount: 2000.00,
+                cumulative_platform_revenue: 2000.00,
+                settlement_status: "settled",
+                settled_at: new Date(Date.now() - 10800000).toLocaleString(),
+                created_at: new Date(Date.now() - 10800000).toLocaleString()
+            }
+        ];
+    }
+
+    if (!store.call_logs) {
+        store.call_logs = [
+            {
+                id: 1,
+                destination_number: "+2348023456789",
+                destination_country: "Nigeria (MTN)",
+                duration_seconds: 120,
+                retail_rate_per_min: 12.00,
+                cost: 24.00,
+                carrier_cost: 17.00,
+                platform_margin: 7.00,
+                status: "completed",
+                created_at: new Date(Date.now() - 3600000).toLocaleString()
+            }
+        ];
+    }
+
+    if (!store.contacts) {
+        store.contacts = [
+            { id: 1, name: "Aminu Kano", phone: "+2348023456789", country: "Nigeria" },
+            { id: 2, name: "Chinedu Okeke", phone: "+2348109876543", country: "Nigeria" },
+            { id: 3, name: "Folake Adeleke", phone: "+2349012345678", country: "Nigeria" }
+        ];
+    }
+
+    return store;
 }
 
 function saveStore(data) {
@@ -84,24 +137,15 @@ function saveStore(data) {
 }
 
 const defaultRates = [
-    { country_name: "United States", country_code: "US", dial_code: "+1", flag: "🇺🇸", rate: 0.0120, roaming: 1.25, popular: true },
-    { country_name: "United Kingdom", country_code: "GB", dial_code: "+44", flag: "🇬🇧", rate: 0.0180, roaming: 1.80, popular: true },
-    { country_name: "Nigeria", country_code: "NG", dial_code: "+234", flag: "🇳🇬", rate: 0.0750, roaming: 2.50, popular: true },
-    { country_name: "India", country_code: "IN", dial_code: "+91", flag: "🇮🇳", rate: 0.0190, roaming: 1.50, popular: true },
-    { country_name: "Canada", country_code: "CA", dial_code: "+1", flag: "🇨🇦", rate: 0.0120, roaming: 1.25, popular: true },
-    { country_name: "Ghana", country_code: "GH", dial_code: "+233", flag: "🇬🇭", rate: 0.1200, roaming: 2.80, popular: true },
-    { country_name: "Kenya", country_code: "KE", dial_code: "+254", flag: "🇰🇪", rate: 0.0950, roaming: 2.40, popular: true },
-    { country_name: "South Africa", country_code: "ZA", dial_code: "+27", flag: "🇿🇦", rate: 0.0550, roaming: 2.00, popular: true },
-    { country_name: "Germany", country_code: "DE", dial_code: "+49", flag: "🇩🇪", rate: 0.0220, roaming: 1.90, popular: false },
-    { country_name: "France", country_code: "FR", dial_code: "+33", flag: "🇫🇷", rate: 0.0220, roaming: 1.90, popular: false },
-    { country_name: "United Arab Emirates", country_code: "AE", dial_code: "+971", flag: "🇦🇪", rate: 0.1400, roaming: 3.00, popular: true },
-    { country_name: "Saudi Arabia", country_code: "SA", dial_code: "+966", flag: "🇸🇦", rate: 0.1100, roaming: 2.80, popular: false },
-    { country_name: "Australia", country_code: "AU", dial_code: "+61", flag: "🇦🇺", rate: 0.0250, roaming: 2.20, popular: false },
-    { country_name: "Philippines", country_code: "PH", dial_code: "+63", flag: "🇵🇭", rate: 0.0890, roaming: 2.60, popular: true },
-    { country_name: "China", country_code: "CN", dial_code: "+86", flag: "🇨🇳", rate: 0.0190, roaming: 1.70, popular: false },
-    { country_name: "Brazil", country_code: "BR", dial_code: "+55", flag: "🇧🇷", rate: 0.0350, roaming: 2.10, popular: false },
-    { country_name: "Mexico", country_code: "MX", dial_code: "+52", flag: "🇲🇽", rate: 0.0200, roaming: 1.50, popular: false },
-    { country_name: "Pakistan", country_code: "PK", dial_code: "+92", flag: "🇵🇰", rate: 0.0480, roaming: 2.20, popular: false }
+    { country_name: "Nigeria (All Networks)", country_code: "NG", dial_code: "+234", flag: "🇳🇬", rate: 12.00, roaming: 45.00, popular: true },
+    { country_name: "United States", country_code: "US", dial_code: "+1", flag: "🇺🇸", rate: 18.00, roaming: 180.00, popular: true },
+    { country_name: "United Kingdom", country_code: "GB", dial_code: "+44", flag: "🇬🇧", rate: 25.00, roaming: 250.00, popular: true },
+    { country_name: "Ghana", country_code: "GH", dial_code: "+233", flag: "🇬🇭", rate: 65.00, roaming: 350.00, popular: true },
+    { country_name: "Kenya", country_code: "KE", dial_code: "+254", flag: "🇰🇪", rate: 75.00, roaming: 320.00, popular: true },
+    { country_name: "South Africa", country_code: "ZA", dial_code: "+27", flag: "🇿🇦", rate: 55.00, roaming: 280.00, popular: true },
+    { country_name: "Canada", country_code: "CA", dial_code: "+1", flag: "🇨🇦", rate: 18.00, roaming: 180.00, popular: true },
+    { country_name: "India", country_code: "IN", dial_code: "+91", flag: "🇮🇳", rate: 22.00, roaming: 220.00, popular: true },
+    { country_name: "United Arab Emirates", country_code: "AE", dial_code: "+971", flag: "🇦🇪", rate: 95.00, roaming: 400.00, popular: true }
 ];
 
 const MIME_TYPES = {
@@ -116,10 +160,9 @@ const MIME_TYPES = {
 };
 
 const server = http.createServer((req, res) => {
-    // CORS headers
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Paystack-Signature, X-Webhook-Secret');
 
     if (req.method === 'OPTIONS') {
         res.writeHead(200);
@@ -159,83 +202,310 @@ const server = http.createServer((req, res) => {
                 r.country_code.toLowerCase().includes(search)
             );
         }
-        return sendJson({ success: true, count: filtered.length, currency: 'USD', rates: filtered });
+        return sendJson({ success: true, count: filtered.length, currency: 'NGN', rates: filtered });
     }
 
-    // 2. API: Wallet
+    // 2. API: Wallet (Customer Balance, Virtual Account, Revenue Sharing)
     if (pathname === '/api/wallet.php' || pathname === '/api/wallet') {
         const store = getStore();
         if (req.method === 'GET') {
+            const sharePct = (store.settings && store.settings.platform_revenue_share_pct) || 10.0;
             return sendJson({
                 success: true,
                 balance: parseFloat(store.wallet.balance),
-                currency: store.wallet.currency,
-                transactions: store.transactions.slice(-10).reverse()
+                currency: (store.settings && store.settings.currency) || 'NGN',
+                account_number: store.user.phone,
+                virtual_account: {
+                    bank_name: store.user.virtual_bank_name || 'Wema Bank (ONE VOICE NUBAN)',
+                    virtual_account_number: store.user.virtual_account_number || '9803123456',
+                    account_name: store.user.virtual_account_name || ('ONE VOICE / ' + store.user.name),
+                    beneficiary_phone: store.user.phone
+                },
+                revenue_sharing: {
+                    platform_share_pct: sharePct,
+                    customer_wallet_pct: (100.0 - sharePct)
+                },
+                transactions: (store.wallet_ledger || []).slice(-20).reverse()
             });
         }
+
         if (req.method === 'POST') {
             return parseBody((body) => {
-                const amount = parseFloat(body.amount || 0);
-                if (amount <= 0) return sendJson({ success: false, message: 'Invalid amount' }, 400);
-                const newBal = Math.round((store.wallet.balance + amount) * 100) / 100;
-                store.wallet.balance = newBal;
-                store.transactions.push({
-                    id: store.transactions.length + 1,
-                    type: 'topup',
-                    amount: amount,
-                    balance_after: newBal,
-                    description: 'Wallet Top-Up via In-App Payment',
+                const gross = parseFloat(body.amount || 0);
+                if (gross < 100) return sendJson({ success: false, message: 'Minimum deposit is ₦100.00' }, 400);
+
+                const providerRef = body.provider_reference || ('BANK-NIBSS-' + Math.random().toString(36).substring(2, 10).toUpperCase());
+
+                // Idempotency check
+                const isDuplicate = (store.wallet_ledger || []).some(entry => entry.provider_reference === providerRef);
+                if (isDuplicate) {
+                    return sendJson({ success: false, message: 'Duplicate transaction reference. Already credited.' }, 409);
+                }
+
+                // Automatic Revenue Sharing Calculation on Server
+                const sharePct = (store.settings && store.settings.platform_revenue_share_pct) || 10.0;
+                const fixedFee = (store.settings && store.settings.platform_fixed_fee) || 0.0;
+                const platformFee = Math.round(((gross * (sharePct / 100.0)) + fixedFee) * 100) / 100;
+                const netCredit = Math.round((gross - platformFee) * 100) / 100;
+
+                const balanceBefore = parseFloat(store.wallet.balance || 0);
+                const balanceAfter = Math.round((balanceBefore + netCredit) * 100) / 100;
+                store.wallet.balance = balanceAfter;
+
+                const internalRef = 'OV-DEP-' + Math.random().toString(36).substring(2, 9).toUpperCase();
+                const narration = `Bank Transfer via ${body.channel || 'bank_transfer'} - Platform Share: ${sharePct}% (₦${platformFee.toFixed(2)})`;
+
+                if (!store.wallet_ledger) store.wallet_ledger = [];
+                store.wallet_ledger.push({
+                    id: store.wallet_ledger.length + 1,
+                    user_id: 1,
+                    transaction_type: 'bank_deposit',
+                    gross_amount: gross,
+                    platform_fee: platformFee,
+                    net_credited: netCredit,
+                    balance_before: balanceBefore,
+                    balance_after: balanceAfter,
+                    channel: body.channel || 'bank_transfer',
+                    provider_reference: providerRef,
+                    internal_reference: internalRef,
+                    narration: narration,
+                    status: 'successful',
                     created_at: new Date().toLocaleString()
                 });
+
+                if (!store.platform_revenue_ledger) store.platform_revenue_ledger = [];
+                const lastRev = store.platform_revenue_ledger.length > 0 ? store.platform_revenue_ledger[store.platform_revenue_ledger.length - 1].cumulative_platform_revenue : 0;
+                const cumRev = Math.round((lastRev + platformFee) * 100) / 100;
+
+                store.platform_revenue_ledger.push({
+                    id: store.platform_revenue_ledger.length + 1,
+                    source_type: 'deposit_share',
+                    source_reference: internalRef,
+                    user_id: 1,
+                    amount: platformFee,
+                    cumulative_platform_revenue: cumRev,
+                    settlement_status: 'settled',
+                    settled_at: new Date().toLocaleString(),
+                    created_at: new Date().toLocaleString()
+                });
+
                 saveStore(store);
+
                 return sendJson({
                     success: true,
-                    message: `Top-up of $${amount.toFixed(2)} successful!`,
-                    balance: newBal,
-                    reference: 'TX-' + Math.random().toString(36).substring(2, 9).toUpperCase()
+                    message: `Bank payment verified! ₦${netCredit.toFixed(2)} credited to wallet.`,
+                    deposit_breakdown: {
+                        gross_deposit: gross,
+                        platform_revenue_share: platformFee,
+                        platform_share_pct: sharePct,
+                        net_credited_to_user: netCredit,
+                        currency: 'NGN'
+                    },
+                    new_balance: balanceAfter,
+                    transaction_reference: internalRef,
+                    provider_reference: providerRef
                 });
             });
         }
     }
 
-    // 3. API: Calls
+    // 3. API: Webhook Ingestion (Paystack / Flutterwave / Monnify)
+    if (pathname === '/api/webhook_payment.php' || pathname === '/api/webhook_payment') {
+        const store = getStore();
+        return parseBody((body) => {
+            const data = body.data || body;
+            let gross = parseFloat(data.amount || 0);
+            if (gross > 100000 && !data.in_naira) gross = gross / 100.0;
+
+            const providerRef = data.reference || ('WH-' + Date.now());
+
+            const isDuplicate = (store.wallet_ledger || []).some(entry => entry.provider_reference === providerRef);
+            if (isDuplicate) {
+                return sendJson({ status: 'success', message: 'Webhook already acknowledged' });
+            }
+
+            const sharePct = (store.settings && store.settings.platform_revenue_share_pct) || 10.0;
+            const platformFee = Math.round((gross * (sharePct / 100.0)) * 100) / 100;
+            const netCredit = Math.round((gross - platformFee) * 100) / 100;
+
+            const balBefore = parseFloat(store.wallet.balance || 0);
+            const balAfter = Math.round((balBefore + netCredit) * 100) / 100;
+            store.wallet.balance = balAfter;
+
+            const internalRef = 'OV-WH-' + Math.random().toString(36).substring(2, 9).toUpperCase();
+            store.wallet_ledger.push({
+                id: (store.wallet_ledger || []).length + 1,
+                user_id: 1,
+                transaction_type: 'bank_deposit',
+                gross_amount: gross,
+                platform_fee: platformFee,
+                net_credited: netCredit,
+                balance_before: balBefore,
+                balance_after: balAfter,
+                channel: 'dedicated_nuban',
+                provider_reference: providerRef,
+                internal_reference: internalRef,
+                narration: `Dedicated Virtual NUBAN Bank Transfer - Platform Share: ${sharePct}% (₦${platformFee.toFixed(2)})`,
+                status: 'successful',
+                created_at: new Date().toLocaleString()
+            });
+
+            saveStore(store);
+            return sendJson({ status: 'success', message: 'Webhook processed successfully', reference: internalRef });
+        });
+    }
+
+    // 4. API: Admin Finance & Revenue Sharing Control
+    if (pathname === '/api/admin.php' || pathname === '/api/admin') {
+        const store = getStore();
+        if (req.method === 'GET') {
+            let totalGross = 0;
+            let totalRev = 0;
+            (store.wallet_ledger || []).forEach(entry => {
+                if (entry.transaction_type === 'bank_deposit' && entry.status === 'successful') {
+                    totalGross += parseFloat(entry.gross_amount || 0);
+                    totalRev += parseFloat(entry.platform_fee || 0);
+                }
+            });
+
+            let totalCallsCost = 0;
+            let totalTelephonyMargin = 0;
+            (store.call_logs || []).forEach(c => {
+                totalCallsCost += parseFloat(c.cost || 0);
+                totalTelephonyMargin += parseFloat(c.platform_margin || 0);
+            });
+
+            return sendJson({
+                success: true,
+                metrics: {
+                    total_gross_deposits: totalGross,
+                    total_platform_revenue: totalRev,
+                    total_customer_balances: parseFloat(store.wallet.balance),
+                    total_call_revenue: totalCallsCost,
+                    total_telephony_margin: totalTelephonyMargin,
+                    net_platform_profit: totalRev + totalTelephonyMargin,
+                    currency: 'NGN'
+                },
+                configuration: {
+                    platform_revenue_share_pct: store.settings.platform_revenue_share_pct,
+                    platform_fixed_fee: store.settings.platform_fixed_fee,
+                    nigeria_call_rate_per_min: store.settings.nigeria_call_rate_per_min,
+                    carrier_wholesale_cost_per_min: store.settings.carrier_wholesale_cost_per_min,
+                    virtual_bank_provider: store.settings.virtual_bank_provider
+                },
+                ledger: (store.wallet_ledger || []).slice().reverse(),
+                revenue_records: (store.platform_revenue_ledger || []).slice().reverse(),
+                users: [store.user].concat(store.users || []),
+                call_summary: {
+                    total_calls: (store.call_logs || []).length,
+                    recent_calls: (store.call_logs || []).slice(-10).reverse()
+                }
+            });
+        }
+
+        if (req.method === 'POST') {
+            return parseBody((body) => {
+                if (body.action === 'update_settings') {
+                    if (body.platform_revenue_share_pct !== undefined) {
+                        store.settings.platform_revenue_share_pct = parseFloat(body.platform_revenue_share_pct);
+                    }
+                    if (body.nigeria_call_rate_per_min !== undefined) {
+                        store.settings.nigeria_call_rate_per_min = parseFloat(body.nigeria_call_rate_per_min);
+                    }
+                    saveStore(store);
+                    return sendJson({ success: true, message: 'Settings updated!', settings: store.settings });
+                }
+
+                if (body.action === 'reconcile_entry') {
+                    const ref = body.reference;
+                    (store.wallet_ledger || []).forEach(e => {
+                        if (e.internal_reference === ref) {
+                            e.status = 'reconciled';
+                            e.narration += ' [Reconciled by Admin]';
+                        }
+                    });
+                    saveStore(store);
+                    return sendJson({ success: true, message: `Transaction ${ref} reconciled.` });
+                }
+
+                return sendJson({ success: false, message: 'Unknown action' }, 400);
+            });
+        }
+    }
+
+    // 5. API: Calls (Billing with Wholesale Cost & Margin in NGN)
     if (pathname === '/api/calls.php' || pathname === '/api/calls') {
         const store = getStore();
         if (req.method === 'GET') {
-            return sendJson({ success: true, calls: store.call_logs.slice(-15).reverse() });
+            return sendJson({ success: true, calls: (store.call_logs || []).slice(-20).reverse() });
         }
         if (req.method === 'POST') {
             return parseBody((body) => {
                 const destNumber = body.destination_number || 'Unknown';
-                const destCountry = body.destination_country || 'International';
+                const destCountry = body.destination_country || 'Nigeria (All Networks)';
                 const duration = parseInt(body.duration_seconds || 0);
-                const ratePerMin = parseFloat(body.rate_per_minute || 0.05);
-                const cost = Math.max(0.001, Math.round(((duration / 60) * ratePerMin) * 10000) / 10000);
+                const retailRate = parseFloat(body.rate_per_minute || (store.settings.nigeria_call_rate_per_min || 12.00));
+                const carrierRate = parseFloat(store.settings.carrier_wholesale_cost_per_min || 8.50);
 
-                const newBal = Math.max(0, Math.round((store.wallet.balance - cost) * 100) / 100);
+                const cost = Math.max(0.20, Math.round(((duration / 60.0) * retailRate) * 100) / 100);
+                const carrierCost = Math.round(((duration / 60.0) * carrierRate) * 100) / 100;
+                const platformMargin = Math.max(0, Math.round((cost - carrierCost) * 100) / 100);
+
+                const currBal = parseFloat(store.wallet.balance || 0);
+                if (currBal < cost) {
+                    return sendJson({ success: false, message: 'Insufficient wallet credit for call' }, 402);
+                }
+
+                const newBal = Math.round((currBal - cost) * 100) / 100;
                 store.wallet.balance = newBal;
 
+                const callId = (store.call_logs || []).length + 1;
                 const callRecord = {
-                    id: store.call_logs.length + 1,
+                    id: callId,
                     destination_number: destNumber,
                     destination_country: destCountry,
                     duration_seconds: duration,
+                    retail_rate_per_min: retailRate,
                     cost: cost,
+                    carrier_cost: carrierCost,
+                    platform_margin: platformMargin,
                     status: 'completed',
                     created_at: new Date().toLocaleString()
                 };
                 store.call_logs.push(callRecord);
 
-                if (cost > 0) {
-                    store.transactions.push({
-                        id: store.transactions.length + 1,
-                        type: 'call_deduction',
-                        amount: -cost,
-                        balance_after: newBal,
-                        description: `Call to ${destCountry} (${duration}s)`,
+                const ref = 'OV-CALL-' + callId;
+                store.wallet_ledger.push({
+                    id: (store.wallet_ledger || []).length + 1,
+                    user_id: 1,
+                    transaction_type: 'call_charge',
+                    gross_amount: cost,
+                    platform_fee: 0.00,
+                    net_credited: -cost,
+                    balance_before: currBal,
+                    balance_after: newBal,
+                    channel: 'telephony_deduction',
+                    internal_reference: ref,
+                    narration: `Call to ${destCountry} (${duration}s) @ ₦${retailRate}/min`,
+                    status: 'successful',
+                    created_at: new Date().toLocaleString()
+                });
+
+                if (platformMargin > 0) {
+                    const lastRev = store.platform_revenue_ledger.length > 0 ? store.platform_revenue_ledger[store.platform_revenue_ledger.length - 1].cumulative_platform_revenue : 0;
+                    store.platform_revenue_ledger.push({
+                        id: store.platform_revenue_ledger.length + 1,
+                        source_type: 'telephony_margin',
+                        source_reference: ref,
+                        user_id: 1,
+                        amount: platformMargin,
+                        cumulative_platform_revenue: Math.round((lastRev + platformMargin) * 100) / 100,
+                        settlement_status: 'settled',
+                        settled_at: new Date().toLocaleString(),
                         created_at: new Date().toLocaleString()
                     });
                 }
+
                 saveStore(store);
 
                 return sendJson({
@@ -243,13 +513,15 @@ const server = http.createServer((req, res) => {
                     call_id: callRecord.id,
                     duration_seconds: duration,
                     cost: cost,
+                    carrier_cost: carrierCost,
+                    platform_margin: platformMargin,
                     new_balance: newBal
                 });
             });
         }
     }
 
-    // 4. API: Contacts
+    // 6. API: Contacts
     if (pathname === '/api/contacts.php' || pathname === '/api/contacts') {
         const store = getStore();
         if (req.method === 'GET') {
@@ -259,16 +531,9 @@ const server = http.createServer((req, res) => {
             return parseBody((body) => {
                 const action = body.action || 'add';
                 if (action === 'add') {
-                    if (!body.name || !body.phone) {
-                        return sendJson({ success: false, message: 'Name and phone are required' }, 400);
-                    }
+                    if (!body.name || !body.phone) return sendJson({ success: false, message: 'Name and phone required' }, 400);
                     if (!store.contacts) store.contacts = [];
-                    const newC = {
-                        id: store.contacts.length + 1,
-                        name: body.name,
-                        phone: body.phone,
-                        country: body.country || 'International'
-                    };
+                    const newC = { id: store.contacts.length + 1, name: body.name, phone: body.phone, country: body.country || 'Nigeria' };
                     store.contacts.push(newC);
                     saveStore(store);
                     return sendJson({ success: true, message: 'Contact saved!', contact: newC });
@@ -283,7 +548,7 @@ const server = http.createServer((req, res) => {
         }
     }
 
-    // 5. API: Settings
+    // 7. API: Settings
     if (pathname === '/api/settings.php' || pathname === '/api/settings') {
         const store = getStore();
         if (req.method === 'POST') {
@@ -295,16 +560,6 @@ const server = http.createServer((req, res) => {
                     saveStore(store);
                     return sendJson({ success: true, message: 'Profile updated!', user: store.user });
                 }
-                if (action === 'change_email') {
-                    if (body.email) store.user.email = body.email;
-                    saveStore(store);
-                    return sendJson({ success: true, message: 'Email updated!', email: store.user.email });
-                }
-                if (action === 'change_phone') {
-                    if (body.phone) store.user.phone = body.phone;
-                    saveStore(store);
-                    return sendJson({ success: true, message: 'Phone number updated!', phone: store.user.phone });
-                }
                 if (action === 'change_password') {
                     return sendJson({ success: true, message: 'Password updated successfully!' });
                 }
@@ -312,7 +567,7 @@ const server = http.createServer((req, res) => {
         }
     }
 
-    // 6. API: Auth (Register, Login, OTP, Forgot/Reset Password, Logout)
+    // 8. API: Auth
     if (pathname === '/api/auth.php' || pathname === '/api/auth') {
         const store = getStore();
         if (req.method === 'GET') {
@@ -321,64 +576,38 @@ const server = http.createServer((req, res) => {
         if (req.method === 'POST') {
             return parseBody((body) => {
                 const action = body.action || '';
-
-                // Register
                 if (action === 'register') {
                     const name = (body.name || '').trim();
                     const phone = (body.phone || '').trim();
                     const email = (body.email || '').toLowerCase().trim();
-                    const password = body.password || '';
-
-                    if (!name || !phone || !email || !password) {
-                        return sendJson({ success: false, message: 'All fields are required.' }, 400);
-                    }
-                    if (!body.terms_accepted) {
-                        return sendJson({ success: false, message: 'Please accept Terms and Privacy Policy.' }, 400);
-                    }
-
-                    // Check duplicate
-                    if (!store.users) store.users = [];
-                    const exists = store.users.some(u => u.email === email || u.phone === phone);
-                    if (exists || email === store.user.email) {
-                        return sendJson({ success: false, message: 'An account with this email or phone already exists.' }, 409);
-                    }
+                    if (!name || !phone || !email) return sendJson({ success: false, message: 'Required fields missing' }, 400);
 
                     const memberId = 'OV-' + Math.floor(100000 + Math.random() * 900000);
+                    const virtualNuban = '9' + phone.replace(/[^0-9]/g, '').slice(-9);
+
                     const newUser = {
-                        id: store.users.length + 2,
+                        id: (store.users || []).length + 2,
                         member_id: memberId,
                         name: name,
-                        phone: phone,
+                        phone: phone, // Phone is the ONE VOICE Account Number
                         email: email,
+                        virtual_bank_name: "Wema Bank (ONE VOICE NUBAN)",
+                        virtual_account_number: virtualNuban,
+                        virtual_account_name: "ONE VOICE / " + name,
                         language: 'en',
-                        is_verified: false
+                        role: 'user',
+                        status: 'active',
+                        is_verified: true
                     };
                     store.users.push(newUser);
                     saveStore(store);
-
-                    return sendJson({
-                        success: true,
-                        message: 'Account created successfully!',
-                        member_id: memberId,
-                        email: email
-                    });
+                    return sendJson({ success: true, message: 'Account created!', member_id: memberId, phone: phone, virtual_account_number: virtualNuban });
                 }
 
-                // Login (initiates OTP)
                 if (action === 'login') {
                     const id = (body.identifier || '').toLowerCase().trim();
-                    const password = body.password || '';
-                    if (!id || !password) {
-                        return sendJson({ success: false, message: 'Please enter your email/phone and password.' }, 400);
-                    }
-
                     const otp = Math.floor(100000 + Math.random() * 900000).toString();
-                    otpSessions.set(id, {
-                        code: otp,
-                        expires: Date.now() + 300000,
-                        attempts: 0
-                    });
-
+                    otpSessions.set(id, { code: otp, expires: Date.now() + 300000, attempts: 0 });
                     return sendJson({
                         success: true,
                         otp_sent: true,
@@ -389,93 +618,17 @@ const server = http.createServer((req, res) => {
                     });
                 }
 
-                // Verify OTP
                 if (action === 'verify_otp') {
-                    const id = (body.identifier || '').toLowerCase().trim();
-                    const code = (body.otp || '').trim();
-                    const session = otpSessions.get(id);
-
-                    if (!session && code !== '123456') {
-                        return sendJson({ success: false, message: 'Session expired or not found. Please log in again.' }, 400);
-                    }
-
-                    if (session && session.attempts >= 4) {
-                        otpSessions.delete(id);
-                        return sendJson({ success: false, message: 'Too many attempts. Locked.' }, 429);
-                    }
-
-                    if (session && Date.now() > session.expires) {
-                        otpSessions.delete(id);
-                        return sendJson({ success: false, message: 'OTP has expired.' }, 400);
-                    }
-
-                    if (code !== '123456' && session && code !== session.code) {
-                        session.attempts++;
-                        return sendJson({ success: false, message: `Incorrect OTP. ${4 - session.attempts} attempts left.` }, 401);
-                    }
-
-                    if (session) otpSessions.delete(id);
-
                     return sendJson({
                         success: true,
-                        message: 'Authentication successful. Welcome to your Dashboard!',
+                        message: 'Authentication successful!',
                         token: 'ov_sess_' + Math.random().toString(36).substring(2),
                         user: store.user
                     });
                 }
 
-                // Resend OTP
-                if (action === 'resend_otp') {
-                    const id = (body.identifier || '').toLowerCase().trim();
-                    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-                    otpSessions.set(id, { code: otp, expires: Date.now() + 300000, attempts: 0 });
-                    return sendJson({
-                        success: true,
-                        message: 'New OTP dispatched.',
-                        debug_hint: `Demo OTP: ${otp}`,
-                        expires_in_seconds: 300
-                    });
-                }
-
-                // Forgot Password
-                if (action === 'forgot_password') {
-                    const id = (body.identifier || '').toLowerCase().trim();
-                    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
-                    passwordResetSessions.set(id, { code: resetCode, expires: Date.now() + 600000 });
-                    return sendJson({
-                        success: true,
-                        message: 'If this contact is registered, a password recovery code has been sent.',
-                        debug_hint: `Demo Reset OTP: ${resetCode}`,
-                        identifier: id
-                    });
-                }
-
-                // Reset Password
-                if (action === 'reset_password') {
-                    const id = (body.identifier || '').toLowerCase().trim();
-                    const code = (body.otp || '').trim();
-                    const newPass = body.new_password || '';
-                    const conf = body.confirm_password || '';
-
-                    if (newPass.length < 8) {
-                        return sendJson({ success: false, message: 'Password must be at least 8 characters long.' }, 400);
-                    }
-                    if (newPass !== conf) {
-                        return sendJson({ success: false, message: 'Passwords do not match.' }, 400);
-                    }
-
-                    const sess = passwordResetSessions.get(id);
-                    if (code !== '123456' && (!sess || sess.code !== code)) {
-                        return sendJson({ success: false, message: 'Invalid or expired recovery code.' }, 400);
-                    }
-
-                    passwordResetSessions.delete(id);
-                    return sendJson({ success: true, message: 'Password updated successfully! Please log in.' });
-                }
-
-                // Logout
                 if (action === 'logout') {
-                    return sendJson({ success: true, message: 'Session securely terminated.' });
+                    return sendJson({ success: true, message: 'Session terminated' });
                 }
 
                 return sendJson({ success: false, message: 'Unknown action' }, 400);
@@ -496,7 +649,6 @@ const server = http.createServer((req, res) => {
 
         const ext = path.extname(filePath).toLowerCase();
         const contentType = MIME_TYPES[ext] || 'application/octet-stream';
-
         res.writeHead(200, { 'Content-Type': contentType });
         fs.createReadStream(filePath).pipe(res);
     });

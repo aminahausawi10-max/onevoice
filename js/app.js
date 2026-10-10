@@ -1,14 +1,28 @@
 /**
- * ONE VOICE - Single Page Application Router & Controller
- * Implements Dedicated Page Navigation for:
- * - Home (Dashboard)
- * - Make Call (Dialer)
- * - Contacts
- * - Wallet
- * - Call Rates
- * - Settings
- * - Auth Pages (Register, Login, OTP, Forgot/Reset)
+ * ONE VOICE - Single Page Application Router & Financial Controller
+ * Implements:
+ * - Phone-Number as Unique Account Number & Dedicated Virtual NUBAN
+ * - Fund Wallet via Bank Payment with Server-Enforced Revenue Sharing
+ * - Telephony with Nigerian Retail Rates vs Wholesale Carrier Margins
+ * - Administrator Finance Dashboard & Ledger Reconciliation
  */
+
+// Global clipboard helper
+window.copyText = (text, message = 'Copied to clipboard!') => {
+    if (navigator.clipboard) {
+        navigator.clipboard.writeText(text).then(() => {
+            if (window.showToast) window.showToast(message, 'success');
+        });
+    } else {
+        const temp = document.createElement('input');
+        temp.value = text;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        temp.remove();
+        if (window.showToast) window.showToast(message, 'success');
+    }
+};
 
 document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------------------------------
@@ -20,19 +34,23 @@ document.addEventListener('DOMContentLoaded', () => {
     let otpSecondsLeft = 300;
     let pendingLoginIdentifier = '';
     
-    // Dialer & Calling State
-    let currentDialNumber = '';
+    // Financial State (NGN)
+    let userWalletBalance = 18000.00;
+    let currentCurrency = 'NGN';
+    let platformSharePct = 10.0;
+    let selectedTopupAmount = 10000;
+    let cachedRates = [];
+
+    // Dialer & Telephony State
+    let currentDialNumber = '+234';
     let callTimer = null;
     let callSeconds = 0;
     let isCallActive = false;
-    let currentCallRate = 0.05;
-    let activeCallCountry = 'International';
-    let userWalletBalance = 15.00;
-    let selectedTopupAmount = 10;
-    let cachedRates = [];
+    let currentCallRate = 12.00; // ₦12.00/min Nigeria
+    let activeCallCountry = 'Nigeria (All Networks)';
 
     // ----------------------------------------------------
-    // DOM Elements - Navigation & Shell
+    // DOM Elements
     // ----------------------------------------------------
     const allPages = document.querySelectorAll('.app-page');
     const allPageButtons = document.querySelectorAll('.nav-page-btn');
@@ -50,9 +68,23 @@ document.addEventListener('DOMContentLoaded', () => {
     const dashMemberId = document.getElementById('dash-member-id');
     const dashWalletBalance = document.getElementById('dash-wallet-balance');
     const dashLangBadge = document.getElementById('dash-language-badge');
+    const dashPhoneAccount = document.getElementById('dash-phone-account-number');
     const userDisplayName = document.getElementById('user-display-name');
     const userMemberDisplay = document.getElementById('user-member-display');
     const dialerBalancePill = document.getElementById('dialer-balance-pill');
+
+    // Virtual Bank Elements
+    const walletBankName = document.getElementById('wallet-bank-name');
+    const walletVirtualNuban = document.getElementById('wallet-virtual-nuban');
+    const walletAccountName = document.getElementById('wallet-account-name');
+    const walletPhoneAccount = document.getElementById('wallet-phone-account');
+    const modalVirtualNuban = document.getElementById('modal-virtual-nuban');
+
+    // Modal Revenue Split Elements
+    const modalDepositInput = document.getElementById('modal-deposit-amount');
+    const modalSharePctLabel = document.getElementById('modal-share-pct-label');
+    const modalPlatformCutVal = document.getElementById('modal-platform-cut-val');
+    const modalNetCreditVal = document.getElementById('modal-net-credit-val');
 
     // Dialer Elements
     const dialDisplay = document.getElementById('dial-number');
@@ -77,36 +109,42 @@ document.addEventListener('DOMContentLoaded', () => {
     const homeCallLogsList = document.getElementById('home-call-logs-body');
     const contactsContainer = document.getElementById('contacts-list-container');
 
+    // Admin Dashboard Elements
+    const adminGrossDeposits = document.getElementById('admin-gross-deposits');
+    const adminPlatformRev = document.getElementById('admin-platform-rev');
+    const adminCustomerBalances = document.getElementById('admin-customer-balances');
+    const adminTelephonyMargin = document.getElementById('admin-telephony-margin');
+    const inputAdminSharePct = document.getElementById('input-admin-share-pct');
+    const inputAdminCallRate = document.getElementById('input-admin-call-rate');
+    const adminLedgerBody = document.getElementById('admin-ledger-body');
+    const adminSearchInput = document.getElementById('admin-search-input');
+    const formAdminSettings = document.getElementById('form-admin-settings');
+    const btnRefreshAdmin = document.getElementById('btn-refresh-admin');
+
     // Modals
     const topupModal = document.getElementById('topup-modal');
     const logoutModal = document.getElementById('logout-modal');
     const addContactModal = document.getElementById('add-contact-modal');
 
     // ----------------------------------------------------
-    // 1. Dedicated Multi-Page Routing Engine
+    // 1. Single Page Application Routing
     // ----------------------------------------------------
     function navigateToPage(pageName) {
         if (!pageName) return;
 
-        // If user is not authenticated and tries to access protected page
-        const protectedPages = ['home', 'contacts', 'settings'];
+        const protectedPages = ['home', 'contacts', 'settings', 'admin'];
         if (!currentUser && protectedPages.includes(pageName)) {
             showToast('Please sign in to access this page', 'warning');
             pageName = 'login';
         }
 
         const targetEl = document.getElementById('page-' + pageName);
-        if (!targetEl) {
-            console.warn(`Target page "page-${pageName}" not found`);
-            return;
-        }
+        if (!targetEl) return;
 
-        // Hide all pages and show target page
         allPages.forEach(p => p.classList.remove('active'));
         targetEl.classList.add('active');
         currentPage = pageName;
 
-        // Update active class on all navigation buttons (desktop + mobile dock)
         allPageButtons.forEach(btn => {
             if (btn.getAttribute('data-page') === pageName) {
                 btn.classList.add('active');
@@ -115,45 +153,39 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
-        // Scroll cleanly to the top of the newly loaded page
         window.scrollTo({ top: 0, behavior: 'smooth' });
 
-        // Lazy load page-specific data
         if (pageName === 'contacts') {
             loadContacts();
         } else if (pageName === 'wallet' || pageName === 'home') {
             loadWalletData();
             loadCallLogs();
-            loadTransactions();
+        } else if (pageName === 'admin') {
+            loadAdminData();
         } else if (pageName === 'rates') {
             loadRates();
         } else if (pageName === 'dialer') {
-            if (dialerBalancePill) dialerBalancePill.textContent = userWalletBalance.toFixed(2);
+            if (dialerBalancePill) dialerBalancePill.textContent = `₦${userWalletBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
         }
 
-        // Update URL hash without jumping
         try {
             history.pushState(null, '', `#${pageName}`);
         } catch (e) {}
     }
 
-    // Attach click listener to ALL page navigation buttons
     document.addEventListener('click', (e) => {
         const btn = e.target.closest('[data-page]');
         if (btn) {
             e.preventDefault();
-            const pageName = btn.getAttribute('data-page');
-            navigateToPage(pageName);
+            navigateToPage(btn.getAttribute('data-page'));
         }
     });
 
-    // Handle browser back/forward buttons
     window.addEventListener('popstate', () => {
         const hash = window.location.hash.replace('#', '') || (currentUser ? 'home' : 'welcome');
         navigateToPage(hash);
     });
 
-    // Brand logo navigation
     if (brandLogo) {
         brandLogo.addEventListener('click', (e) => {
             e.preventDefault();
@@ -161,8 +193,17 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Copy Account Number button on Dashboard
+    const btnCopyDashPhone = document.getElementById('btn-copy-dash-phone');
+    if (btnCopyDashPhone) {
+        btnCopyDashPhone.addEventListener('click', () => {
+            const phone = (currentUser ? currentUser.phone : '+2348031234567');
+            window.copyText(phone, `ONE VOICE Account Number (${phone}) copied!`);
+        });
+    }
+
     // ----------------------------------------------------
-    // 2. Localization (English / Hausa)
+    // 2. Localization (EN / HA)
     // ----------------------------------------------------
     if (window.locManager) {
         window.locManager.applyTranslations();
@@ -180,7 +221,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ----------------------------------------------------
-    // 3. User Authentication State Setup
+    // 3. User Authentication Setup
     // ----------------------------------------------------
     function setAuthenticatedUI(user) {
         if (!user) return;
@@ -198,13 +239,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (userDisplayName) userDisplayName.textContent = user.name;
         if (userMemberDisplay) userMemberDisplay.textContent = `Member ID: ${user.member_id || 'OV-784920'}`;
 
+        const phoneNum = user.phone || '+2348031234567';
+        if (dashPhoneAccount) dashPhoneAccount.textContent = phoneNum;
+        if (walletPhoneAccount) walletPhoneAccount.textContent = phoneNum;
+
+        if (walletVirtualNuban && user.virtual_account_number) {
+            walletVirtualNuban.textContent = user.virtual_account_number;
+        }
+        if (modalVirtualNuban && user.virtual_account_number) {
+            modalVirtualNuban.textContent = user.virtual_account_number;
+        }
+
         if (dashLangBadge) {
             dashLangBadge.textContent = (user.language === 'ha') ? 'Hausa (ha)' : 'English (en)';
         }
-        const settingsLang = document.getElementById('settings-language');
-        if (settingsLang && user.language) settingsLang.value = user.language;
-        const settingsName = document.getElementById('settings-name');
-        if (settingsName && user.name) settingsName.value = user.name;
     }
 
     function setUnauthenticatedUI() {
@@ -216,7 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------
-    // 4. Registration Submission
+    // 4. Registration & Login Handlers
     // ----------------------------------------------------
     const formRegister = document.getElementById('form-register');
     if (formRegister) {
@@ -236,7 +284,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const btn = document.getElementById('btn-submit-register');
             btn.disabled = true;
-            btn.textContent = 'Creating Account...';
+            btn.textContent = 'Allocating Account...';
 
             try {
                 const res = await fetch('api/auth.php', {
@@ -255,15 +303,15 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await res.json();
 
                 if (data.success) {
-                    showToast('Account created successfully!', 'success');
+                    showToast('Account created with phone identity!', 'success');
                     const succId = document.getElementById('success-member-id');
-                    if (succId) succId.textContent = `Member ID: ${data.member_id}`;
+                    if (succId) succId.textContent = `Member ID: ${data.member_id} • Account: ${phone}`;
                     navigateToPage('reg-success');
                 } else {
                     showToast(data.message || 'Registration failed', 'error');
                 }
             } catch (err) {
-                showToast('Network error during registration', 'error');
+                showToast('Registration network error', 'error');
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'Register';
@@ -271,9 +319,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ----------------------------------------------------
-    // 5. Login Submission (Step 1 -> Dispatch OTP)
-    // ----------------------------------------------------
     const formLogin = document.getElementById('form-login');
     if (formLogin) {
         formLogin.addEventListener('submit', async (e) => {
@@ -283,7 +328,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const btn = document.getElementById('btn-submit-login');
             btn.disabled = true;
-            btn.textContent = 'Verifying Credentials...';
+            btn.textContent = 'Verifying...';
 
             try {
                 const res = await fetch('api/auth.php', {
@@ -309,7 +354,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     showToast(data.message || 'Invalid credentials', 'error');
                 }
             } catch (err) {
-                showToast('Server connection error during login', 'error');
+                showToast('Login server error', 'error');
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'Send OTP & Login';
@@ -317,9 +362,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // ----------------------------------------------------
-    // 6. OTP Timer & Resend
-    // ----------------------------------------------------
     function startOtpTimer(seconds = 300) {
         if (otpCountdownTimer) clearInterval(otpCountdownTimer);
         otpSecondsLeft = seconds;
@@ -329,10 +371,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const m = String(Math.floor(otpSecondsLeft / 60)).padStart(2, '0');
             const s = String(otpSecondsLeft % 60).padStart(2, '0');
             if (timerEl) timerEl.textContent = `${m}:${s}`;
-
             if (otpSecondsLeft <= 0) {
                 clearInterval(otpCountdownTimer);
-                showToast('OTP has expired. Please request a new code.', 'warning');
+                showToast('OTP has expired.', 'warning');
             }
             otpSecondsLeft--;
         };
@@ -341,35 +382,6 @@ document.addEventListener('DOMContentLoaded', () => {
         otpCountdownTimer = setInterval(updateTimer, 1000);
     }
 
-    const btnResendOtp = document.getElementById('btn-resend-otp');
-    if (btnResendOtp) {
-        btnResendOtp.addEventListener('click', async () => {
-            btnResendOtp.disabled = true;
-            try {
-                const res = await fetch('api/auth.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'resend_otp', identifier: pendingLoginIdentifier })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    showToast(data.message, 'success');
-                    if (data.debug_hint) {
-                        setTimeout(() => showToast(`🔑 ${data.debug_hint}`, 'info'), 800);
-                    }
-                    startOtpTimer(data.expires_in_seconds || 300);
-                }
-            } catch (err) {
-                showToast('Failed to resend code', 'error');
-            } finally {
-                setTimeout(() => { btnResendOtp.disabled = false; }, 4000);
-            }
-        });
-    }
-
-    // ----------------------------------------------------
-    // 7. OTP Verification (Step 2 -> Enter Home Dashboard)
-    // ----------------------------------------------------
     const formOtp = document.getElementById('form-otp-verify');
     if (formOtp) {
         formOtp.addEventListener('submit', async (e) => {
@@ -377,17 +389,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const otpCode = document.getElementById('otp-input').value.trim();
             const btn = document.getElementById('btn-submit-otp');
             btn.disabled = true;
-            btn.textContent = 'Verifying Code...';
+            btn.textContent = 'Verifying OTP...';
 
             try {
                 const res = await fetch('api/auth.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'verify_otp',
-                        identifier: pendingLoginIdentifier,
-                        otp: otpCode
-                    })
+                    body: JSON.stringify({ action: 'verify_otp', identifier: pendingLoginIdentifier, otp: otpCode })
                 });
                 const data = await res.json();
 
@@ -410,267 +418,284 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // ----------------------------------------------------
-    // 8. Forgot & Reset Password
+    // 5. Wallet & Automated Revenue-Sharing Engine
     // ----------------------------------------------------
-    const formForgot = document.getElementById('form-forgot-password');
-    if (formForgot) {
-        formForgot.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const id = document.getElementById('forgot-identifier').value.trim();
-            try {
-                const res = await fetch('api/auth.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'forgot_password', identifier: id })
-                });
-                const data = await res.json();
-                showToast(data.message, 'info');
-                if (data.debug_hint) {
-                    setTimeout(() => showToast(`🔑 ${data.debug_hint}`, 'info'), 1000);
-                }
-                pendingLoginIdentifier = id;
-                navigateToPage('reset');
-            } catch (err) {
-                showToast('Unable to send recovery code', 'error');
-            }
-        });
-    }
-
-    const formReset = document.getElementById('form-reset-password');
-    if (formReset) {
-        formReset.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const code = document.getElementById('reset-otp-code').value.trim();
-            const newP = document.getElementById('reset-new-password').value;
-            const confP = document.getElementById('reset-confirm-password').value;
-
-            if (newP !== confP) {
-                showToast('Passwords do not match.', 'error');
-                return;
-            }
-
-            try {
-                const res = await fetch('api/auth.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'reset_password',
-                        identifier: pendingLoginIdentifier,
-                        otp: code,
-                        new_password: newP,
-                        confirm_password: confP
-                    })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    showToast(data.message, 'success');
-                    navigateToPage('login');
-                } else {
-                    showToast(data.message || 'Reset failed', 'error');
-                }
-            } catch (err) {
-                showToast('Failed to reset password', 'error');
-            }
-        });
-    }
-
-    // ----------------------------------------------------
-    // 9. Logout
-    // ----------------------------------------------------
-    window.openLogoutModal = () => { if (logoutModal) logoutModal.classList.add('active'); };
-    window.closeLogoutModal = () => { if (logoutModal) logoutModal.classList.remove('active'); };
-
-    const navBtnLogout = document.getElementById('btn-trigger-logout');
-    if (navBtnLogout) navBtnLogout.addEventListener('click', window.openLogoutModal);
-
-    const btnConfirmLogout = document.getElementById('btn-confirm-logout');
-    if (btnConfirmLogout) {
-        btnConfirmLogout.addEventListener('click', async () => {
-            closeLogoutModal();
-            try {
-                await fetch('api/auth.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'logout' })
-                });
-            } catch (e) {}
-
-            setUnauthenticatedUI();
-            showToast('Your session has ended safely. Goodbye!', 'info');
-            navigateToPage('welcome');
-        });
-    }
-
-    // ----------------------------------------------------
-    // 10. Contacts Management
-    // ----------------------------------------------------
-    async function loadContacts() {
+    async function loadWalletData() {
         try {
-            const res = await fetch('api/contacts.php');
+            const res = await fetch('api/wallet.php');
             const data = await res.json();
-            if (data.success && data.contacts) {
-                renderContacts(data.contacts);
+            if (data.success) {
+                userWalletBalance = parseFloat(data.balance);
+                currentCurrency = data.currency || 'NGN';
+                platformSharePct = parseFloat(data.revenue_sharing?.platform_share_pct || 10.0);
+
+                updateBalanceUI(userWalletBalance);
+
+                if (data.virtual_account) {
+                    if (walletBankName) walletBankName.textContent = data.virtual_account.bank_name;
+                    if (walletVirtualNuban) walletVirtualNuban.textContent = data.virtual_account.virtual_account_number;
+                    if (walletAccountName) walletAccountName.textContent = data.virtual_account.account_name;
+                    if (walletPhoneAccount) walletPhoneAccount.textContent = data.virtual_account.beneficiary_phone;
+                    if (modalVirtualNuban) modalVirtualNuban.textContent = data.virtual_account.virtual_account_number;
+                }
+
+                updateModalSplitPreview();
+                if (data.transactions) renderTransactions(data.transactions);
             }
         } catch (err) {}
     }
 
-    function renderContacts(contacts) {
-        if (!contactsContainer) return;
-        contactsContainer.innerHTML = '';
+    function updateBalanceUI(balance) {
+        const formatted = `₦${balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+        if (walletBalanceEl) walletBalanceEl.textContent = formatted;
+        if (dashWalletBalance) dashWalletBalance.textContent = formatted;
+        if (navBalanceDisplay) navBalanceDisplay.textContent = formatted;
+        if (dialerBalancePill) dialerBalancePill.textContent = formatted;
+    }
 
-        if (!contacts || contacts.length === 0) {
-            contactsContainer.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:30px;">No saved contacts yet. Click "+ Add New Contact" to create one.</p>`;
-            return;
+    // Live Revenue Split calculation in Deposit Modal
+    function updateModalSplitPreview() {
+        if (!modalDepositInput) return;
+        const gross = parseFloat(modalDepositInput.value) || 0;
+        const platformCut = Math.round((gross * (platformSharePct / 100.0)) * 100) / 100;
+        const netCredit = Math.round((gross - platformCut) * 100) / 100;
+
+        if (modalSharePctLabel) modalSharePctLabel.textContent = `${platformSharePct}%`;
+        if (modalPlatformCutVal) modalPlatformCutVal.textContent = `₦${platformCut.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+        if (modalNetCreditVal) modalNetCreditVal.textContent = `₦${netCredit.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+    }
+
+    if (modalDepositInput) {
+        modalDepositInput.addEventListener('input', updateModalSplitPreview);
+    }
+
+    // Quick chip selection on Wallet page
+    const topupChips = document.querySelectorAll('.topup-chip-btn');
+    topupChips.forEach(chip => {
+        chip.addEventListener('click', () => {
+            topupChips.forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            selectedTopupAmount = parseFloat(chip.getAttribute('data-amount'));
+            const customInput = document.getElementById('custom-topup-input');
+            if (customInput) customInput.value = selectedTopupAmount;
+            if (modalDepositInput) {
+                modalDepositInput.value = selectedTopupAmount;
+                updateModalSplitPreview();
+            }
+        });
+    });
+
+    const customInput = document.getElementById('custom-topup-input');
+    if (customInput) {
+        customInput.addEventListener('input', (e) => {
+            selectedTopupAmount = parseFloat(e.target.value) || 0;
+            topupChips.forEach(c => c.classList.remove('active'));
+            if (modalDepositInput) {
+                modalDepositInput.value = selectedTopupAmount;
+                updateModalSplitPreview();
+            }
+        });
+    }
+
+    window.openTopupModal = () => {
+        if (modalDepositInput && selectedTopupAmount) {
+            modalDepositInput.value = selectedTopupAmount;
         }
+        updateModalSplitPreview();
+        if (topupModal) topupModal.classList.add('active');
+    };
+    window.closeTopupModal = () => { if (topupModal) topupModal.classList.remove('active'); };
 
-        contacts.forEach(c => {
-            const item = document.createElement('div');
-            item.className = 'contact-row-item';
-            const initial = c.name.charAt(0).toUpperCase();
+    const triggerTopupBtns = document.querySelectorAll('.trigger-topup');
+    triggerTopupBtns.forEach(btn => btn.addEventListener('click', window.openTopupModal));
 
-            item.innerHTML = `
-                <div class="contact-info-main">
-                    <div class="contact-avatar">${initial}</div>
-                    <div>
-                        <div style="font-weight:700; font-size:1.05rem;">${c.name}</div>
-                        <div style="font-size:0.85rem; color:var(--text-secondary); font-family:var(--font-mono);">${c.phone} • ${c.country}</div>
-                    </div>
-                </div>
-                <div style="display:flex; gap:10px;">
-                    <button class="clay-btn clay-btn-primary" style="padding:8px 18px; font-size:0.85rem;" data-dial="${c.phone}">
-                        📞 Call
-                    </button>
-                    <button class="clay-action-icon-btn" style="width:38px; height:38px; font-size:0.9rem;" data-delete="${c.id}" title="Delete">
-                        🗑️
-                    </button>
-                </div>
-            `;
-
-            // Call contact directly on Dialer Page
-            item.querySelector('button[data-dial]').addEventListener('click', () => {
-                currentDialNumber = c.phone;
-                updateDialDisplay();
-                navigateToPage('dialer');
-                showToast(`Calling ${c.name} (${c.phone})...`, 'info');
-                setTimeout(() => startCall(), 500);
-            });
-
-            // Delete contact
-            item.querySelector('button[data-delete]').addEventListener('click', async () => {
-                await fetch('api/contacts.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'delete', id: c.id })
-                });
-                showToast(`Contact removed`, 'info');
-                loadContacts();
-            });
-
-            contactsContainer.appendChild(item);
-        });
-    }
-
-    const btnAddContactModal = document.getElementById('btn-add-contact-modal');
-    if (btnAddContactModal) btnAddContactModal.addEventListener('click', () => openAddContactModal());
-
-    window.openAddContactModal = () => { if (addContactModal) addContactModal.classList.add('active'); };
-    window.closeAddContactModal = () => { if (addContactModal) addContactModal.classList.remove('active'); };
-
-    const formAddContact = document.getElementById('form-add-contact');
-    if (formAddContact) {
-        formAddContact.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('contact-input-name').value.trim();
-            const phone = document.getElementById('contact-input-phone').value.trim();
-            const country = document.getElementById('contact-input-country').value.trim();
-
-            try {
-                const res = await fetch('api/contacts.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'add', name, phone, country })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    showToast('Contact saved successfully!', 'success');
-                    closeAddContactModal();
-                    formAddContact.reset();
-                    loadContacts();
-                }
-            } catch (err) {
-                showToast('Failed to save contact', 'error');
-            }
-        });
-    }
-
-    // ----------------------------------------------------
-    // 11. Settings Form
-    // ----------------------------------------------------
-    const formUpdateProfile = document.getElementById('form-update-profile');
-    if (formUpdateProfile) {
-        formUpdateProfile.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const name = document.getElementById('settings-name').value.trim();
-            const lang = document.getElementById('settings-language').value;
-
-            try {
-                const res = await fetch('api/settings.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'update_profile', name, language: lang })
-                });
-                const data = await res.json();
-                if (data.success) {
-                    showToast('Profile and preferences updated!', 'success');
-                    if (currentUser) {
-                        currentUser.name = name;
-                        currentUser.language = lang;
-                        setAuthenticatedUI(currentUser);
-                    }
-                    if (window.locManager) {
-                        window.locManager.setLanguage(lang);
-                    }
-                }
-            } catch (err) {
-                showToast('Failed to save settings', 'error');
-            }
-        });
-    }
-
-    const formChangePassword = document.getElementById('form-change-password');
-    if (formChangePassword) {
-        formChangePassword.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const oldP = document.getElementById('settings-old-pass').value;
-            const newP = document.getElementById('settings-new-pass').value;
-            const confP = document.getElementById('settings-confirm-pass').value;
-
-            if (newP !== confP) {
-                showToast('Passwords do not match.', 'error');
+    // Confirm Bank Deposit & Trigger Server-Side Revenue Share
+    const confirmTopupBtn = document.getElementById('btn-confirm-topup');
+    if (confirmTopupBtn) {
+        confirmTopupBtn.addEventListener('click', async () => {
+            const amount = parseFloat(modalDepositInput ? modalDepositInput.value : selectedTopupAmount);
+            if (amount < 100) {
+                showToast('Minimum deposit via bank transfer is ₦100.00', 'error');
                 return;
             }
 
+            confirmTopupBtn.textContent = 'Verifying Bank Transfer...';
+            confirmTopupBtn.disabled = true;
+
             try {
-                const res = await fetch('api/settings.php', {
+                const res = await fetch('api/wallet.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'change_password', old_password: oldP, new_password: newP, confirm_password: confP })
+                    body: JSON.stringify({
+                        action: 'fund_bank_transfer',
+                        amount: amount,
+                        channel: 'bank_transfer',
+                        provider_reference: 'BANK-WEMA-' + Date.now()
+                    })
                 });
                 const data = await res.json();
+
                 if (data.success) {
-                    showToast('Password changed successfully!', 'success');
-                    formChangePassword.reset();
+                    userWalletBalance = parseFloat(data.new_balance);
+                    updateBalanceUI(userWalletBalance);
+                    const breakdown = data.deposit_breakdown;
+                    showToast(`🎉 Transfer Verified! ₦${breakdown.net_credited_to_user.toLocaleString()} credited to wallet (₦${breakdown.platform_revenue_share.toLocaleString()} platform share)`, 'success');
+                    closeTopupModal();
+                    loadWalletData();
                 } else {
-                    showToast(data.message || 'Error changing password', 'error');
+                    showToast(data.message || 'Payment verification failed', 'error');
                 }
             } catch (err) {
-                showToast('Failed to update password', 'error');
+                showToast('Bank gateway connection failed', 'error');
+            } finally {
+                confirmTopupBtn.textContent = 'Confirm Bank Transfer & Fund';
+                confirmTopupBtn.disabled = false;
             }
         });
     }
 
+    function renderTransactions(txs) {
+        if (!transactionsList) return;
+        transactionsList.innerHTML = '';
+        if (!txs || txs.length === 0) {
+            transactionsList.innerHTML = `<tr><td colspan="5" style="text-align:center;">No financial transactions recorded yet</td></tr>`;
+            return;
+        }
+
+        txs.forEach(t => {
+            const tr = document.createElement('tr');
+            const gross = parseFloat(t.gross_amount || 0);
+            const fee = parseFloat(t.platform_fee || 0);
+            const net = parseFloat(t.net_credited || 0);
+
+            tr.innerHTML = `
+                <td>
+                    <strong>${t.narration || t.transaction_type}</strong>
+                    <div style="font-size:0.75rem; color:var(--text-muted); font-family:var(--font-mono);">${t.internal_reference || t.provider_reference}</div>
+                </td>
+                <td style="font-family:var(--font-mono); font-weight:700;">₦${gross.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                <td style="font-family:var(--font-mono); color:var(--clay-coral-dark); font-weight:700;">-₦${fee.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                <td style="font-family:var(--font-mono); color:var(--clay-mint-dark); font-weight:800;">+₦${net.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                <td><span class="clay-badge badge-mint">${t.status || 'successful'}</span></td>
+            `;
+            transactionsList.appendChild(tr);
+        });
+    }
+
     // ----------------------------------------------------
-    // 12. Interactive Phone Dialer & DTMF Engine
+    // 6. Administrator Finance Dashboard Controller
+    // ----------------------------------------------------
+    async function loadAdminData(searchQuery = '') {
+        try {
+            const url = searchQuery ? `api/admin.php?search=${encodeURIComponent(searchQuery)}` : 'api/admin.php';
+            const res = await fetch(url);
+            const data = await res.json();
+
+            if (data.success) {
+                const m = data.metrics;
+                if (adminGrossDeposits) adminGrossDeposits.textContent = `₦${m.total_gross_deposits.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+                if (adminPlatformRev) adminPlatformRev.textContent = `₦${m.total_platform_revenue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+                if (adminCustomerBalances) adminCustomerBalances.textContent = `₦${m.total_customer_balances.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+                if (adminTelephonyMargin) adminTelephonyMargin.textContent = `₦${m.total_telephony_margin.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+
+                const c = data.configuration;
+                if (inputAdminSharePct) inputAdminSharePct.value = c.platform_revenue_share_pct;
+                if (inputAdminCallRate) inputAdminCallRate.value = c.nigeria_call_rate_per_min;
+
+                renderAdminLedger(data.ledger || []);
+            }
+        } catch (err) {}
+    }
+
+    function renderAdminLedger(ledger) {
+        if (!adminLedgerBody) return;
+        adminLedgerBody.innerHTML = '';
+
+        if (!ledger || ledger.length === 0) {
+            adminLedgerBody.innerHTML = `<tr><td colspan="8" style="text-align:center;">No matching transactions found in audit ledger</td></tr>`;
+            return;
+        }
+
+        ledger.forEach(entry => {
+            const tr = document.createElement('tr');
+            const gross = parseFloat(entry.gross_amount || 0);
+            const fee = parseFloat(entry.platform_fee || 0);
+            const net = parseFloat(entry.net_credited || 0);
+            const isReconciled = entry.status === 'reconciled';
+
+            tr.innerHTML = `
+                <td style="font-size:0.82rem; color:var(--text-muted);">${entry.created_at || 'Just now'}</td>
+                <td style="font-family:var(--font-mono); font-size:0.85rem;"><strong>${entry.internal_reference}</strong></td>
+                <td style="font-family:var(--font-mono);">₦${gross.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                <td style="font-family:var(--font-mono); color:var(--clay-coral-dark); font-weight:700;">₦${fee.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                <td style="font-family:var(--font-mono); color:var(--clay-mint-dark); font-weight:700;">₦${net.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+                <td><span class="clay-badge">${entry.channel}</span></td>
+                <td><span class="clay-badge ${isReconciled ? 'badge-primary' : 'badge-mint'}">${entry.status}</span></td>
+                <td>
+                    ${!isReconciled ? `<button class="clay-btn clay-btn-white" style="padding:6px 12px; font-size:0.75rem;" onclick="reconcileEntry('${entry.internal_reference}')">Reconcile</button>` : `<span style="color:var(--clay-primary);font-size:0.8rem;">✓ Audited</span>`}
+                </td>
+            `;
+            adminLedgerBody.appendChild(tr);
+        });
+    }
+
+    window.reconcileEntry = async (reference) => {
+        try {
+            const res = await fetch('api/admin.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'reconcile_entry', reference: reference })
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast(`Transaction ${reference} reconciled!`, 'success');
+                loadAdminData();
+            }
+        } catch (e) {}
+    };
+
+    if (formAdminSettings) {
+        formAdminSettings.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const share = parseFloat(inputAdminSharePct.value);
+            const rate = parseFloat(inputAdminCallRate.value);
+
+            try {
+                const res = await fetch('api/admin.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'update_settings',
+                        platform_revenue_share_pct: share,
+                        nigeria_call_rate_per_min: rate
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    platformSharePct = share;
+                    currentCallRate = rate;
+                    showToast(`Financial rules updated! Platform share set to ${share}%.`, 'success');
+                    loadAdminData();
+                    loadWalletData();
+                }
+            } catch (err) {
+                showToast('Failed to update admin settings', 'error');
+            }
+        });
+    }
+
+    if (btnRefreshAdmin) btnRefreshAdmin.addEventListener('click', () => loadAdminData());
+
+    if (adminSearchInput) {
+        let deb;
+        adminSearchInput.addEventListener('input', (e) => {
+            clearTimeout(deb);
+            deb = setTimeout(() => loadAdminData(e.target.value.trim()), 300);
+        });
+    }
+
+    // ----------------------------------------------------
+    // 7. Interactive Dialer & Telephony Margins (Nigeria)
     // ----------------------------------------------------
     const dialKeys = document.querySelectorAll('.clay-dial-key');
     dialKeys.forEach(btn => {
@@ -693,27 +718,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (dialClearBtn) {
         dialClearBtn.addEventListener('click', () => {
-            currentDialNumber = '';
+            currentDialNumber = '+234';
             updateDialDisplay();
         });
     }
 
     function detectCountry(number) {
-        if (!number) return { name: 'Enter Number', rate: 0.05, flag: '🌐' };
+        if (!number) return { name: 'Enter Nigerian / Global Number', rate: 12.00, flag: '🇳🇬' };
         const cleaned = number.replace(/\s+/g, '');
-        if (cachedRates && cachedRates.length > 0) {
-            const sortedRates = [...cachedRates].sort((a, b) => b.dial_code.length - a.dial_code.length);
-            for (const r of sortedRates) {
-                if (cleaned.startsWith(r.dial_code) || cleaned.startsWith(r.dial_code.replace('+', ''))) {
-                    return { name: r.country_name, rate: r.rate, flag: r.flag };
-                }
-            }
+
+        if (cleaned.startsWith('+234') || cleaned.startsWith('234') || cleaned.startsWith('080') || cleaned.startsWith('081') || cleaned.startsWith('090') || cleaned.startsWith('070')) {
+            return { name: 'Nigeria (All Networks)', rate: 12.00, flag: '🇳🇬' };
         }
-        if (cleaned.startsWith('+1') || cleaned.startsWith('1')) return { name: 'USA / Canada', rate: 0.012, flag: '🇺🇸' };
-        if (cleaned.startsWith('+44') || cleaned.startsWith('44')) return { name: 'United Kingdom', rate: 0.018, flag: '🇬🇧' };
-        if (cleaned.startsWith('+234') || cleaned.startsWith('234')) return { name: 'Nigeria', rate: 0.075, flag: '🇳🇬' };
-        if (cleaned.startsWith('+91') || cleaned.startsWith('91')) return { name: 'India', rate: 0.019, flag: '🇮🇳' };
-        return { name: 'International Call', rate: 0.05, flag: '🌐' };
+        if (cleaned.startsWith('+1') || cleaned.startsWith('1')) return { name: 'USA / Canada', rate: 18.00, flag: '🇺🇸' };
+        if (cleaned.startsWith('+44') || cleaned.startsWith('44')) return { name: 'United Kingdom', rate: 25.00, flag: '🇬🇧' };
+        if (cleaned.startsWith('+233')) return { name: 'Ghana', rate: 65.00, flag: '🇬🇭' };
+        return { name: 'International Call', rate: 25.00, flag: '🌐' };
     }
 
     function updateDialDisplay() {
@@ -723,7 +743,7 @@ document.addEventListener('DOMContentLoaded', () => {
         activeCallCountry = detected.name;
         currentCallRate = detected.rate;
         if (dialCountry) {
-            dialCountry.innerHTML = `${detected.flag} ${detected.name} <span style="color:var(--clay-primary);font-weight:700;">($${detected.rate.toFixed(3)}/min)</span>`;
+            dialCountry.innerHTML = `${detected.flag} ${detected.name} <span style="color:var(--clay-primary);font-weight:700;">(₦${detected.rate.toFixed(2)}/min)</span>`;
         }
     }
 
@@ -731,13 +751,13 @@ document.addEventListener('DOMContentLoaded', () => {
     if (endCallBtn) endCallBtn.addEventListener('click', endCall);
 
     function startCall() {
-        if (!currentDialNumber || currentDialNumber.length < 3) {
+        if (!currentDialNumber || currentDialNumber.length < 5) {
             showToast('Please dial a valid phone number first', 'error');
             return;
         }
 
-        if (userWalletBalance < 0.10) {
-            showToast('Insufficient wallet credit! Please top up your wallet.', 'error');
+        if (userWalletBalance < 12.00) {
+            showToast('Insufficient wallet credit! Minimum ₦12.00 required to start call.', 'error');
             openTopupModal();
             return;
         }
@@ -750,9 +770,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         overlayName.textContent = detected.name;
         overlayNumber.textContent = currentDialNumber;
-        overlayStatus.textContent = 'Calling...';
+        overlayStatus.textContent = 'Routing through carrier...';
         overlayTimer.textContent = '00:00';
-        overlayRate.textContent = `Rate: $${detected.rate.toFixed(3)}/min`;
+        overlayRate.textContent = `Rate: ₦${detected.rate.toFixed(2)}/min`;
         callingOverlay.style.display = 'flex';
 
         if (window.soundEngine) window.soundEngine.startRingback();
@@ -764,8 +784,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 window.soundEngine.playConnectBeep();
             }
 
-            overlayStatus.textContent = 'Connected (HD Audio)';
-            showToast('Call connected via low-latency carrier route', 'success');
+            overlayStatus.textContent = 'Connected (HD Telecom)';
+            showToast('Call connected to Nigerian carrier gateway', 'success');
 
             callTimer = setInterval(() => {
                 callSeconds++;
@@ -773,12 +793,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 const secs = String(callSeconds % 60).padStart(2, '0');
                 overlayTimer.textContent = `${mins}:${secs}`;
 
-                const perSecondCost = currentCallRate / 60;
+                const perSecondCost = currentCallRate / 60.0;
                 userWalletBalance = Math.max(0, userWalletBalance - perSecondCost);
                 updateBalanceUI(userWalletBalance);
 
                 if (userWalletBalance <= 0) {
-                    showToast('Call ended: credit depleted', 'warning');
+                    showToast('Call ended: wallet balance depleted', 'warning');
                     endCall();
                 }
             }, 1000);
@@ -801,9 +821,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         callingOverlay.style.display = 'none';
         const finalDuration = callSeconds;
-        const finalCost = (finalDuration / 60) * currentCallRate;
+        const finalCost = (finalDuration / 60.0) * currentCallRate;
 
-        showToast(`Call ended. Duration: ${finalDuration}s • Cost: $${finalCost.toFixed(3)}`, 'info');
+        showToast(`Call ended. Duration: ${finalDuration}s • Cost: ₦${finalCost.toFixed(2)}`, 'info');
         logCallToBackend(currentDialNumber, activeCallCountry, finalDuration, currentCallRate);
     }
 
@@ -824,13 +844,50 @@ document.addEventListener('DOMContentLoaded', () => {
                 userWalletBalance = parseFloat(data.new_balance);
                 updateBalanceUI(userWalletBalance);
                 loadCallLogs();
-                loadTransactions();
+                loadWalletData();
             }
         } catch (err) {}
     }
 
+    async function loadCallLogs() {
+        try {
+            const res = await fetch('api/calls.php');
+            const data = await res.json();
+            if (data.success && data.calls) {
+                renderCallLogs(data.calls);
+            }
+        } catch (err) {}
+    }
+
+    function renderCallLogs(calls) {
+        const renderTo = (container, list) => {
+            if (!container) return;
+            container.innerHTML = '';
+            if (!list || list.length === 0) {
+                container.innerHTML = `<tr><td colspan="5" style="text-align:center;">No calls recorded yet</td></tr>`;
+                return;
+            }
+            list.forEach(c => {
+                const tr = document.createElement('tr');
+                const mins = Math.floor(c.duration_seconds / 60);
+                const secs = c.duration_seconds % 60;
+                tr.innerHTML = `
+                    <td><strong>${c.destination_country}</strong></td>
+                    <td style="font-family:var(--font-mono);">${c.destination_number}</td>
+                    <td>${mins}m ${secs}s</td>
+                    <td style="color:var(--clay-coral-dark); font-weight:700; font-family:var(--font-mono);">-₦${parseFloat(c.cost).toFixed(2)}</td>
+                    <td><span class="clay-badge badge-mint">${c.status || 'completed'}</span></td>
+                `;
+                container.appendChild(tr);
+            });
+        };
+
+        renderTo(callLogsList, calls);
+        renderTo(homeCallLogsList, calls.slice(0, 5));
+    }
+
     // ----------------------------------------------------
-    // 13. Rates Calculator
+    // 8. Rates & Contacts Management
     // ----------------------------------------------------
     async function loadRates(searchQuery = '') {
         try {
@@ -866,12 +923,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 </div>
                 <div class="rate-price-row">
                     <div>
-                        <span class="rate-price-big">$${parseFloat(r.rate).toFixed(3)}</span>
+                        <span class="rate-price-big">₦${parseFloat(r.rate).toFixed(2)}</span>
                         <span class="rate-price-unit">/min</span>
                     </div>
                     <span class="roaming-savings">Save ${savingsPercent}%</span>
                 </div>
-                <button class="clay-btn clay-btn-primary" style="padding: 10px 18px; font-size: 0.9rem;" data-dial="${r.dial_code}" data-country="${r.country_name}">
+                <button class="clay-btn clay-btn-primary" style="padding: 10px 18px; font-size: 0.9rem;" data-dial="${r.dial_code}">
                     📞 Dial Now
                 </button>
             `;
@@ -887,156 +944,104 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    if (ratesSearch) {
-        let debounceTimer;
-        ratesSearch.addEventListener('input', (e) => {
-            clearTimeout(debounceTimer);
-            debounceTimer = setTimeout(() => loadRates(e.target.value.trim()), 250);
-        });
-    }
-
-    // ----------------------------------------------------
-    // 14. Wallet Management
-    // ----------------------------------------------------
-    async function loadWalletData() {
+    async function loadContacts() {
         try {
-            const res = await fetch('api/wallet.php');
+            const res = await fetch('api/contacts.php');
             const data = await res.json();
-            if (data.success) {
-                userWalletBalance = parseFloat(data.balance);
-                updateBalanceUI(userWalletBalance);
-                if (data.transactions) renderTransactions(data.transactions);
-            }
+            if (data.success && data.contacts) renderContacts(data.contacts);
         } catch (err) {}
     }
 
-    function updateBalanceUI(balance) {
-        const formatted = `$${balance.toFixed(2)}`;
-        if (walletBalanceEl) walletBalanceEl.textContent = formatted;
-        if (dashWalletBalance) dashWalletBalance.textContent = formatted;
-        if (navBalanceDisplay) navBalanceDisplay.textContent = formatted;
-        if (dialerBalancePill) dialerBalancePill.textContent = balance.toFixed(2);
-    }
+    function renderContacts(contacts) {
+        if (!contactsContainer) return;
+        contactsContainer.innerHTML = '';
 
-    const topupChips = document.querySelectorAll('.topup-chip-btn');
-    topupChips.forEach(chip => {
-        chip.addEventListener('click', () => {
-            topupChips.forEach(c => c.classList.remove('active'));
-            chip.classList.add('active');
-            selectedTopupAmount = parseFloat(chip.getAttribute('data-amount'));
-            const customInput = document.getElementById('custom-topup-input');
-            if (customInput) customInput.value = selectedTopupAmount;
-        });
-    });
+        if (!contacts || contacts.length === 0) {
+            contactsContainer.innerHTML = `<p style="text-align:center; color:var(--text-muted); padding:30px;">No saved contacts yet.</p>`;
+            return;
+        }
 
-    const customInput = document.getElementById('custom-topup-input');
-    if (customInput) {
-        customInput.addEventListener('input', (e) => {
-            selectedTopupAmount = parseFloat(e.target.value) || 0;
-            topupChips.forEach(c => c.classList.remove('active'));
-        });
-    }
+        contacts.forEach(c => {
+            const item = document.createElement('div');
+            item.className = 'contact-row-item';
+            const initial = c.name.charAt(0).toUpperCase();
 
-    window.openTopupModal = () => { if (topupModal) topupModal.classList.add('active'); };
-    window.closeTopupModal = () => { if (topupModal) topupModal.classList.remove('active'); };
+            item.innerHTML = `
+                <div class="contact-info-main">
+                    <div class="contact-avatar">${initial}</div>
+                    <div>
+                        <div style="font-weight:700; font-size:1.05rem;">${c.name}</div>
+                        <div style="font-size:0.85rem; color:var(--text-secondary); font-family:var(--font-mono);">${c.phone} • ${c.country}</div>
+                    </div>
+                </div>
+                <div style="display:flex; gap:10px;">
+                    <button class="clay-btn clay-btn-primary" style="padding:8px 18px; font-size:0.85rem;" data-dial="${c.phone}">
+                        📞 Call
+                    </button>
+                    <button class="clay-action-icon-btn" style="width:38px; height:38px; font-size:0.9rem;" data-delete="${c.id}" title="Delete">
+                        🗑️
+                    </button>
+                </div>
+            `;
 
-    const triggerTopupBtns = document.querySelectorAll('.trigger-topup');
-    triggerTopupBtns.forEach(btn => btn.addEventListener('click', window.openTopupModal));
+            item.querySelector('button[data-dial]').addEventListener('click', () => {
+                currentDialNumber = c.phone;
+                updateDialDisplay();
+                navigateToPage('dialer');
+                showToast(`Calling ${c.name} (${c.phone})...`, 'info');
+                setTimeout(() => startCall(), 500);
+            });
 
-    const confirmTopupBtn = document.getElementById('btn-confirm-topup');
-    if (confirmTopupBtn) {
-        confirmTopupBtn.addEventListener('click', async () => {
-            confirmTopupBtn.textContent = 'Processing Payment...';
-            confirmTopupBtn.disabled = true;
-
-            try {
-                const res = await fetch('api/wallet.php', {
+            item.querySelector('button[data-delete]').addEventListener('click', async () => {
+                await fetch('api/contacts.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'topup', amount: selectedTopupAmount })
+                    body: JSON.stringify({ action: 'delete', id: c.id })
+                });
+                showToast('Contact removed', 'info');
+                loadContacts();
+            });
+
+            contactsContainer.appendChild(item);
+        });
+    }
+
+    const btnAddContactModal = document.getElementById('btn-add-contact-modal');
+    if (btnAddContactModal) btnAddContactModal.addEventListener('click', () => {
+        if (addContactModal) addContactModal.classList.add('active');
+    });
+
+    window.closeAddContactModal = () => { if (addContactModal) addContactModal.classList.remove('active'); };
+
+    const formAddContact = document.getElementById('form-add-contact');
+    if (formAddContact) {
+        formAddContact.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('contact-input-name').value.trim();
+            const phone = document.getElementById('contact-input-phone').value.trim();
+            const country = document.getElementById('contact-input-country').value.trim();
+
+            try {
+                const res = await fetch('api/contacts.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'add', name, phone, country })
                 });
                 const data = await res.json();
                 if (data.success) {
-                    userWalletBalance = parseFloat(data.balance);
-                    updateBalanceUI(userWalletBalance);
-                    showToast(`🎉 Top-up successful! $${selectedTopupAmount.toFixed(2)} added.`, 'success');
-                    closeTopupModal();
-                    loadTransactions();
+                    showToast('Contact saved!', 'success');
+                    closeAddContactModal();
+                    formAddContact.reset();
+                    loadContacts();
                 }
-            } catch (err) {
-                showToast('Payment processing error', 'error');
-            } finally {
-                confirmTopupBtn.textContent = 'Confirm & Top Up';
-                confirmTopupBtn.disabled = false;
-            }
+            } catch (err) {}
         });
     }
 
-    function renderTransactions(txs) {
-        if (!transactionsList) return;
-        transactionsList.innerHTML = '';
-        txs.forEach(t => {
-            const tr = document.createElement('tr');
-            const isPlus = parseFloat(t.amount) > 0;
-            const amountColor = isPlus ? 'var(--clay-mint-dark)' : 'var(--clay-coral-dark)';
-            const sign = isPlus ? '+' : '';
-            tr.innerHTML = `
-                <td><strong>${t.description}</strong></td>
-                <td><span class="clay-badge">${t.type}</span></td>
-                <td style="color:${amountColor}; font-weight:800; font-family:var(--font-mono);">${sign}$${Math.abs(parseFloat(t.amount)).toFixed(2)}</td>
-                <td style="color:var(--text-muted); font-size:0.85rem;">${t.created_at || 'Just now'}</td>
-            `;
-            transactionsList.appendChild(tr);
-        });
-    }
-
-    async function loadTransactions() {
-        try {
-            const res = await fetch('api/wallet.php');
-            const data = await res.json();
-            if (data.success && data.transactions) renderTransactions(data.transactions);
-        } catch (err) {}
-    }
-
-    async function loadCallLogs() {
-        try {
-            const res = await fetch('api/calls.php');
-            const data = await res.json();
-            if (data.success && data.calls) renderCallLogs(data.calls);
-        } catch (err) {}
-    }
-
-    function renderCallLogs(calls) {
-        const renderTo = (container, list) => {
-            if (!container) return;
-            container.innerHTML = '';
-            if (!list || list.length === 0) {
-                container.innerHTML = `<tr><td colspan="5" style="text-align:center;">No calls recorded</td></tr>`;
-                return;
-            }
-            list.forEach(c => {
-                const tr = document.createElement('tr');
-                const mins = Math.floor(c.duration_seconds / 60);
-                const secs = c.duration_seconds % 60;
-                tr.innerHTML = `
-                    <td><strong>${c.destination_country}</strong></td>
-                    <td style="font-family:var(--font-mono);">${c.destination_number}</td>
-                    <td>${mins}m ${secs}s</td>
-                    <td style="color:var(--clay-coral-dark); font-weight:700; font-family:var(--font-mono);">-$${parseFloat(c.cost).toFixed(3)}</td>
-                    <td><span class="clay-badge badge-mint">${c.status || 'completed'}</span></td>
-                `;
-                container.appendChild(tr);
-            });
-        };
-
-        renderTo(callLogsList, calls);
-        renderTo(homeCallLogsList, calls.slice(0, 5));
-    }
-
     // ----------------------------------------------------
-    // 15. Toast Notifications
+    // 9. Toast Notification Helper
     // ----------------------------------------------------
-    function showToast(message, type = 'info') {
+    window.showToast = (message, type = 'info') => {
         let container = document.getElementById('toast-container');
         if (!container) {
             container = document.createElement('div');
@@ -1060,12 +1065,36 @@ document.addEventListener('DOMContentLoaded', () => {
             toast.style.opacity = '0';
             toast.style.transform = 'translateY(10px)';
             setTimeout(() => toast.remove(), 300);
-        }, 3800);
-    }
+        }, 4000);
+    };
 
     // ----------------------------------------------------
-    // 16. App Boot & Session Restore
+    // 10. Logout & Session Boot
     // ----------------------------------------------------
+    window.openLogoutModal = () => { if (logoutModal) logoutModal.classList.add('active'); };
+    window.closeLogoutModal = () => { if (logoutModal) logoutModal.classList.remove('active'); };
+
+    const navBtnLogout = document.getElementById('btn-trigger-logout');
+    if (navBtnLogout) navBtnLogout.addEventListener('click', window.openLogoutModal);
+
+    const btnConfirmLogout = document.getElementById('btn-confirm-logout');
+    if (btnConfirmLogout) {
+        btnConfirmLogout.addEventListener('click', async () => {
+            closeLogoutModal();
+            try {
+                await fetch('api/auth.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'logout' })
+                });
+            } catch (e) {}
+
+            setUnauthenticatedUI();
+            showToast('Your session has ended safely. Goodbye!', 'info');
+            navigateToPage('welcome');
+        });
+    }
+
     async function initSession() {
         try {
             const res = await fetch('api/auth.php');
@@ -1076,8 +1105,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 navigateToPage(initialHash);
             } else {
                 setUnauthenticatedUI();
-                const initialHash = window.location.hash.replace('#', '') || 'welcome';
-                navigateToPage(initialHash);
+                navigateToPage('welcome');
             }
         } catch (err) {
             setUnauthenticatedUI();

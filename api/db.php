@@ -1,13 +1,13 @@
 <?php
 /**
- * ONE VOICE - Database Connection Helper
+ * ONE VOICE - Database Connection Helper & Resilient Store
  * Supports Neon PostgreSQL via PDO with fallback to JSON store
  */
 
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Paystack-Signature, X-Webhook-Secret');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -21,8 +21,6 @@ function getDbConnection() {
     }
 
     $dbUrl = getenv('DATABASE_URL');
-    
-    // Check if DATABASE_URL or individual PG credentials exist
     if ($dbUrl) {
         try {
             $parsed = parse_url($dbUrl);
@@ -40,11 +38,9 @@ function getDbConnection() {
             ]);
             return $pdo;
         } catch (Exception $e) {
-            // Neon connection failed or not yet provisioned; fall back safely
             error_log("Postgres connection error: " . $e->getMessage());
         }
     }
-    
     return null;
 }
 
@@ -57,46 +53,83 @@ function getLocalStore() {
     
     if (!file_exists($filePath)) {
         $defaultData = [
+            "settings" => [
+                "platform_revenue_share_pct" => 10.0,
+                "platform_fixed_fee" => 0.0,
+                "nigeria_call_rate_per_min" => 12.00,
+                "carrier_wholesale_cost_per_min" => 8.50,
+                "currency" => "NGN",
+                "virtual_bank_provider" => "Wema Bank (ONE VOICE NUBAN)"
+            ],
             "user" => [
                 "id" => 1,
+                "member_id" => "OV-784920",
                 "name" => "Alex Morgan",
-                "phone" => "+1 (415) 555-2671",
-                "email" => "alex.morgan@onevoice.app"
+                "phone" => "+2348031234567", // Phone number acts as ONE VOICE Account Number
+                "email" => "demo@onevoice.app",
+                "virtual_bank_name" => "Wema Bank (ONE VOICE)",
+                "virtual_account_number" => "9803123456",
+                "virtual_account_name" => "ONE VOICE / Alex Morgan",
+                "language" => "en",
+                "role" => "admin",
+                "status" => "active",
+                "is_verified" => true
             ],
             "wallet" => [
-                "balance" => 15.00,
-                "currency" => "USD"
+                "balance" => 18000.00,
+                "currency" => "NGN"
             ],
-            "transactions" => [
+            "wallet_ledger" => [
                 [
                     "id" => 1,
-                    "type" => "topup",
-                    "amount" => 15.00,
-                    "balance_after" => 15.00,
-                    "description" => "Initial Welcome Bonus Credit",
-                    "created_at" => date("Y-m-d H:i:s", strtotime("-2 hours"))
+                    "user_id" => 1,
+                    "transaction_type" => "bank_deposit",
+                    "gross_amount" => 20000.00,
+                    "platform_fee" => 2000.00,
+                    "net_credited" => 18000.00,
+                    "balance_before" => 0.00,
+                    "balance_after" => 18000.00,
+                    "channel" => "bank_transfer",
+                    "provider_reference" => "BANK-WEMA-9803123456-01",
+                    "internal_reference" => "OV-DEP-99201",
+                    "narration" => "Bank Transfer via Wema NUBAN - Platform Share: 10% (₦2,000.00)",
+                    "status" => "successful",
+                    "created_at" => date("Y-m-d H:i:s", strtotime("-3 hours"))
+                ]
+            ],
+            "platform_revenue_ledger" => [
+                [
+                    "id" => 1,
+                    "source_type" => "deposit_share",
+                    "source_reference" => "OV-DEP-99201",
+                    "user_id" => 1,
+                    "amount" => 2000.00,
+                    "cumulative_platform_revenue" => 2000.00,
+                    "settlement_status" => "settled",
+                    "settled_at" => date("Y-m-d H:i:s", strtotime("-3 hours")),
+                    "created_at" => date("Y-m-d H:i:s", strtotime("-3 hours"))
                 ]
             ],
             "call_logs" => [
                 [
                     "id" => 1,
-                    "destination_number" => "+44 20 7946 0991",
-                    "destination_country" => "United Kingdom",
-                    "duration_seconds" => 142,
-                    "cost" => 0.0426,
+                    "destination_number" => "+2348023456789",
+                    "destination_country" => "Nigeria (MTN)",
+                    "duration_seconds" => 120,
+                    "retail_rate_per_min" => 12.00,
+                    "cost" => 24.00,
+                    "carrier_cost" => 17.00,
+                    "platform_margin" => 7.00,
                     "status" => "completed",
-                    "created_at" => date("Y-m-d H:i:s", strtotime("-45 minutes"))
-                ],
-                [
-                    "id" => 2,
-                    "destination_number" => "+234 803 123 4567",
-                    "destination_country" => "Nigeria",
-                    "duration_seconds" => 85,
-                    "cost" => 0.1062,
-                    "status" => "completed",
-                    "created_at" => date("Y-m-d H:i:s", strtotime("-1 day"))
+                    "created_at" => date("Y-m-d H:i:s", strtotime("-1 hour"))
                 ]
-            ]
+            ],
+            "contacts" => [
+                ["id" => 1, "name" => "Aminu Kano", "phone" => "+2348023456789", "country" => "Nigeria"],
+                ["id" => 2, "name" => "Chinedu Okeke", "phone" => "+2348109876543", "country" => "Nigeria"],
+                ["id" => 3, "name" => "Folake Adeleke", "phone" => "+2349012345678", "country" => "Nigeria"]
+            ],
+            "users" => []
         ];
         file_put_contents($filePath, json_encode($defaultData, JSON_PRETTY_PRINT));
     }

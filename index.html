@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ONE VOICE — Crystal-Clear International Calling & Digital Wallet</title>
-    <meta name="description" content="Secure communication platform with dedicated pages for Home Dashboard, Make Call Dialer, Contacts, Wallet, Settings, and Global Rates.">
+    <title>ONE VOICE — Phone Account, Wallet Funding & Automatic Revenue Sharing</title>
+    <meta name="description" content="Fund your ONE VOICE wallet via Nigerian bank transfer using your verified phone number as your account number, with automatic revenue sharing and real calling across Nigeria.">
     
     <!-- Claymorphism CSS -->
     <link rel="stylesheet" href="css/clay.css">
@@ -30,7 +30,7 @@
                 <li><button class="nav-page-btn" data-page="rates" data-i18n="navRates">Call Rates</button></li>
             </ul>
 
-            <!-- Authenticated App Navigation Buttons (HOME, MAKE CALL, CONTACTS, WALLET, SETTINGS) -->
+            <!-- Authenticated App Navigation Buttons -->
             <ul class="nav-links" id="auth-nav-links" style="display: none;">
                 <li>
                     <button class="nav-page-btn active" data-page="home">
@@ -53,8 +53,8 @@
                     </button>
                 </li>
                 <li>
-                    <button class="nav-page-btn" data-page="rates">
-                        <span>🌍</span> <span data-i18n="navRates">Rates</span>
+                    <button class="nav-page-btn" data-page="admin" id="nav-admin-link">
+                        <span>👑</span> <span>Admin</span>
                     </button>
                 </li>
                 <li>
@@ -73,9 +73,9 @@
                 </div>
 
                 <!-- Wallet Balance Badge (Click to open Wallet Page / Top Up) -->
-                <button class="wallet-badge-btn trigger-topup" title="Prepaid Calling Wallet" id="nav-wallet-btn">
+                <button class="wallet-badge-btn trigger-topup" title="Prepaid Calling Wallet (Click to Fund)" id="nav-wallet-btn">
                     <span class="wallet-dot"></span>
-                    <span id="nav-balance">$15.00</span>
+                    <span id="nav-balance">₦18,000.00</span>
                     <span style="color:var(--clay-primary);font-weight:800;">+</span>
                 </button>
 
@@ -112,14 +112,14 @@
             <div class="hero-section" style="margin-bottom: 50px;">
                 <div class="hero-content">
                     <div class="clay-badge badge-primary hero-pill">
-                        ✨ Next-Gen PSTN & International VoIP Calling
+                        🇳🇬 Phone Account Banking & Low-Cost Calling in Nigeria
                     </div>
                     <h1 class="hero-title" data-i18n="welcomeTitle">
                         One Voice.<br>
-                        <span class="gradient-text">Zero Roaming Limits.</span>
+                        <span class="gradient-text">Fund With Your Phone Number.</span>
                     </h1>
-                    <p class="hero-description" data-i18n="welcomeDesc">
-                        Call real mobile phones and landlines in 190+ countries with HD audio clarity. No expensive roaming contracts, no surprise bills—just transparent per-second billing from your secure digital wallet.
+                    <p class="hero-description">
+                        Your verified phone number is your ONE VOICE bank account number. Transfer funds from any Nigerian banking app (GTBank, Access, Zenith, Kuda, OPay, etc.) directly into your wallet with automated revenue sharing and call anywhere in Nigeria at ₦12/min.
                     </p>
 
                     <div class="hero-actions">
@@ -130,37 +130,37 @@
                             Login
                         </button>
                         <button class="clay-btn clay-btn-secondary nav-page-btn" data-page="dialer" data-i18n="makeCall">
-                            📞 Try Dialer
+                            📞 Try Web Phone
                         </button>
                     </div>
 
                     <div class="hero-stats">
                         <div class="stat-item">
-                            <h3>190+</h3>
-                            <p>Countries</p>
+                            <h3>₦12/min</h3>
+                            <p>Calls Across Nigeria</p>
                         </div>
                         <div class="stat-item">
-                            <h3>&lt;65ms</h3>
-                            <p>Audio Latency</p>
+                            <h3>100%</h3>
+                            <p>NUBAN Bank Transfer</p>
                         </div>
                         <div class="stat-item">
-                            <h3>98%</h3>
-                            <p>Savings</p>
+                            <h3>10%</h3>
+                            <p>Admin Share Split</p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Preview Mini Dialer Card -->
-                <div class="clay-card" style="padding: 36px 30px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 20px;">
-                    <div style="width: 80px; height: 80px; border-radius: 50%; background: #e0e7ff; color: var(--clay-primary); display: flex; align-items: center; justify-content: center; font-size: 2.4rem; box-shadow: var(--clay-shadow-sm), var(--clay-inset);">
-                        📞
+                <!-- Preview Mini Phone Account Card -->
+                <div class="clay-card" style="padding: 36px 30px; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; gap: 16px;">
+                    <div style="width: 76px; height: 76px; border-radius: 50%; background: #e0e7ff; color: var(--clay-primary); display: flex; align-items: center; justify-content: center; font-size: 2.2rem; box-shadow: var(--clay-shadow-sm), var(--clay-inset);">
+                        🏦
                     </div>
-                    <h3 style="font-size: 1.6rem; font-weight: 800;">High-Definition Web Calling</h3>
-                    <p style="color: var(--text-secondary); max-width: 320px; font-size: 0.95rem;">
-                        Experience authentic DTMF dialing tones, live in-call balance deduction, and crystal audio straight from your browser.
+                    <h3 style="font-size: 1.5rem; font-weight: 800;">Dedicated Virtual Account</h3>
+                    <p style="color: var(--text-secondary); max-width: 320px; font-size: 0.92rem;">
+                        Your verified phone number is linked to a dedicated Wema Bank virtual account for instant deposit settlement and wallet top-ups.
                     </p>
-                    <button class="clay-btn clay-btn-primary nav-page-btn" data-page="dialer" style="width: 100%; max-width: 260px;" data-i18n="makeCall">
-                        Open Full Web Phone
+                    <button class="clay-btn clay-btn-primary nav-page-btn" data-page="login" style="width: 100%; max-width: 260px;">
+                        Sign In to View Your Account
                     </button>
                 </div>
             </div>
@@ -168,19 +168,19 @@
             <!-- Features Highlights -->
             <div class="features-grid">
                 <div class="clay-card feature-box">
-                    <div class="feature-icon-wrapper" style="background:#e0e7ff; color:var(--clay-primary);">📡</div>
-                    <h3 class="feature-title">Edge-Routed PSTN Termination</h3>
-                    <p class="feature-desc">Calls connect through Anycast regional PoPs directly into tier-1 telecom carriers with jitter below 5ms.</p>
+                    <div class="feature-icon-wrapper" style="background:#e0e7ff; color:var(--clay-primary);">📱</div>
+                    <h3 class="feature-title">Phone Number = Account Number</h3>
+                    <p class="feature-desc">No complicated account numbers to memorize. Send money from your mobile banking app directly using your phone number or linked virtual NUBAN.</p>
                 </div>
                 <div class="clay-card feature-box">
-                    <div class="feature-icon-wrapper" style="background:#d1fae5; color:var(--clay-mint-dark);">🔒</div>
-                    <h3 class="feature-title">Double-Entry Ledger Security</h3>
-                    <p class="feature-desc">All top-ups and per-second call deductions are verified on Neon PostgreSQL with zero balance discrepancy.</p>
+                    <div class="feature-icon-wrapper" style="background:#d1fae5; color:var(--clay-mint-dark);">⚖️</div>
+                    <h3 class="feature-title">Automated Revenue Sharing</h3>
+                    <p class="feature-desc">Every deposit is split securely on the server between the customer wallet credit (90%) and the ONE VOICE platform revenue share (10%).</p>
                 </div>
                 <div class="clay-card feature-box">
-                    <div class="feature-icon-wrapper" style="background:#ffe4e6; color:var(--clay-coral-dark);">📱</div>
-                    <h3 class="feature-title">Call Real Mobiles & Landlines</h3>
-                    <p class="feature-desc">Recipients do not need the ONE VOICE app or internet. Their standard telephone rings normally.</p>
+                    <div class="feature-icon-wrapper" style="background:#ffe4e6; color:var(--clay-coral-dark);">📞</div>
+                    <h3 class="feature-title">Real Calling Across Nigeria</h3>
+                    <p class="feature-desc">Make HD voice calls to MTN, Airtel, Glo, and 9mobile phone numbers with live per-second billing deducted straight from your wallet balance.</p>
                 </div>
             </div>
         </section>
@@ -189,6 +189,29 @@
              PAGE 2: DEDICATED DASHBOARD HOME (AUTHENTICATED)
              ==================================================== -->
         <section class="app-page" id="page-home">
+            
+            <!-- PROMINENT PHONE NUMBER ACCOUNT BANNER -->
+            <div class="phone-account-banner">
+                <div>
+                    <span class="clay-badge" style="background:rgba(255,255,255,0.2); color:#ffffff; margin-bottom:8px;">
+                        🏦 YOUR ONE VOICE BENEFICIARY ACCOUNT
+                    </span>
+                    <h3 style="font-size: 1.25rem; font-weight: 700; color:#e0e7ff;">Verified Phone Number (Account Number):</h3>
+                    <div class="account-num-big" id="dash-phone-account-number">+234 803 123 4567</div>
+                    <p style="font-size: 0.9rem; color: #c7d2fe;">
+                        Use this phone number or your dedicated <strong>Wema Bank NUBAN</strong> when transferring funds from your banking app.
+                    </p>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <button class="clay-btn clay-btn-white" id="btn-copy-dash-phone" style="font-size:0.9rem; padding:12px 22px;">
+                        📋 Copy Account Number
+                    </button>
+                    <button class="clay-btn clay-btn-secondary trigger-topup" style="font-size:0.9rem; padding:12px 22px;">
+                        ⚡ Fund Wallet Now
+                    </button>
+                </div>
+            </div>
+
             <!-- Hero User Profile Card -->
             <div class="clay-card dashboard-hero-card">
                 <div>
@@ -201,19 +224,20 @@
                             <span data-i18n="memberId">Member ID</span>: <strong id="dash-member-id">OV-784920</strong>
                         </span>
                         <span class="clay-badge badge-primary" id="dash-language-badge">English (en)</span>
+                        <span class="clay-badge badge-mint" id="dash-role-badge">Admin Account</span>
                     </div>
                 </div>
 
                 <div style="text-align: right;">
                     <div style="font-size:0.85rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;" data-i18n="activeCallingCredit">
-                        Available Calling Credit
+                        Available Wallet Balance
                     </div>
                     <div style="font-size:2.8rem; font-weight:800; color:var(--clay-mint-dark); font-family:var(--font-mono);" id="dash-wallet-balance">
-                        $15.00
+                        ₦18,000.00
                     </div>
-                    <button class="clay-btn clay-btn-secondary trigger-topup" style="padding:10px 22px; font-size:0.9rem;" data-i18n="topUpNow">
-                        ⚡ Instant Top-Up
-                    </button>
+                    <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:2px;">
+                        Revenue Share: 10% Platform | 90% Wallet
+                    </div>
                 </div>
             </div>
 
@@ -223,7 +247,7 @@
                 <div class="clay-card dash-nav-card nav-page-btn" data-page="dialer">
                     <div class="dash-nav-icon" style="background:#e0e7ff; color:var(--clay-primary);">📞</div>
                     <div class="dash-nav-title" data-i18n="makeCall">Make Call</div>
-                    <div class="dash-nav-desc">Full-screen phone dialer with DTMF key audio</div>
+                    <div class="dash-nav-desc">Call any Nigerian phone number @ ₦12.00/min</div>
                 </div>
 
                 <!-- 2. Contacts Tile -->
@@ -237,14 +261,14 @@
                 <div class="clay-card dash-nav-card nav-page-btn" data-page="wallet">
                     <div class="dash-nav-icon" style="background:#d1fae5; color:var(--clay-mint-dark);">💳</div>
                     <div class="dash-nav-title" data-i18n="navWallet">My Wallet</div>
-                    <div class="dash-nav-desc">Prepaid balance, instant top-up, and call history</div>
+                    <div class="dash-nav-desc">Dedicated NUBAN, bank deposit & revenue splits</div>
                 </div>
 
-                <!-- 4. Call Rates Tile -->
-                <div class="clay-card dash-nav-card nav-page-btn" data-page="rates">
-                    <div class="dash-nav-icon" style="background:#fef3c7; color:var(--clay-amber);">🌍</div>
-                    <div class="dash-nav-title" data-i18n="navRates">Call Rates</div>
-                    <div class="dash-nav-desc">Explore per-minute rates for 190+ countries</div>
+                <!-- 4. Admin Finance Tile -->
+                <div class="clay-card dash-nav-card nav-page-btn" data-page="admin">
+                    <div class="dash-nav-icon" style="background:#fef3c7; color:var(--clay-amber);">👑</div>
+                    <div class="dash-nav-title">Admin Dashboard</div>
+                    <div class="dash-nav-desc">Track revenue shares, settlements, and call margins</div>
                 </div>
 
                 <!-- 5. Settings Tile -->
@@ -265,7 +289,7 @@
             <!-- Quick Recent Activity Preview on Home -->
             <div class="clay-card table-container" style="margin-top: 32px;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <h3 style="font-size: 1.25rem; font-weight: 800;" data-i18n="recentCalls">Recent Call Detail Records</h3>
+                    <h3 style="font-size: 1.25rem; font-weight: 800;" data-i18n="recentCalls">Recent Call Detail Records (Nigeria)</h3>
                     <button class="clay-btn clay-btn-white nav-page-btn" data-page="wallet" style="padding: 8px 16px; font-size: 0.85rem;">
                         View All in Wallet →
                     </button>
@@ -296,14 +320,14 @@
             <div class="page-header-box">
                 <div>
                     <h2 data-i18n="navDialer">Make Call</h2>
-                    <p>Enter any international telephone number or pick from your saved contacts.</p>
+                    <p>Call any real mobile or landline across Nigeria and worldwide with verified per-second billing.</p>
                 </div>
-                <div style="display:flex; gap:12px;">
+                <div style="display:flex; gap:12px; align-items:center;">
                     <button class="clay-btn clay-btn-white nav-page-btn" data-page="contacts">
                         👥 Open Contacts
                     </button>
                     <button class="clay-btn clay-btn-secondary trigger-topup">
-                        💳 Recharge ($<span id="dialer-balance-pill">15.00</span>)
+                        💳 Wallet: <span id="dialer-balance-pill">₦18,000.00</span>
                     </button>
                 </div>
             </div>
@@ -318,9 +342,9 @@
                     <div class="phone-screen">
                         <div class="dial-display">
                             <div class="dial-country-preview" id="dial-country">
-                                🌐 Enter Number <span style="color:var(--clay-primary);font-weight:700;">($0.05/min)</span>
+                                🇳🇬 Nigeria (All Networks) <span style="color:var(--clay-primary);font-weight:700;">(₦12.00/min)</span>
                             </div>
-                            <div class="dial-number-preview" id="dial-number">—</div>
+                            <div class="dial-number-preview" id="dial-number">+234</div>
                         </div>
 
                         <!-- 12-Key Dialpad -->
@@ -349,11 +373,11 @@
                         <div class="calling-overlay" id="calling-overlay">
                             <div class="call-header-info">
                                 <div class="calling-avatar">👤</div>
-                                <h3 class="calling-name" id="overlay-country-name">United Kingdom</h3>
-                                <div class="dial-number-preview" style="color:#ffffff; font-size:1.1rem;" id="overlay-phone-number">+44 20 7946 0991</div>
+                                <h3 class="calling-name" id="overlay-country-name">Nigeria (MTN)</h3>
+                                <div class="dial-number-preview" style="color:#ffffff; font-size:1.1rem;" id="overlay-phone-number">+234 803 123 4567</div>
                                 <div class="calling-status" id="overlay-call-status">Calling...</div>
                                 <div class="calling-timer" id="overlay-call-timer">00:00</div>
-                                <div class="calling-rate-badge" id="overlay-call-rate">Rate: $0.018/min</div>
+                                <div class="calling-rate-badge" id="overlay-call-rate">Rate: ₦12.00/min</div>
                             </div>
 
                             <div style="display:flex; gap:16px; align-items:center;">
@@ -368,34 +392,67 @@
         </section>
 
         <!-- ====================================================
-             PAGE 4: DEDICATED CONTACTS MANAGEMENT PAGE
-             ==================================================== -->
-        <section class="app-page" id="page-contacts">
-            <div class="page-header-box">
-                <div>
-                    <h2 data-i18n="contactsTitle">Saved Contacts</h2>
-                    <p>Speed dial your friends, family, and global clients with a single click.</p>
-                </div>
-                <button class="clay-btn clay-btn-primary" id="btn-add-contact-modal" data-i18n="addContact">
-                    + Add New Contact
-                </button>
-            </div>
-
-            <div class="clay-card settings-section-block">
-                <div id="contacts-list-container">
-                    <!-- Populated dynamically via api/contacts.php -->
-                </div>
-            </div>
-        </section>
-
-        <!-- ====================================================
-             PAGE 5: DEDICATED WALLET & CALL LEDGER PAGE
+             PAGE 4: DEDICATED WALLET & BANK FUNDING PAGE
              ==================================================== -->
         <section class="app-page" id="page-wallet">
             <div class="page-header-box">
                 <div>
-                    <h2 data-i18n="navWallet">My Wallet & Billing Ledger</h2>
-                    <p>Prepaid calling credits, auto-deduction logs, and top-up statements.</p>
+                    <h2 data-i18n="navWallet">My Wallet & Bank Funding</h2>
+                    <p>Deposit funds via bank transfer using your phone number or dedicated virtual NUBAN.</p>
+                </div>
+                <button class="clay-btn clay-btn-secondary trigger-topup" style="padding:12px 24px;">
+                    ⚡ Fund Wallet / Bank Transfer
+                </button>
+            </div>
+
+            <!-- Dedicated Virtual Bank Account Card -->
+            <div class="virtual-bank-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
+                    <div>
+                        <span class="clay-badge badge-mint">🏦 Dedicated Bank Transfer Details</span>
+                        <h3 style="font-size:1.4rem; font-weight:800; margin-top:6px;">Your ONE VOICE Virtual Account</h3>
+                        <p style="color:var(--text-secondary); font-size:0.9rem;">
+                            Make a standard bank transfer from GTBank, Access, Zenith, OPay, Palmpay, Kuda, etc. Funds credit your wallet automatically upon confirmation.
+                        </p>
+                    </div>
+                    <div class="revenue-split-preview">
+                        <span>Revenue Rule: <strong>10% Platform Fee</strong></span>
+                        <span style="color:var(--clay-mint-dark);">You Receive: <strong>90% Credit</strong></span>
+                    </div>
+                </div>
+
+                <div class="bank-detail-grid">
+                    <div class="bank-detail-item">
+                        <div>
+                            <div class="bank-detail-label">Bank Name</div>
+                            <div class="bank-detail-val" id="wallet-bank-name">Wema Bank</div>
+                        </div>
+                        <button class="clay-action-icon-btn" onclick="copyText('Wema Bank', 'Bank Name copied!')" title="Copy">📋</button>
+                    </div>
+
+                    <div class="bank-detail-item">
+                        <div>
+                            <div class="bank-detail-label">Virtual NUBAN Account</div>
+                            <div class="bank-detail-val" id="wallet-virtual-nuban">9803123456</div>
+                        </div>
+                        <button class="clay-action-icon-btn" onclick="copyText('9803123456', 'Account Number copied!')" title="Copy">📋</button>
+                    </div>
+
+                    <div class="bank-detail-item">
+                        <div>
+                            <div class="bank-detail-label">Beneficiary Name</div>
+                            <div class="bank-detail-val" id="wallet-account-name">ONE VOICE / Alex Morgan</div>
+                        </div>
+                        <button class="clay-action-icon-btn" onclick="copyText('ONE VOICE / Alex Morgan', 'Beneficiary copied!')" title="Copy">📋</button>
+                    </div>
+
+                    <div class="bank-detail-item">
+                        <div>
+                            <div class="bank-detail-label">ONE VOICE Account No. (Phone)</div>
+                            <div class="bank-detail-val" id="wallet-phone-account">+2348031234567</div>
+                        </div>
+                        <button class="clay-action-icon-btn" onclick="copyText('+2348031234567', 'Phone Number copied!')" title="Copy">📋</button>
+                    </div>
                 </div>
             </div>
 
@@ -413,33 +470,54 @@
 
                         <div class="wallet-balance-display">
                             <div class="balance-label" data-i18n="activeCallingCredit">Available Calling Credit</div>
-                            <div class="balance-amount" id="wallet-balance">$15.00</div>
-                            <span style="font-size:0.85rem; color:var(--text-muted);">Auto-deducted per second during calls</span>
+                            <div class="balance-amount" id="wallet-balance">₦18,000.00</div>
+                            <span style="font-size:0.85rem; color:var(--text-muted);">Auto-deducted per second during calls (@ ₦12/min)</span>
                         </div>
 
-                        <div style="margin-bottom: 12px; font-weight: 700; font-size: 0.95rem;">Select Quick Recharge Amount:</div>
+                        <div style="margin-bottom: 12px; font-weight: 700; font-size: 0.95rem;">Select Quick Deposit Amount:</div>
                         <div class="topup-chips">
-                            <button class="topup-chip-btn" data-amount="5">$5</button>
-                            <button class="topup-chip-btn active" data-amount="10">$10</button>
-                            <button class="topup-chip-btn" data-amount="20">$20</button>
-                            <button class="topup-chip-btn" data-amount="50">$50</button>
+                            <button class="topup-chip-btn" data-amount="2000">₦2,000</button>
+                            <button class="topup-chip-btn" data-amount="5000">₦5,000</button>
+                            <button class="topup-chip-btn active" data-amount="10000">₦10,000</button>
+                            <button class="topup-chip-btn" data-amount="20000">₦20,000</button>
                         </div>
 
                         <div class="clay-input-box" style="margin-bottom: 20px;">
-                            <input type="number" id="custom-topup-input" class="clay-input" placeholder="Or enter custom USD amount..." value="10" min="1" step="1">
+                            <input type="number" id="custom-topup-input" class="clay-input" placeholder="Or enter custom NGN amount..." value="10000" min="100" step="100">
                         </div>
                     </div>
 
-                    <button class="clay-btn clay-btn-secondary trigger-topup" style="width: 100%;" data-i18n="topUpNow">
-                        ⚡ Instant Wallet Top-Up
+                    <button class="clay-btn clay-btn-secondary trigger-topup" style="width: 100%;">
+                        ⚡ Simulate Bank Transfer / Deposit
                     </button>
                 </div>
 
-                <!-- Right: Recent Call Logs & Transactions -->
+                <!-- Right: Recent Activity / Transactions & Call Logs -->
                 <div class="clay-card table-container">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                        <h3 style="font-size: 1.2rem; font-weight: 800;" data-i18n="recentCalls">Call Detail Records (CDR)</h3>
-                        <span class="clay-badge">Real-time sync</span>
+                        <h3 style="font-size: 1.2rem; font-weight: 800;">Append-Only Financial Ledger</h3>
+                        <span class="clay-badge">Audit verified</span>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table class="clay-table">
+                            <thead>
+                                <tr>
+                                    <th>Narration / Channel</th>
+                                    <th>Gross Amount</th>
+                                    <th>Platform Fee (10%)</th>
+                                    <th>Net Credited</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactions-body">
+                                <!-- Populated dynamically via api/wallet.php -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="margin-top: 28px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 style="font-size: 1.2rem; font-weight: 800;">Call Detail Records (CDR)</h3>
                     </div>
 
                     <div style="overflow-x: auto;">
@@ -454,27 +532,7 @@
                                 </tr>
                             </thead>
                             <tbody id="call-logs-body">
-                                <!-- Populated dynamically -->
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <div style="margin-top: 28px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                        <h3 style="font-size: 1.2rem; font-weight: 800;" data-i18n="walletTransactions">Wallet Transactions</h3>
-                    </div>
-
-                    <div style="overflow-x: auto;">
-                        <table class="clay-table">
-                            <thead>
-                                <tr>
-                                    <th>Description</th>
-                                    <th>Type</th>
-                                    <th>Amount</th>
-                                    <th>Timestamp</th>
-                                </tr>
-                            </thead>
-                            <tbody id="transactions-body">
-                                <!-- Populated dynamically -->
+                                <!-- Populated dynamically via api/calls.php -->
                             </tbody>
                         </table>
                     </div>
@@ -483,19 +541,139 @@
         </section>
 
         <!-- ====================================================
-             PAGE 6: DEDICATED CALL RATES PAGE
+             PAGE 5: DEDICATED ADMINISTRATOR DASHBOARD
+             ==================================================== -->
+        <section class="app-page" id="page-admin">
+            <div class="page-header-box">
+                <div>
+                    <h2>👑 Administrator Financial Dashboard</h2>
+                    <p>Reconcile bank deposits, track 10% platform revenue share, telephony margins, and configure rates.</p>
+                </div>
+                <button class="clay-btn clay-btn-primary" id="btn-refresh-admin">
+                    🔄 Refresh Finance Metrics
+                </button>
+            </div>
+
+            <!-- Admin KPI Metrics Grid -->
+            <div class="admin-kpi-grid">
+                <div class="admin-kpi-card">
+                    <span class="bank-detail-label">Total Gross Deposits</span>
+                    <div class="admin-kpi-val" style="color:var(--text-primary);" id="admin-gross-deposits">₦20,000.00</div>
+                    <span style="font-size:0.8rem; color:var(--text-muted);">From bank transfers</span>
+                </div>
+
+                <div class="admin-kpi-card" style="border: 2px solid var(--clay-mint);">
+                    <span class="bank-detail-label" style="color:var(--clay-mint-dark);">ONE VOICE Platform Share (10%)</span>
+                    <div class="admin-kpi-val" style="color:var(--clay-mint-dark);" id="admin-platform-rev">₦2,000.00</div>
+                    <span style="font-size:0.8rem; color:var(--clay-mint-dark);">Automated revenue earned</span>
+                </div>
+
+                <div class="admin-kpi-card">
+                    <span class="bank-detail-label">Customer Wallet Liabilities</span>
+                    <div class="admin-kpi-val" style="color:var(--clay-primary);" id="admin-customer-balances">₦18,000.00</div>
+                    <span style="font-size:0.8rem; color:var(--text-muted);">Available in user wallets</span>
+                </div>
+
+                <div class="admin-kpi-card">
+                    <span class="bank-detail-label">Telephony Margin</span>
+                    <div class="admin-kpi-val" style="color:var(--clay-coral-dark);" id="admin-telephony-margin">₦7.00</div>
+                    <span style="font-size:0.8rem; color:var(--text-muted);">Retail rate - Wholesale cost</span>
+                </div>
+            </div>
+
+            <!-- Admin Configuration & Settings -->
+            <div class="clay-card settings-section-block" style="margin-bottom:32px;">
+                <h3 style="font-size:1.3rem; font-weight:800; margin-bottom:16px;">
+                    ⚙️ Revenue Sharing & Telephony Configuration
+                </h3>
+                <form id="form-admin-settings" style="display:grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap:20px; align-items:end;">
+                    <div class="auth-form-group">
+                        <label class="auth-label">Platform Revenue Share (%)</label>
+                        <input type="number" id="input-admin-share-pct" class="clay-input" value="10.0" min="0" max="50" step="0.5" required>
+                    </div>
+
+                    <div class="auth-form-group">
+                        <label class="auth-label">Nigeria Call Rate (₦ / min)</label>
+                        <input type="number" id="input-admin-call-rate" class="clay-input" value="12.00" min="5" max="100" step="0.5" required>
+                    </div>
+
+                    <div class="auth-form-group">
+                        <button type="submit" class="clay-btn clay-btn-primary" style="width:100%; height:54px;">
+                            Save Financial Rules
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Global Transaction Audit & Reconciliation Ledger -->
+            <div class="clay-card table-container">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:20px;">
+                    <div>
+                        <h3 style="font-size:1.3rem; font-weight:800;">Global Transaction Ledger & Bank Reconciliations</h3>
+                        <p style="color:var(--text-secondary); font-size:0.88rem;">Append-only record of all bank payments, platform fee deductions, and references.</p>
+                    </div>
+                    <div class="clay-input-box" style="max-width:320px;">
+                        <input type="text" id="admin-search-input" class="clay-input" placeholder="🔍 Search reference or phone...">
+                    </div>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="clay-table">
+                        <thead>
+                            <tr>
+                                <th>Date & Time</th>
+                                <th>Reference</th>
+                                <th>Gross (₦)</th>
+                                <th>Platform Share (₦)</th>
+                                <th>Customer Net (₦)</th>
+                                <th>Channel</th>
+                                <th>Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-ledger-body">
+                            <!-- Populated dynamically via api/admin.php -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================================================
+             PAGE 6: DEDICATED CONTACTS PAGE
+             ==================================================== -->
+        <section class="app-page" id="page-contacts">
+            <div class="page-header-box">
+                <div>
+                    <h2 data-i18n="contactsTitle">Saved Contacts</h2>
+                    <p>Speed dial your contacts across Nigerian networks with a single click.</p>
+                </div>
+                <button class="clay-btn clay-btn-primary" id="btn-add-contact-modal" data-i18n="addContact">
+                    + Add New Contact
+                </button>
+            </div>
+
+            <div class="clay-card settings-section-block">
+                <div id="contacts-list-container">
+                    <!-- Populated dynamically via api/contacts.php -->
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================================================
+             PAGE 7: DEDICATED CALL RATES PAGE
              ==================================================== -->
         <section class="app-page" id="page-rates">
             <div class="page-header-box">
                 <div>
-                    <h2 data-i18n="navRates">International Calling Rates</h2>
-                    <p>Search any destination country or dial code. Zero connection fees, zero hidden contracts.</p>
+                    <h2 data-i18n="navRates">International & Nigerian Calling Rates</h2>
+                    <p>Search any destination country or Nigerian network. Zero connection fees, zero hidden contracts.</p>
                 </div>
             </div>
 
             <div class="rates-search-wrapper">
                 <div class="clay-input-box">
-                    <input type="text" id="rates-search" class="clay-input" placeholder="🔍 Search country name or dial code (e.g. United Kingdom, +234, Nigeria, USA)...">
+                    <input type="text" id="rates-search" class="clay-input" placeholder="🔍 Search country name or dial code (e.g. Nigeria, United Kingdom, +234, USA)...">
                 </div>
             </div>
 
@@ -505,7 +683,7 @@
         </section>
 
         <!-- ====================================================
-             PAGE 7: DEDICATED SETTINGS PAGE
+             PAGE 8: DEDICATED SETTINGS PAGE
              ==================================================== -->
         <section class="app-page" id="page-settings">
             <div class="page-header-box">
@@ -516,13 +694,18 @@
             </div>
 
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;">
-                <!-- Edit Profile & Language -->
                 <div class="clay-card settings-section-block">
                     <h4 class="settings-section-title">👤 <span data-i18n="editProfile">Edit Profile</span></h4>
                     <form id="form-update-profile">
                         <div class="auth-form-group">
                             <label class="auth-label" data-i18n="fullName">Full Name</label>
                             <input type="text" id="settings-name" class="clay-input" value="Alex Morgan" required>
+                        </div>
+
+                        <div class="auth-form-group">
+                            <label class="auth-label" data-i18n="phoneNumber">Account Phone Number</label>
+                            <input type="text" class="clay-input" value="+2348031234567" readonly style="background:#e2e8f0;">
+                            <span style="font-size:0.75rem; color:var(--text-muted);">Verified account number. Contact support to change.</span>
                         </div>
 
                         <div class="auth-form-group">
@@ -539,7 +722,6 @@
                     </form>
                 </div>
 
-                <!-- Change Password -->
                 <div class="clay-card settings-section-block">
                     <h4 class="settings-section-title">🔑 <span data-i18n="changePassword">Change Password</span></h4>
                     <form id="form-change-password">
@@ -564,7 +746,7 @@
         </section>
 
         <!-- ====================================================
-             PAGE 8: DEDICATED REGISTRATION PAGE
+             PAGE 9: DEDICATED REGISTRATION PAGE
              ==================================================== -->
         <section class="app-page" id="page-register">
             <div class="clay-card auth-page-view" style="display:block;">
@@ -572,7 +754,7 @@
                     <div class="auth-icon-circle" style="background:#e0e7ff; color:var(--clay-primary);">👤</div>
                     <h2 data-i18n="regTitle">Create Your ONE VOICE Account</h2>
                     <p style="color:var(--text-secondary); font-size:0.9rem;" data-i18n="regSubtitle">
-                        Join millions calling loved ones and businesses worldwide
+                        Your phone number will serve as your unique account identity
                     </p>
                 </div>
 
@@ -583,8 +765,8 @@
                     </div>
 
                     <div class="auth-form-group">
-                        <label class="auth-label" data-i18n="phoneNumber">Phone Number (E.164)</label>
-                        <input type="tel" id="reg-phone" class="clay-input" placeholder="+14155552671 or +2348031234567" required>
+                        <label class="auth-label" data-i18n="phoneNumber">Phone Number (Will be your Account No.)</label>
+                        <input type="tel" id="reg-phone" class="clay-input" placeholder="+2348031234567" required>
                     </div>
 
                     <div class="auth-form-group">
@@ -623,15 +805,15 @@
         </section>
 
         <!-- ====================================================
-             PAGE 9: DEDICATED REGISTRATION SUCCESS PAGE
+             PAGE 10: DEDICATED REGISTRATION SUCCESS PAGE
              ==================================================== -->
         <section class="app-page" id="page-reg-success">
             <div class="clay-card auth-page-view" style="display:block;">
                 <div class="auth-header">
                     <div class="auth-icon-circle" style="background:#d1fae5; color:var(--clay-mint-dark);">🎉</div>
                     <h2 data-i18n="regSuccessTitle">Account Created Successfully!</h2>
-                    <p style="color:var(--text-secondary); margin-top:10px; font-size:0.95rem;" data-i18n="regSuccessMsg">
-                        Your ONE VOICE account has been created. A verification code has been dispatched. Please log in to complete OTP verification.
+                    <p style="color:var(--text-secondary); margin-top:10px; font-size:0.95rem;">
+                        Your verified phone number is now your ONE VOICE account number. Dedicated virtual bank accounts have been provisioned.
                     </p>
                     <div class="member-id-tag" id="success-member-id" style="margin-top:16px;">
                         Member ID: OV-784920
@@ -645,7 +827,7 @@
         </section>
 
         <!-- ====================================================
-             PAGE 10: DEDICATED LOGIN PAGE
+             PAGE 11: DEDICATED LOGIN PAGE
              ==================================================== -->
         <section class="app-page" id="page-login">
             <div class="clay-card auth-page-view" style="display:block;">
@@ -660,7 +842,7 @@
                 <form id="form-login">
                     <div class="auth-form-group">
                         <label class="auth-label" data-i18n="identifierPlaceholder">Email Address or Phone Number</label>
-                        <input type="text" id="login-identifier" class="clay-input" placeholder="e.g. demo@onevoice.app or +14155552671" value="demo@onevoice.app" required>
+                        <input type="text" id="login-identifier" class="clay-input" placeholder="e.g. demo@onevoice.app or +2348031234567" value="demo@onevoice.app" required>
                     </div>
 
                     <div class="auth-form-group">
@@ -687,7 +869,7 @@
         </section>
 
         <!-- ====================================================
-             PAGE 11: DEDICATED 6-DIGIT OTP VERIFICATION PAGE
+             PAGE 12: DEDICATED 6-DIGIT OTP VERIFICATION PAGE
              ==================================================== -->
         <section class="app-page" id="page-otp">
             <div class="clay-card auth-page-view" style="display:block;">
@@ -730,7 +912,7 @@
         </section>
 
         <!-- ====================================================
-             PAGE 12: DEDICATED FORGOT & RESET PASSWORD PAGES
+             PAGE 13: FORGOT & RESET PASSWORD PAGES
              ==================================================== -->
         <section class="app-page" id="page-forgot">
             <div class="clay-card auth-page-view" style="display:block;">
@@ -794,7 +976,7 @@
     </main>
 
     <!-- ====================================================
-         MOBILE CLAY BOTTOM DOCK (HOME, CALL, CONTACTS, WALLET, SETTINGS)
+         MOBILE CLAY BOTTOM DOCK
          ==================================================== -->
     <div class="mobile-bottom-dock" id="mobile-dock">
         <button class="mobile-dock-btn active nav-page-btn" data-page="home">
@@ -813,9 +995,9 @@
             <span class="dock-icon">💳</span>
             <span data-i18n="navWallet">Wallet</span>
         </button>
-        <button class="mobile-dock-btn nav-page-btn" data-page="settings">
-            <span class="dock-icon">⚙️</span>
-            <span data-i18n="navSettings">Settings</span>
+        <button class="mobile-dock-btn nav-page-btn" data-page="admin">
+            <span class="dock-icon">👑</span>
+            <span>Admin</span>
         </button>
     </div>
 
@@ -823,34 +1005,51 @@
          MODALS
          ==================================================== -->
 
-    <!-- Top-Up Modal -->
+    <!-- Fund Wallet / Bank Transfer Modal with Revenue Split Preview -->
     <div class="clay-modal" id="topup-modal">
-        <div class="clay-card modal-body">
+        <div class="clay-card modal-body" style="max-width: 480px;">
             <button class="modal-close-btn" onclick="closeTopupModal()">✕</button>
-            <div style="text-align: center; margin-bottom: 24px;">
-                <div style="width:52px; height:52px; border-radius:50%; background:#d1fae5; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; font-size:1.5rem;">💳</div>
-                <h3 style="font-size: 1.4rem; font-weight: 800;">Top Up Calling Wallet</h3>
-                <p style="color:var(--text-secondary); font-size:0.9rem;">Instant credit via Card, Apple Pay or Google Pay</p>
+            <div style="text-align: center; margin-bottom: 20px;">
+                <div style="width:56px; height:56px; border-radius:50%; background:#d1fae5; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; font-size:1.6rem;">🏦</div>
+                <h3 style="font-size: 1.4rem; font-weight: 800;">Fund Wallet Via Bank Transfer</h3>
+                <p style="color:var(--text-secondary); font-size:0.88rem;">Automated revenue sharing applied to every bank deposit</p>
             </div>
 
-            <div style="margin-bottom: 20px;">
-                <label style="font-size:0.85rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Card Number (Demo Sandbox)</label>
-                <input type="text" class="clay-input" value="•••• •••• •••• 4242" style="margin-top:6px;" readonly>
-            </div>
-
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:12px; margin-bottom: 24px;">
-                <div>
-                    <label style="font-size:0.85rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Expires</label>
-                    <input type="text" class="clay-input" value="12/28" style="margin-top:6px;" readonly>
+            <!-- Virtual Account Details Summary in Modal -->
+            <div style="background:#f8fafc; border-radius:var(--radius-md); padding:16px; margin-bottom:18px; box-shadow:var(--clay-inset-carved); font-size:0.85rem;">
+                <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                    <span style="color:var(--text-muted);">Bank Name:</span>
+                    <strong>Wema Bank (ONE VOICE NUBAN)</strong>
                 </div>
+                <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                    <span style="color:var(--text-muted);">Virtual Account:</span>
+                    <strong id="modal-virtual-nuban">9803123456</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between;">
+                    <span style="color:var(--text-muted);">Beneficiary Account Name:</span>
+                    <strong>ONE VOICE / Alex Morgan</strong>
+                </div>
+            </div>
+
+            <div class="auth-form-group">
+                <label class="auth-label">Deposit Amount (NGN ₦)</label>
+                <input type="number" id="modal-deposit-amount" class="clay-input" value="10000" min="100" step="500">
+            </div>
+
+            <!-- Server-Calculated Split Preview -->
+            <div class="revenue-split-preview" id="modal-split-preview">
                 <div>
-                    <label style="font-size:0.85rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">CVV</label>
-                    <input type="text" class="clay-input" value="•••" style="margin-top:6px;" readonly>
+                    <div>Platform Share (<span id="modal-share-pct-label">10%</span>):</div>
+                    <strong style="color:var(--clay-coral-dark);" id="modal-platform-cut-val">₦1,000.00</strong>
+                </div>
+                <div style="text-align:right;">
+                    <div>Wallet Credit (90%):</div>
+                    <strong style="color:var(--clay-mint-dark);" id="modal-net-credit-val">₦9,000.00</strong>
                 </div>
             </div>
 
             <button class="clay-btn clay-btn-primary" id="btn-confirm-topup" style="width: 100%;">
-                Confirm & Top Up
+                Confirm Bank Transfer & Fund
             </button>
         </div>
     </div>
@@ -871,11 +1070,11 @@
                 </div>
                 <div class="auth-form-group">
                     <label class="auth-label" data-i18n="contactPhone">Phone Number</label>
-                    <input type="tel" id="contact-input-phone" class="clay-input" placeholder="+234 803 123 4567" required>
+                    <input type="tel" id="contact-input-phone" class="clay-input" placeholder="+2348023456789" required>
                 </div>
                 <div class="auth-form-group">
-                    <label class="auth-label">Country</label>
-                    <input type="text" id="contact-input-country" class="clay-input" placeholder="Nigeria" value="Nigeria">
+                    <label class="auth-label">Country / Network</label>
+                    <input type="text" id="contact-input-country" class="clay-input" placeholder="Nigeria (MTN)" value="Nigeria (MTN)">
                 </div>
                 <button type="submit" class="clay-btn clay-btn-primary" style="width: 100%;" data-i18n="saveContact">
                     Save Contact
@@ -905,13 +1104,13 @@
             <div style="display: flex; align-items: center; gap: 12px;">
                 <div class="logo-icon" style="width:34px; height:34px; font-size:1rem;">🎙️</div>
                 <span style="font-weight: 800; font-size: 1.1rem;">ONE VOICE</span>
-                <span style="color: var(--text-muted); font-size: 0.9rem;">— Global Calling & Digital Wallet</span>
+                <span style="color: var(--text-muted); font-size: 0.9rem;">— Phone Account Banking & Telephony</span>
             </div>
 
             <div style="display: flex; gap: 16px; align-items: center;">
-                <span class="clay-badge">🐘 PHP Backend</span>
+                <span class="clay-badge">🇳🇬 Nigerian NUBAN</span>
+                <span class="clay-badge">⚖️ 10% Revenue Share</span>
                 <span class="clay-badge">⚡ Neon PostgreSQL</span>
-                <span class="clay-badge">▲ Vercel Ready</span>
             </div>
 
             <div style="font-size: 0.85rem; color: var(--text-muted);">
