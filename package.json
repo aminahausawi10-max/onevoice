@@ -1,0 +1,24 @@
+{
+  "name": "one-voice-web",
+  "version": "1.0.0",
+  "description": "ONE VOICE - International VoIP Calling & Digital Wallet Web Platform",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js"
+  },
+  "dependencies": {
+    "pg": "^8.13.1"
+  },
+  "keywords": [
+    "claymorphism",
+    "voip",
+    "telecom",
+    "calling",
+    "wallet",
+    "php",
+    "neon-postgres"
+  ],
+  "author": "ONE VOICE",
+  "license": "MIT"
+}
