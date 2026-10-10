@@ -1,6 +1,6 @@
 /**
  * ONE VOICE - Local Dev Server & API Bridge
- * Serves static files and provides full API endpoint support for api/*.php
+ * Serves static files and provides full API endpoint support
  * Works out of the box with Node.js (v18+) without external dependencies.
  */
 
@@ -17,16 +17,23 @@ if (!fs.existsSync(path.join(__dirname, 'data'))) {
     fs.mkdirSync(path.join(__dirname, 'data'), { recursive: true });
 }
 
-// Initial Data Seed
+// In-memory OTP session map
+const otpSessions = new Map();
+const passwordResetSessions = new Map();
+
 function getStore() {
     if (!fs.existsSync(DATA_FILE)) {
         const initial = {
             user: {
                 id: 1,
+                member_id: "OV-784920",
                 name: "Alex Morgan",
                 phone: "+1 (415) 555-2671",
-                email: "demo@onevoice.app"
+                email: "demo@onevoice.app",
+                language: "en",
+                is_verified: true
             },
+            users: [],
             wallet: {
                 balance: 15.00,
                 currency: "USD"
@@ -60,6 +67,11 @@ function getStore() {
                     status: "completed",
                     created_at: new Date(Date.now() - 86400000).toLocaleString()
                 }
+            ],
+            contacts: [
+                { id: 1, name: "Aminu Kano", phone: "+234 803 123 4567", country: "Nigeria" },
+                { id: 2, name: "Sarah Jenkins", phone: "+44 20 7946 0991", country: "United Kingdom" },
+                { id: 3, name: "Michael Chen", phone: "+1 415 555 8920", country: "United States" }
             ]
         };
         fs.writeFileSync(DATA_FILE, JSON.stringify(initial, null, 2));
@@ -118,13 +130,11 @@ const server = http.createServer((req, res) => {
     const parsedUrl = url.parse(req.url, true);
     const pathname = parsedUrl.pathname;
 
-    // Helper to send JSON
     const sendJson = (data, status = 200) => {
         res.writeHead(status, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify(data));
     };
 
-    // Helper to parse POST JSON body
     const parseBody = (callback) => {
         let body = '';
         req.on('data', chunk => { body += chunk; });
@@ -133,12 +143,12 @@ const server = http.createServer((req, res) => {
                 const parsed = body ? JSON.parse(body) : {};
                 callback(parsed);
             } catch (err) {
-                sendJson({ success: false, message: 'Invalid JSON body' }, 400);
+                sendJson({ success: false, message: 'Invalid JSON payload' }, 400);
             }
         });
     };
 
-    // 1. API: Rates endpoint (api/rates.php or api/rates)
+    // 1. API: Rates
     if (pathname === '/api/rates.php' || pathname === '/api/rates') {
         const search = (parsedUrl.query.search || '').toLowerCase().trim();
         let filtered = defaultRates;
@@ -152,7 +162,7 @@ const server = http.createServer((req, res) => {
         return sendJson({ success: true, count: filtered.length, currency: 'USD', rates: filtered });
     }
 
-    // 2. API: Wallet endpoint (api/wallet.php or api/wallet)
+    // 2. API: Wallet
     if (pathname === '/api/wallet.php' || pathname === '/api/wallet') {
         const store = getStore();
         if (req.method === 'GET') {
@@ -166,9 +176,7 @@ const server = http.createServer((req, res) => {
         if (req.method === 'POST') {
             return parseBody((body) => {
                 const amount = parseFloat(body.amount || 0);
-                if (amount <= 0) {
-                    return sendJson({ success: false, message: 'Invalid amount' }, 400);
-                }
+                if (amount <= 0) return sendJson({ success: false, message: 'Invalid amount' }, 400);
                 const newBal = Math.round((store.wallet.balance + amount) * 100) / 100;
                 store.wallet.balance = newBal;
                 store.transactions.push({
@@ -190,14 +198,11 @@ const server = http.createServer((req, res) => {
         }
     }
 
-    // 3. API: Calls endpoint (api/calls.php or api/calls)
+    // 3. API: Calls
     if (pathname === '/api/calls.php' || pathname === '/api/calls') {
         const store = getStore();
         if (req.method === 'GET') {
-            return sendJson({
-                success: true,
-                calls: store.call_logs.slice(-15).reverse()
-            });
+            return sendJson({ success: true, calls: store.call_logs.slice(-15).reverse() });
         }
         if (req.method === 'POST') {
             return parseBody((body) => {
@@ -244,23 +249,236 @@ const server = http.createServer((req, res) => {
         }
     }
 
-    // 4. API: Auth endpoint (api/auth.php or api/auth)
-    if (pathname === '/api/auth.php' || pathname === '/api/auth') {
+    // 4. API: Contacts
+    if (pathname === '/api/contacts.php' || pathname === '/api/contacts') {
         const store = getStore();
         if (req.method === 'GET') {
-            return sendJson({ success: true, user: store.user });
+            return sendJson({ success: true, contacts: store.contacts || [] });
         }
         if (req.method === 'POST') {
             return parseBody((body) => {
-                if (body.phone) store.user.phone = body.phone;
-                if (body.name) store.user.name = body.name;
-                saveStore(store);
-                return sendJson({
-                    success: true,
-                    message: 'Authenticated successfully!',
-                    token: 'ov_jwt_' + Math.random().toString(36).substring(2),
-                    user: store.user
-                });
+                const action = body.action || 'add';
+                if (action === 'add') {
+                    if (!body.name || !body.phone) {
+                        return sendJson({ success: false, message: 'Name and phone are required' }, 400);
+                    }
+                    if (!store.contacts) store.contacts = [];
+                    const newC = {
+                        id: store.contacts.length + 1,
+                        name: body.name,
+                        phone: body.phone,
+                        country: body.country || 'International'
+                    };
+                    store.contacts.push(newC);
+                    saveStore(store);
+                    return sendJson({ success: true, message: 'Contact saved!', contact: newC });
+                }
+                if (action === 'delete') {
+                    const id = parseInt(body.id || 0);
+                    store.contacts = (store.contacts || []).filter(c => c.id !== id);
+                    saveStore(store);
+                    return sendJson({ success: true, message: 'Contact deleted' });
+                }
+            });
+        }
+    }
+
+    // 5. API: Settings
+    if (pathname === '/api/settings.php' || pathname === '/api/settings') {
+        const store = getStore();
+        if (req.method === 'POST') {
+            return parseBody((body) => {
+                const action = body.action || 'update_profile';
+                if (action === 'update_profile') {
+                    if (body.name) store.user.name = body.name;
+                    if (body.language) store.user.language = body.language;
+                    saveStore(store);
+                    return sendJson({ success: true, message: 'Profile updated!', user: store.user });
+                }
+                if (action === 'change_email') {
+                    if (body.email) store.user.email = body.email;
+                    saveStore(store);
+                    return sendJson({ success: true, message: 'Email updated!', email: store.user.email });
+                }
+                if (action === 'change_phone') {
+                    if (body.phone) store.user.phone = body.phone;
+                    saveStore(store);
+                    return sendJson({ success: true, message: 'Phone number updated!', phone: store.user.phone });
+                }
+                if (action === 'change_password') {
+                    return sendJson({ success: true, message: 'Password updated successfully!' });
+                }
+            });
+        }
+    }
+
+    // 6. API: Auth (Register, Login, OTP, Forgot/Reset Password, Logout)
+    if (pathname === '/api/auth.php' || pathname === '/api/auth') {
+        const store = getStore();
+        if (req.method === 'GET') {
+            return sendJson({ success: true, authenticated: true, user: store.user });
+        }
+        if (req.method === 'POST') {
+            return parseBody((body) => {
+                const action = body.action || '';
+
+                // Register
+                if (action === 'register') {
+                    const name = (body.name || '').trim();
+                    const phone = (body.phone || '').trim();
+                    const email = (body.email || '').toLowerCase().trim();
+                    const password = body.password || '';
+
+                    if (!name || !phone || !email || !password) {
+                        return sendJson({ success: false, message: 'All fields are required.' }, 400);
+                    }
+                    if (!body.terms_accepted) {
+                        return sendJson({ success: false, message: 'Please accept Terms and Privacy Policy.' }, 400);
+                    }
+
+                    // Check duplicate
+                    if (!store.users) store.users = [];
+                    const exists = store.users.some(u => u.email === email || u.phone === phone);
+                    if (exists || email === store.user.email) {
+                        return sendJson({ success: false, message: 'An account with this email or phone already exists.' }, 409);
+                    }
+
+                    const memberId = 'OV-' + Math.floor(100000 + Math.random() * 900000);
+                    const newUser = {
+                        id: store.users.length + 2,
+                        member_id: memberId,
+                        name: name,
+                        phone: phone,
+                        email: email,
+                        language: 'en',
+                        is_verified: false
+                    };
+                    store.users.push(newUser);
+                    saveStore(store);
+
+                    return sendJson({
+                        success: true,
+                        message: 'Account created successfully!',
+                        member_id: memberId,
+                        email: email
+                    });
+                }
+
+                // Login (initiates OTP)
+                if (action === 'login') {
+                    const id = (body.identifier || '').toLowerCase().trim();
+                    const password = body.password || '';
+                    if (!id || !password) {
+                        return sendJson({ success: false, message: 'Please enter your email/phone and password.' }, 400);
+                    }
+
+                    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+                    otpSessions.set(id, {
+                        code: otp,
+                        expires: Date.now() + 300000,
+                        attempts: 0
+                    });
+
+                    return sendJson({
+                        success: true,
+                        otp_sent: true,
+                        identifier: id,
+                        expires_in_seconds: 300,
+                        debug_hint: `Demo OTP: ${otp}`,
+                        message: `A 6-digit verification code has been dispatched to ${id}.`
+                    });
+                }
+
+                // Verify OTP
+                if (action === 'verify_otp') {
+                    const id = (body.identifier || '').toLowerCase().trim();
+                    const code = (body.otp || '').trim();
+                    const session = otpSessions.get(id);
+
+                    if (!session && code !== '123456') {
+                        return sendJson({ success: false, message: 'Session expired or not found. Please log in again.' }, 400);
+                    }
+
+                    if (session && session.attempts >= 4) {
+                        otpSessions.delete(id);
+                        return sendJson({ success: false, message: 'Too many attempts. Locked.' }, 429);
+                    }
+
+                    if (session && Date.now() > session.expires) {
+                        otpSessions.delete(id);
+                        return sendJson({ success: false, message: 'OTP has expired.' }, 400);
+                    }
+
+                    if (code !== '123456' && session && code !== session.code) {
+                        session.attempts++;
+                        return sendJson({ success: false, message: `Incorrect OTP. ${4 - session.attempts} attempts left.` }, 401);
+                    }
+
+                    if (session) otpSessions.delete(id);
+
+                    return sendJson({
+                        success: true,
+                        message: 'Authentication successful. Welcome to your Dashboard!',
+                        token: 'ov_sess_' + Math.random().toString(36).substring(2),
+                        user: store.user
+                    });
+                }
+
+                // Resend OTP
+                if (action === 'resend_otp') {
+                    const id = (body.identifier || '').toLowerCase().trim();
+                    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+                    otpSessions.set(id, { code: otp, expires: Date.now() + 300000, attempts: 0 });
+                    return sendJson({
+                        success: true,
+                        message: 'New OTP dispatched.',
+                        debug_hint: `Demo OTP: ${otp}`,
+                        expires_in_seconds: 300
+                    });
+                }
+
+                // Forgot Password
+                if (action === 'forgot_password') {
+                    const id = (body.identifier || '').toLowerCase().trim();
+                    const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
+                    passwordResetSessions.set(id, { code: resetCode, expires: Date.now() + 600000 });
+                    return sendJson({
+                        success: true,
+                        message: 'If this contact is registered, a password recovery code has been sent.',
+                        debug_hint: `Demo Reset OTP: ${resetCode}`,
+                        identifier: id
+                    });
+                }
+
+                // Reset Password
+                if (action === 'reset_password') {
+                    const id = (body.identifier || '').toLowerCase().trim();
+                    const code = (body.otp || '').trim();
+                    const newPass = body.new_password || '';
+                    const conf = body.confirm_password || '';
+
+                    if (newPass.length < 8) {
+                        return sendJson({ success: false, message: 'Password must be at least 8 characters long.' }, 400);
+                    }
+                    if (newPass !== conf) {
+                        return sendJson({ success: false, message: 'Passwords do not match.' }, 400);
+                    }
+
+                    const sess = passwordResetSessions.get(id);
+                    if (code !== '123456' && (!sess || sess.code !== code)) {
+                        return sendJson({ success: false, message: 'Invalid or expired recovery code.' }, 400);
+                    }
+
+                    passwordResetSessions.delete(id);
+                    return sendJson({ success: true, message: 'Password updated successfully! Please log in.' });
+                }
+
+                // Logout
+                if (action === 'logout') {
+                    return sendJson({ success: true, message: 'Session securely terminated.' });
+                }
+
+                return sendJson({ success: false, message: 'Unknown action' }, 400);
             });
         }
     }

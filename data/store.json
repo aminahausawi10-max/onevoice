@@ -3,7 +3,8 @@
     "id": 1,
     "name": "Alex Morgan",
     "phone": "+1 (415) 555-2671",
-    "email": "demo@onevoice.app"
+    "email": "demo@onevoice.app",
+    "language": "ha"
   },
   "wallet": {
     "balance": 24.99,
@@ -62,6 +63,25 @@
       "cost": 0.012,
       "status": "completed",
       "created_at": "10/10/2026, 11:08:14 PM"
+    }
+  ],
+  "contacts": [
+    {
+      "id": 1,
+      "name": "Aminu Kano",
+      "phone": "+2348031234567",
+      "country": "Nigeria"
+    }
+  ],
+  "users": [
+    {
+      "id": 2,
+      "member_id": "OV-219691",
+      "name": "Fatima Bello",
+      "phone": "+2348099887766",
+      "email": "fatima.bello@example.com",
+      "language": "en",
+      "is_verified": false
     }
   ]
 }

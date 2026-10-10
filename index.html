@@ -4,376 +4,765 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ONE VOICE — Crystal-Clear International Calling & Digital Wallet</title>
-    <meta name="description" content="Call any real mobile or landline globally with low rates, ultra-low latency, and transparent digital wallet billing.">
+    <meta name="description" content="Secure communication platform with user authentication, OTP verification, real international calling, and transparent digital wallet billing.">
     
     <!-- Claymorphism CSS -->
     <link rel="stylesheet" href="css/clay.css">
     
     <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📞</text></svg>">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎙️</text></svg>">
 </head>
 <body>
 
     <!-- Sticky Claymorphic Navbar -->
     <nav class="navbar">
         <div class="nav-container">
-            <a href="#" class="nav-logo">
+            <a href="#" class="nav-logo" id="nav-brand-logo">
                 <div class="logo-icon">🎙️</div>
-                <span>ONE VOICE</span>
+                <span data-i18n="appName">ONE VOICE</span>
             </a>
 
-            <ul class="nav-links">
-                <li><a href="#dialer-section" class="nav-link">Web Dialer</a></li>
-                <li><a href="#rates-section" class="nav-link">Global Rates</a></li>
-                <li><a href="#wallet-section" class="nav-link">Wallet & Ledger</a></li>
+            <!-- Public / Welcome Nav Links -->
+            <ul class="nav-links" id="public-nav-links">
+                <li><a href="#welcome-section" class="nav-link" data-i18n="navWebDialer">Web Dialer</a></li>
+                <li><a href="#rates-section" class="nav-link" data-i18n="navRates">Call Rates</a></li>
                 <li><a href="#features-section" class="nav-link">Features</a></li>
                 <li><a href="#download-section" class="nav-link">Mobile Apps</a></li>
             </ul>
 
+            <!-- Authenticated Dashboard Nav Links -->
+            <ul class="nav-links" id="auth-nav-links" style="display: none;">
+                <li><a href="#dashboard-section" class="nav-link" data-i18n="dashboard">Dashboard</a></li>
+                <li><a href="#dialer-card" class="nav-link" data-i18n="makeCall">Make Call</a></li>
+                <li><a href="#contacts-view" class="nav-link" data-i18n="navContacts">Contacts</a></li>
+                <li><a href="#wallet-section" class="nav-link" data-i18n="navWallet">My Wallet</a></li>
+                <li><a href="#settings-view" class="nav-link" data-i18n="navSettings">Settings</a></li>
+            </ul>
+
+            <!-- Controls (Language Toggle, Wallet, Auth) -->
             <div class="nav-auth">
-                <button class="wallet-badge-btn trigger-topup" title="Click to Top Up Wallet">
+                <!-- English / Hausa Language Selector -->
+                <div class="lang-selector-group" title="Select Language / Zaɓi Harshe">
+                    <button class="lang-select-btn active" data-lang="en">EN</button>
+                    <button class="lang-select-btn" data-lang="ha">HA</button>
+                </div>
+
+                <!-- Wallet Balance Badge (Click to Top Up) -->
+                <button class="wallet-badge-btn trigger-topup" title="Prepaid Calling Wallet" id="nav-wallet-btn">
                     <span class="wallet-dot"></span>
                     <span id="nav-balance">$15.00</span>
                     <span style="color:var(--clay-primary);font-weight:800;">+</span>
                 </button>
-                <button class="clay-btn clay-btn-white trigger-auth" style="padding: 10px 20px; font-size: 0.9rem;" id="user-profile-name">
-                    Sign In
-                </button>
+
+                <!-- Auth Buttons for Public Mode -->
+                <div id="public-auth-btns" style="display: flex; gap: 10px;">
+                    <button class="clay-btn clay-btn-white" style="padding: 10px 18px; font-size: 0.9rem;" id="nav-btn-login" data-i18n="login">
+                        Login
+                    </button>
+                    <button class="clay-btn clay-btn-primary" style="padding: 10px 18px; font-size: 0.9rem;" id="nav-btn-register" data-i18n="createAccount">
+                        Create Account
+                    </button>
+                </div>
+
+                <!-- User Profile & Logout for Authenticated Mode -->
+                <div id="auth-user-btns" style="display: none; align-items: center; gap: 12px;">
+                    <button class="clay-badge badge-primary" id="nav-member-badge" style="cursor: pointer;">
+                        OV-784920
+                    </button>
+                    <button class="clay-btn clay-btn-danger" style="padding: 10px 18px; font-size: 0.85rem;" id="btn-trigger-logout" data-i18n="logout">
+                        Logout
+                    </button>
+                </div>
             </div>
         </div>
     </nav>
 
-    <!-- Hero Section with Interactive Clay Phone Dialer -->
-    <header class="hero-section" id="dialer-section">
-        <div class="hero-content">
-            <div class="clay-badge badge-primary hero-pill">
-                ✨ Next-Gen PSTN & International VoIP Calling
-            </div>
-            <h1 class="hero-title">
-                One Voice.<br>
-                <span class="gradient-text">Zero Roaming Limits.</span>
-            </h1>
-            <p class="hero-description">
-                Call real mobile phones and landlines in 190+ countries with HD audio clarity. No expensive roaming contracts, no surprise bills—just transparent per-second billing from your secure digital wallet.
-            </p>
+    <!-- MAIN APP CONTAINER -->
+    <main>
 
-            <div class="hero-actions">
-                <a href="#rates-section" class="clay-btn clay-btn-primary">
-                    🌍 Explore Call Rates
-                </a>
-                <button class="clay-btn clay-btn-white trigger-topup">
-                    💳 Recharge Wallet
+        <!-- ====================================================
+             1. WELCOME / LANDING PAGE VIEW
+             ==================================================== -->
+        <section class="hero-section" id="welcome-section">
+            <div class="hero-content">
+                <div class="clay-badge badge-primary hero-pill">
+                    ✨ Secure Cloud Communication & International Calling
+                </div>
+                <h1 class="hero-title" data-i18n="welcomeTitle">
+                    One Voice.<br>
+                    <span class="gradient-text">Zero Roaming Limits.</span>
+                </h1>
+                <p class="hero-description" data-i18n="welcomeDesc">
+                    Call real mobile phones and landlines in 190+ countries with HD audio clarity. No expensive roaming contracts, no surprise bills—just transparent per-second billing from your secure digital wallet.
+                </p>
+
+                <div class="hero-actions">
+                    <button class="clay-btn clay-btn-primary" id="hero-btn-create-account" data-i18n="createAccount">
+                        Create Account
+                    </button>
+                    <button class="clay-btn clay-btn-white" id="hero-btn-login" data-i18n="login">
+                        Login
+                    </button>
+                    <a href="#rates-section" class="clay-btn clay-btn-secondary" data-i18n="exploreRates">
+                        Explore Call Rates
+                    </a>
+                </div>
+
+                <div class="hero-stats">
+                    <div class="stat-item">
+                        <h3>190+</h3>
+                        <p>Countries Covered</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>&lt;65ms</h3>
+                        <p>Edge Audio Latency</p>
+                    </div>
+                    <div class="stat-item">
+                        <h3>98%</h3>
+                        <p>Savings vs Roaming</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Clay Phone Mockup Frame (Web Dialer) -->
+            <div class="clay-phone" id="dialer-card">
+                <div class="phone-island">
+                    <div class="camera-dot"></div>
+                </div>
+
+                <div class="phone-screen">
+                    <div class="dial-display">
+                        <div class="dial-country-preview" id="dial-country">
+                            🌐 Enter Number <span style="color:var(--clay-primary);font-weight:700;">($0.05/min)</span>
+                        </div>
+                        <div class="dial-number-preview" id="dial-number">—</div>
+                    </div>
+
+                    <!-- 12-Key Dialpad -->
+                    <div class="dialpad-grid">
+                        <button class="clay-dial-key" data-digit="1"><span class="key-digit">1</span><span class="key-letters">&nbsp;</span></button>
+                        <button class="clay-dial-key" data-digit="2"><span class="key-digit">2</span><span class="key-letters">ABC</span></button>
+                        <button class="clay-dial-key" data-digit="3"><span class="key-digit">3</span><span class="key-letters">DEF</span></button>
+                        <button class="clay-dial-key" data-digit="4"><span class="key-digit">4</span><span class="key-letters">GHI</span></button>
+                        <button class="clay-dial-key" data-digit="5"><span class="key-digit">5</span><span class="key-letters">JKL</span></button>
+                        <button class="clay-dial-key" data-digit="6"><span class="key-digit">6</span><span class="key-letters">MNO</span></button>
+                        <button class="clay-dial-key" data-digit="7"><span class="key-digit">7</span><span class="key-letters">PQRS</span></button>
+                        <button class="clay-dial-key" data-digit="8"><span class="key-digit">8</span><span class="key-letters">TUV</span></button>
+                        <button class="clay-dial-key" data-digit="9"><span class="key-digit">9</span><span class="key-letters">WXYZ</span></button>
+                        <button class="clay-dial-key" data-digit="*"><span class="key-digit">*</span><span class="key-letters">&nbsp;</span></button>
+                        <button class="clay-dial-key" data-digit="0"><span class="key-digit">0</span><span class="key-letters">+</span></button>
+                        <button class="clay-dial-key" data-digit="#"><span class="key-digit">#</span><span class="key-letters">&nbsp;</span></button>
+                    </div>
+
+                    <div class="dialpad-actions">
+                        <button class="clay-action-icon-btn" id="btn-dial-clear" title="Clear">🔄</button>
+                        <button class="clay-call-btn" id="btn-make-call" title="Call Now">📞</button>
+                        <button class="clay-action-icon-btn" id="btn-dial-backspace" title="Backspace">⌫</button>
+                    </div>
+
+                    <!-- Active In-Call Screen Overlay -->
+                    <div class="calling-overlay" id="calling-overlay">
+                        <div class="call-header-info">
+                            <div class="calling-avatar">👤</div>
+                            <h3 class="calling-name" id="overlay-country-name">United Kingdom</h3>
+                            <div class="dial-number-preview" style="color:#ffffff; font-size:1.1rem;" id="overlay-phone-number">+44 20 7946 0991</div>
+                            <div class="calling-status" id="overlay-call-status">Calling...</div>
+                            <div class="calling-timer" id="overlay-call-timer">00:00</div>
+                            <div class="calling-rate-badge" id="overlay-call-rate">Rate: $0.018/min</div>
+                        </div>
+
+                        <div style="display:flex; gap:16px; align-items:center;">
+                            <button class="clay-action-icon-btn" title="Mute" style="background:rgba(255,255,255,0.2); color:#ffffff;">🎙️</button>
+                            <button class="clay-call-btn clay-end-btn" id="btn-end-call" title="End Call">❌</button>
+                            <button class="clay-action-icon-btn" title="Speaker" style="background:rgba(255,255,255,0.2); color:#ffffff;">🔊</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================================================
+             2. REGISTRATION VIEW (CREATE ACCOUNT)
+             ==================================================== -->
+        <section class="clay-card auth-page-view" id="view-register">
+            <div class="auth-header">
+                <div class="auth-icon-circle" style="background:#e0e7ff; color:var(--clay-primary);">👤</div>
+                <h2 data-i18n="regTitle">Create Your ONE VOICE Account</h2>
+                <p style="color:var(--text-secondary); font-size:0.9rem;" data-i18n="regSubtitle">
+                    Join millions calling loved ones and businesses worldwide
+                </p>
+            </div>
+
+            <form id="form-register">
+                <div class="auth-form-group">
+                    <label class="auth-label" data-i18n="fullName">Full Name</label>
+                    <input type="text" id="reg-name" class="clay-input" placeholder="e.g. Alex Morgan" required>
+                </div>
+
+                <div class="auth-form-group">
+                    <label class="auth-label" data-i18n="phoneNumber">Phone Number (E.164)</label>
+                    <input type="tel" id="reg-phone" class="clay-input" placeholder="+14155552671 or +2348031234567" required>
+                </div>
+
+                <div class="auth-form-group">
+                    <label class="auth-label" data-i18n="emailAddress">Email Address</label>
+                    <input type="email" id="reg-email" class="clay-input" placeholder="alex.morgan@onevoice.app" required>
+                </div>
+
+                <div class="auth-form-group">
+                    <label class="auth-label" data-i18n="password">Password</label>
+                    <input type="password" id="reg-password" class="clay-input" placeholder="Minimum 8 characters" minlength="8" required>
+                </div>
+
+                <div class="auth-form-group">
+                    <label class="auth-label" data-i18n="confirmPassword">Confirm Password</label>
+                    <input type="password" id="reg-confirm-password" class="clay-input" placeholder="Re-enter password" minlength="8" required>
+                </div>
+
+                <div class="auth-checkbox-group">
+                    <input type="checkbox" id="reg-terms" required>
+                    <label for="reg-terms" data-i18n="termsAgreement">
+                        I accept the Terms and Conditions and Privacy Policy
+                    </label>
+                </div>
+
+                <button type="submit" class="clay-btn clay-btn-primary" style="width:100%;" id="btn-submit-register" data-i18n="register">
+                    Register
                 </button>
+
+                <div style="text-align:center; margin-top:20px;">
+                    <a href="#" id="link-to-login" style="color:var(--clay-primary); font-weight:700; text-decoration:none; font-size:0.9rem;" data-i18n="alreadyAccount">
+                        Already have an account? Login
+                    </a>
+                </div>
+            </form>
+        </section>
+
+        <!-- ====================================================
+             3. REGISTRATION SUCCESS VIEW
+             ==================================================== -->
+        <section class="clay-card auth-page-view" id="view-reg-success">
+            <div class="auth-header">
+                <div class="auth-icon-circle" style="background:#d1fae5; color:var(--clay-mint-dark);">🎉</div>
+                <h2 data-i18n="regSuccessTitle">Account Created Successfully!</h2>
+                <p style="color:var(--text-secondary); margin-top:10px; font-size:0.95rem;" data-i18n="regSuccessMsg">
+                    Your ONE VOICE account has been created. A verification code has been dispatched. Please log in to complete OTP verification.
+                </p>
+                <div class="member-id-tag" id="success-member-id" style="margin-top:16px;">
+                    Member ID: OV-784920
+                </div>
             </div>
 
-            <div class="hero-stats">
-                <div class="stat-item">
-                    <h3>190+</h3>
-                    <p>Countries Covered</p>
-                </div>
-                <div class="stat-item">
-                    <h3>&lt;65ms</h3>
-                    <p>Edge Audio Latency</p>
-                </div>
-                <div class="stat-item">
-                    <h3>90%</h3>
-                    <p>Average Savings</p>
-                </div>
-            </div>
-        </div>
+            <button class="clay-btn clay-btn-primary" style="width:100%;" id="btn-success-goto-login" data-i18n="goToLogin">
+                Go to Login
+            </button>
+        </section>
 
-        <!-- Clay Phone Mockup Frame -->
-        <div class="clay-phone">
-            <div class="phone-island">
-                <div class="camera-dot"></div>
+        <!-- ====================================================
+             4. LOGIN VIEW
+             ==================================================== -->
+        <section class="clay-card auth-page-view" id="view-login">
+            <div class="auth-header">
+                <div class="auth-icon-circle" style="background:#e0e7ff; color:var(--clay-primary);">🔐</div>
+                <h2 data-i18n="loginTitle">Sign in to ONE VOICE</h2>
+                <p style="color:var(--text-secondary); font-size:0.9rem;" data-i18n="loginSubtitle">
+                    Enter your registered email address or phone number
+                </p>
             </div>
 
-            <div class="phone-screen">
-                <!-- Dial Display -->
-                <div class="dial-display">
-                    <div class="dial-country-preview" id="dial-country">
-                        🌐 Enter Number <span style="color:var(--clay-primary);font-weight:700;">($0.05/min)</span>
+            <form id="form-login">
+                <div class="auth-form-group">
+                    <label class="auth-label" data-i18n="identifierPlaceholder">Email Address or Phone Number</label>
+                    <input type="text" id="login-identifier" class="clay-input" placeholder="e.g. demo@onevoice.app or +14155552671" value="demo@onevoice.app" required>
+                </div>
+
+                <div class="auth-form-group">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <label class="auth-label" data-i18n="password">Password</label>
+                        <a href="#" id="link-forgot-password" style="font-size:0.8rem; color:var(--clay-primary); font-weight:700; text-decoration:none;" data-i18n="forgotPassword">
+                            Forgot Password?
+                        </a>
                     </div>
-                    <div class="dial-number-preview" id="dial-number">—</div>
+                    <input type="password" id="login-password" class="clay-input" placeholder="••••••••" value="Password123!" required>
                 </div>
 
-                <!-- Dialpad 12-Keys -->
-                <div class="dialpad-grid">
-                    <button class="clay-dial-key" data-digit="1">
-                        <span class="key-digit">1</span>
-                        <span class="key-letters">&nbsp;</span>
-                    </button>
-                    <button class="clay-dial-key" data-digit="2">
-                        <span class="key-digit">2</span>
-                        <span class="key-letters">ABC</span>
-                    </button>
-                    <button class="clay-dial-key" data-digit="3">
-                        <span class="key-digit">3</span>
-                        <span class="key-letters">DEF</span>
-                    </button>
-                    <button class="clay-dial-key" data-digit="4">
-                        <span class="key-digit">4</span>
-                        <span class="key-letters">GHI</span>
-                    </button>
-                    <button class="clay-dial-key" data-digit="5">
-                        <span class="key-digit">5</span>
-                        <span class="key-letters">JKL</span>
-                    </button>
-                    <button class="clay-dial-key" data-digit="6">
-                        <span class="key-digit">6</span>
-                        <span class="key-letters">MNO</span>
-                    </button>
-                    <button class="clay-dial-key" data-digit="7">
-                        <span class="key-digit">7</span>
-                        <span class="key-letters">PQRS</span>
-                    </button>
-                    <button class="clay-dial-key" data-digit="8">
-                        <span class="key-digit">8</span>
-                        <span class="key-letters">TUV</span>
-                    </button>
-                    <button class="clay-dial-key" data-digit="9">
-                        <span class="key-digit">9</span>
-                        <span class="key-letters">WXYZ</span>
-                    </button>
-                    <button class="clay-dial-key" data-digit="*">
-                        <span class="key-digit">*</span>
-                        <span class="key-letters">&nbsp;</span>
-                    </button>
-                    <button class="clay-dial-key" data-digit="0">
-                        <span class="key-digit">0</span>
-                        <span class="key-letters">+</span>
-                    </button>
-                    <button class="clay-dial-key" data-digit="#">
-                        <span class="key-digit">#</span>
-                        <span class="key-letters">&nbsp;</span>
-                    </button>
+                <button type="submit" class="clay-btn clay-btn-primary" style="width:100%;" id="btn-submit-login" data-i18n="sendOtp">
+                    Send OTP & Login
+                </button>
+
+                <div style="text-align:center; margin-top:20px;">
+                    <a href="#" id="link-to-register" style="color:var(--clay-primary); font-weight:700; text-decoration:none; font-size:0.9rem;" data-i18n="newToPlatform">
+                        New to ONE VOICE? Create Account
+                    </a>
                 </div>
+            </form>
+        </section>
 
-                <!-- Call Actions Bar -->
-                <div class="dialpad-actions">
-                    <button class="clay-action-icon-btn" id="btn-dial-clear" title="Clear Dialpad">
-                        🔄
-                    </button>
-                    <button class="clay-call-btn" id="btn-make-call" title="Call Now">
-                        📞
-                    </button>
-                    <button class="clay-action-icon-btn" id="btn-dial-backspace" title="Backspace">
-                        ⌫
-                    </button>
-                </div>
-
-                <!-- Calling Overlay Screen -->
-                <div class="calling-overlay" id="calling-overlay">
-                    <div class="call-header-info">
-                        <div class="calling-avatar">👤</div>
-                        <h3 class="calling-name" id="overlay-country-name">United Kingdom</h3>
-                        <div class="dial-number-preview" style="color:#ffffff; font-size:1.1rem;" id="overlay-phone-number">+44 20 7946 0991</div>
-                        <div class="calling-status" id="overlay-call-status">Calling...</div>
-                        <div class="calling-timer" id="overlay-call-timer">00:00</div>
-                        <div class="calling-rate-badge" id="overlay-call-rate">Rate: $0.018/min</div>
-                    </div>
-
-                    <div style="display:flex; gap:16px; align-items:center;">
-                        <button class="clay-action-icon-btn" title="Mute Microphone" style="background:rgba(255,255,255,0.2); color:#ffffff;">
-                            🎙️
-                        </button>
-                        <button class="clay-call-btn clay-end-btn" id="btn-end-call" title="End Call">
-                            ❌
-                        </button>
-                        <button class="clay-action-icon-btn" title="Speaker" style="background:rgba(255,255,255,0.2); color:#ffffff;">
-                            🔊
-                        </button>
-                    </div>
+        <!-- ====================================================
+             5. OTP VERIFICATION VIEW
+             ==================================================== -->
+        <section class="clay-card auth-page-view" id="view-otp">
+            <div class="auth-header">
+                <div class="auth-icon-circle" style="background:#fef3c7; color:var(--clay-amber);">📲</div>
+                <h2 data-i18n="otpTitle">Verify Your Identity</h2>
+                <p style="color:var(--text-secondary); font-size:0.9rem;" data-i18n="otpSubtitle">
+                    Enter the 6-digit One-Time Password sent to your verified contact
+                </p>
+                <div class="clay-badge badge-primary" id="otp-target-display" style="margin-top:10px;">
+                    demo@onevoice.app
                 </div>
             </div>
-        </div>
-    </header>
 
-    <!-- Global Rate Calculator Section -->
-    <section class="section" id="rates-section">
-        <div class="section-header">
-            <div class="clay-badge badge-mint">💎 Transparent Pricing</div>
-            <h2>International Calling Rates</h2>
-            <p>Search any destination country or dial code. Zero connection fees, zero hidden contracts.</p>
-        </div>
+            <form id="form-otp-verify">
+                <div class="otp-input-wrapper">
+                    <input type="text" id="otp-input" class="clay-input otp-field" maxlength="6" placeholder="000000" autofocus required>
+                </div>
 
-        <div class="rates-search-wrapper">
-            <div class="clay-input-box">
-                <input type="text" id="rates-search" class="clay-input" placeholder="🔍 Search country name or dial code (e.g. United Kingdom, +234, Nigeria, USA)...">
+                <div class="otp-timer-box" style="text-align:center;">
+                    <span data-i18n="otpExpiresIn">Code expires in</span> 
+                    <span class="otp-countdown" id="otp-countdown-timer">05:00</span>
+                </div>
+
+                <button type="submit" class="clay-btn clay-btn-primary" style="width:100%;" id="btn-submit-otp" data-i18n="verifyOtpBtn">
+                    Verify & Enter Dashboard
+                </button>
+
+                <div style="text-align:center; margin-top:16px;">
+                    <button type="button" class="clay-btn clay-btn-white" style="padding:10px 18px; font-size:0.85rem;" id="btn-resend-otp" data-i18n="resendOtp">
+                        Resend OTP
+                    </button>
+                </div>
+
+                <div class="otp-rate-warning" data-i18n="otpRateNotice">
+                    Security notice: OTP verification attempts are strictly rate-limited on the server.
+                </div>
+            </form>
+        </section>
+
+        <!-- ====================================================
+             6. FORGOT & RESET PASSWORD VIEWS
+             ==================================================== -->
+        <section class="clay-card auth-page-view" id="view-forgot-password">
+            <div class="auth-header">
+                <div class="auth-icon-circle" style="background:#fee2e2; color:var(--clay-coral-dark);">🔑</div>
+                <h2 data-i18n="forgotPassTitle">Reset Your Password</h2>
+                <p style="color:var(--text-secondary); font-size:0.9rem;" data-i18n="forgotPassSubtitle">
+                    Enter your registered email or phone to receive a recovery OTP
+                </p>
             </div>
-        </div>
 
-        <div class="rates-grid" id="rates-grid">
-            <!-- Dynamic Rate Cards rendered by JavaScript -->
-        </div>
-    </section>
+            <form id="form-forgot-password">
+                <div class="auth-form-group">
+                    <label class="auth-label" data-i18n="identifierPlaceholder">Email Address or Phone Number</label>
+                    <input type="text" id="forgot-identifier" class="clay-input" placeholder="e.g. demo@onevoice.app" required>
+                </div>
 
-    <!-- Digital Wallet & Transaction Ledger Section -->
-    <section class="section" id="wallet-section">
-        <div class="section-header">
-            <div class="clay-badge badge-primary">💳 Self-Service Finance</div>
-            <h2>Wallet & Call Ledger</h2>
-            <p>Manage your prepaid international calling credits and view real-time Call Detail Records.</p>
-        </div>
+                <button type="submit" class="clay-btn clay-btn-primary" style="width:100%;" data-i18n="sendResetCode">
+                    Send Recovery Code
+                </button>
 
-        <div class="wallet-grid">
-            <!-- Left: Wallet Card & Top-Up -->
-            <div class="clay-card wallet-card-main">
+                <div style="text-align:center; margin-top:18px;">
+                    <a href="#" id="link-forgot-back-to-login" style="color:var(--clay-primary); font-weight:700; text-decoration:none; font-size:0.9rem;" data-i18n="backToLogin">
+                        Back to Login
+                    </a>
+                </div>
+            </form>
+        </section>
+
+        <section class="clay-card auth-page-view" id="view-reset-password">
+            <div class="auth-header">
+                <div class="auth-icon-circle" style="background:#e0e7ff; color:var(--clay-primary);">🔐</div>
+                <h2 data-i18n="resetPassTitle">Set New Password</h2>
+            </div>
+
+            <form id="form-reset-password">
+                <div class="auth-form-group">
+                    <label class="auth-label">6-Digit Recovery OTP</label>
+                    <input type="text" id="reset-otp-code" class="clay-input" maxlength="6" placeholder="000000" required>
+                </div>
+
+                <div class="auth-form-group">
+                    <label class="auth-label" data-i18n="newPassword">New Password</label>
+                    <input type="password" id="reset-new-password" class="clay-input" minlength="8" required>
+                </div>
+
+                <div class="auth-form-group">
+                    <label class="auth-label" data-i18n="confirmPassword">Confirm Password</label>
+                    <input type="password" id="reset-confirm-password" class="clay-input" minlength="8" required>
+                </div>
+
+                <button type="submit" class="clay-btn clay-btn-primary" style="width:100%;" data-i18n="resetPassBtn">
+                    Update Password
+                </button>
+            </form>
+        </section>
+
+        <!-- ====================================================
+             7. APPLICATION DASHBOARD VIEW
+             ==================================================== -->
+        <section class="dashboard-container" id="dashboard-section">
+            <!-- Dashboard Welcome Banner -->
+            <div class="clay-card dashboard-hero-card">
                 <div>
-                    <div class="wallet-user-header">
-                        <div class="wallet-user-info">
-                            <h3 id="user-display-name">Alex Morgan</h3>
-                            <p>Premium Account • ID #OV-10492</p>
+                    <span class="clay-badge badge-mint" style="margin-bottom:8px;">✅ Authenticated Session</span>
+                    <h2 style="font-size: 2.2rem; font-weight: 800; color: #0f172a;">
+                        <span data-i18n="welcomeBack">Welcome back</span>, <span id="dash-user-name">Alex Morgan</span>!
+                    </h2>
+                    <div style="display: flex; gap: 12px; align-items: center; margin-top: 8px;">
+                        <span class="member-id-tag">
+                            <span data-i18n="memberId">Member ID</span>: <strong id="dash-member-id">OV-784920</strong>
+                        </span>
+                        <span class="clay-badge badge-primary" id="dash-language-badge">English (en)</span>
+                    </div>
+                </div>
+
+                <div style="text-align: right;">
+                    <div style="font-size:0.85rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;" data-i18n="activeCallingCredit">
+                        Available Calling Credit
+                    </div>
+                    <div style="font-size:2.8rem; font-weight:800; color:var(--clay-mint-dark); font-family:var(--font-mono);" id="dash-wallet-balance">
+                        $15.00
+                    </div>
+                    <button class="clay-btn clay-btn-secondary trigger-topup" style="padding:10px 22px; font-size:0.9rem;" data-i18n="topUpNow">
+                        ⚡ Instant Top-Up
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dashboard 9-Feature Quick Navigation Grid -->
+            <div class="dashboard-nav-grid">
+                <!-- 1. Make Call -->
+                <div class="clay-card dash-nav-card" id="dash-btn-make-call">
+                    <div class="dash-nav-icon" style="background:#e0e7ff; color:var(--clay-primary);">📞</div>
+                    <div class="dash-nav-title" data-i18n="makeCall">Make Call</div>
+                    <div class="dash-nav-desc">Launch Web Dialer with DTMF audio synthesizer</div>
+                </div>
+
+                <!-- 2. Contacts -->
+                <div class="clay-card dash-nav-card" id="dash-btn-contacts">
+                    <div class="dash-nav-icon" style="background:#d1fae5; color:var(--clay-mint-dark);">👥</div>
+                    <div class="dash-nav-title" data-i18n="navContacts">Contacts</div>
+                    <div class="dash-nav-desc">Manage address book and one-click dialing</div>
+                </div>
+
+                <!-- 3. Call Rates -->
+                <a href="#rates-section" class="clay-card dash-nav-card">
+                    <div class="dash-nav-icon" style="background:#fef3c7; color:var(--clay-amber);">🌍</div>
+                    <div class="dash-nav-title" data-i18n="navRates">Call Rates</div>
+                    <div class="dash-nav-desc">Search 190+ countries with roaming savings</div>
+                </a>
+
+                <!-- 4. Call History -->
+                <a href="#wallet-section" class="clay-card dash-nav-card">
+                    <div class="dash-nav-icon" style="background:#ede9fe; color:#8b5cf6;">📜</div>
+                    <div class="dash-nav-title" data-i18n="recentCalls">Call History</div>
+                    <div class="dash-nav-desc">Review Call Detail Records (CDR) and costs</div>
+                </a>
+
+                <!-- 5. My Wallet -->
+                <a href="#wallet-section" class="clay-card dash-nav-card">
+                    <div class="dash-nav-icon" style="background:#d1fae5; color:var(--clay-mint-dark);">💳</div>
+                    <div class="dash-nav-title" data-i18n="navWallet">My Wallet</div>
+                    <div class="dash-nav-desc">Prepaid balance, top-up logs, and statements</div>
+                </a>
+
+                <!-- 6. Settings -->
+                <div class="clay-card dash-nav-card" id="dash-btn-settings">
+                    <div class="dash-nav-icon" style="background:#f1f5f9; color:var(--text-secondary);">⚙️</div>
+                    <div class="dash-nav-title" data-i18n="navSettings">Settings</div>
+                    <div class="dash-nav-desc">Profile, email, phone, password, and language</div>
+                </div>
+
+                <!-- 7. Support -->
+                <div class="clay-card dash-nav-card" onclick="alert('ONE VOICE 24/7 Priority Support is available via support@onevoice.app and in-app ticket system.')">
+                    <div class="dash-nav-icon" style="background:#ffe4e6; color:var(--clay-coral-dark);">🎧</div>
+                    <div class="dash-nav-title" data-i18n="navSupport">Support</div>
+                    <div class="dash-nav-desc">24/7 dedicated telecom support team</div>
+                </div>
+
+                <!-- 8. Help -->
+                <div class="clay-card dash-nav-card" onclick="alert('Help Center: Call quality tips, E.164 dialing standards, and wallet auto-recharge documentation.')">
+                    <div class="dash-nav-icon" style="background:#e0f2fe; color:#0284c7;">❓</div>
+                    <div class="dash-nav-title" data-i18n="navHelp">Help & FAQ</div>
+                    <div class="dash-nav-desc">Dialing guidelines and system documentation</div>
+                </div>
+
+                <!-- 9. Logout -->
+                <div class="clay-card dash-nav-card" id="dash-btn-logout">
+                    <div class="dash-nav-icon" style="background:#fee2e2; color:var(--clay-coral-dark);">🚪</div>
+                    <div class="dash-nav-title" data-i18n="logout">Logout</div>
+                    <div class="dash-nav-desc">Safely terminate your authenticated session</div>
+                </div>
+            </div>
+
+            <!-- Contacts Management Section (Embedded in Dashboard) -->
+            <div class="clay-card settings-section-block" id="contacts-view" style="display:none;">
+                <div class="contacts-header">
+                    <div>
+                        <h3 style="font-size:1.5rem; font-weight:800;" data-i18n="contactsTitle">Saved Contacts</h3>
+                        <p style="color:var(--text-secondary); font-size:0.9rem;">Quickly dial saved numbers with zero latency</p>
+                    </div>
+                    <button class="clay-btn clay-btn-primary" id="btn-add-contact-modal" style="padding:10px 20px; font-size:0.9rem;" data-i18n="addContact">
+                        + Add Contact
+                    </button>
+                </div>
+
+                <div id="contacts-list-container">
+                    <!-- Populated dynamically via api/contacts.php -->
+                </div>
+            </div>
+
+            <!-- Settings Section (Embedded in Dashboard) -->
+            <div class="clay-card settings-section-block" id="settings-view" style="display:none;">
+                <div class="contacts-header">
+                    <div>
+                        <h3 style="font-size:1.5rem; font-weight:800;" data-i18n="settingsTitle">Account Settings & Security</h3>
+                        <p style="color:var(--text-secondary); font-size:0.9rem;">Manage personal details, security credentials, and preferences</p>
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:24px;">
+                    <!-- Edit Profile & Language -->
+                    <div class="clay-card-flat" style="padding:24px;">
+                        <h4 class="settings-section-title">👤 <span data-i18n="editProfile">Edit Profile</span></h4>
+                        <form id="form-update-profile">
+                            <div class="auth-form-group">
+                                <label class="auth-label" data-i18n="fullName">Full Name</label>
+                                <input type="text" id="settings-name" class="clay-input" value="Alex Morgan" required>
+                            </div>
+
+                            <div class="auth-form-group">
+                                <label class="auth-label" data-i18n="languagePreference">Language Preference</label>
+                                <select id="settings-language" class="clay-input" style="cursor:pointer;">
+                                    <option value="en">English (Default)</option>
+                                    <option value="ha">Hausa (Harshen Hausa)</option>
+                                </select>
+                            </div>
+
+                            <button type="submit" class="clay-btn clay-btn-primary" style="padding:10px 20px; font-size:0.9rem;" data-i18n="saveChanges">
+                                Save Changes
+                            </button>
+                        </form>
+                    </div>
+
+                    <!-- Change Password -->
+                    <div class="clay-card-flat" style="padding:24px;">
+                        <h4 class="settings-section-title">🔑 <span data-i18n="changePassword">Change Password</span></h4>
+                        <form id="form-change-password">
+                            <div class="auth-form-group">
+                                <label class="auth-label" data-i18n="currentPassword">Current Password</label>
+                                <input type="password" id="settings-old-pass" class="clay-input" required>
+                            </div>
+                            <div class="auth-form-group">
+                                <label class="auth-label" data-i18n="newPassword">New Password</label>
+                                <input type="password" id="settings-new-pass" class="clay-input" minlength="8" required>
+                            </div>
+                            <div class="auth-form-group">
+                                <label class="auth-label" data-i18n="confirmPassword">Confirm Password</label>
+                                <input type="password" id="settings-confirm-pass" class="clay-input" minlength="8" required>
+                            </div>
+                            <button type="submit" class="clay-btn clay-btn-secondary" style="padding:10px 20px; font-size:0.9rem;" data-i18n="changePassword">
+                                Change Password
+                            </button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================================================
+             8. GLOBAL RATES SECTION
+             ==================================================== -->
+        <section class="section" id="rates-section">
+            <div class="section-header">
+                <div class="clay-badge badge-mint">💎 Transparent Pricing</div>
+                <h2 data-i18n="navRates">International Calling Rates</h2>
+                <p>Search any destination country or dial code. Zero connection fees, zero hidden contracts.</p>
+            </div>
+
+            <div class="rates-search-wrapper">
+                <div class="clay-input-box">
+                    <input type="text" id="rates-search" class="clay-input" placeholder="🔍 Search country name or dial code (e.g. United Kingdom, +234, Nigeria, USA)...">
+                </div>
+            </div>
+
+            <div class="rates-grid" id="rates-grid">
+                <!-- Populated dynamically via api/rates.php -->
+            </div>
+        </section>
+
+        <!-- ====================================================
+             9. DIGITAL WALLET & CDR LEDGER SECTION
+             ==================================================== -->
+        <section class="section" id="wallet-section">
+            <div class="section-header">
+                <div class="clay-badge badge-primary">💳 Self-Service Finance</div>
+                <h2 data-i18n="navWallet">Wallet & Call Ledger</h2>
+                <p>Manage your prepaid international calling credits and view real-time Call Detail Records.</p>
+            </div>
+
+            <div class="wallet-grid">
+                <!-- Left: Wallet Card & Top-Up -->
+                <div class="clay-card wallet-card-main">
+                    <div>
+                        <div class="wallet-user-header">
+                            <div class="wallet-user-info">
+                                <h3 id="user-display-name">Alex Morgan</h3>
+                                <p id="user-member-display">Member ID: OV-784920</p>
+                            </div>
+                            <span class="clay-badge badge-mint">Active</span>
                         </div>
-                        <span class="clay-badge badge-mint">Active</span>
-                    </div>
 
-                    <div class="wallet-balance-display">
-                        <div class="balance-label">Available Calling Credit</div>
-                        <div class="balance-amount" id="wallet-balance">$15.00</div>
-                        <span style="font-size:0.85rem; color:var(--text-muted);">Auto-deducted per second during calls</span>
-                    </div>
-
-                    <div style="margin-bottom: 12px; font-weight: 700; font-size: 0.95rem;">Select Quick Recharge Amount:</div>
-                    <div class="topup-chips">
-                        <button class="topup-chip-btn" data-amount="5">$5</button>
-                        <button class="topup-chip-btn active" data-amount="10">$10</button>
-                        <button class="topup-chip-btn" data-amount="20">$20</button>
-                        <button class="topup-chip-btn" data-amount="50">$50</button>
-                    </div>
-
-                    <div class="clay-input-box" style="margin-bottom: 20px;">
-                        <input type="number" id="custom-topup-input" class="clay-input" placeholder="Or enter custom USD amount..." value="10" min="1" step="1">
-                    </div>
-                </div>
-
-                <button class="clay-btn clay-btn-secondary trigger-topup" style="width: 100%;">
-                    ⚡ Instant Wallet Top-Up
-                </button>
-            </div>
-
-            <!-- Right: Recent Activity / Transactions & Call Logs -->
-            <div class="clay-card table-container">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <h3 style="font-size: 1.2rem; font-weight: 800;">Recent Call Detail Records</h3>
-                    <span class="clay-badge">Real-time sync</span>
-                </div>
-
-                <div style="overflow-x: auto;">
-                    <table class="clay-table">
-                        <thead>
-                            <tr>
-                                <th>Destination</th>
-                                <th>Number</th>
-                                <th>Duration</th>
-                                <th>Cost</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="call-logs-body">
-                            <!-- Populated dynamically via api/calls.php -->
-                        </tbody>
-                    </table>
-                </div>
-
-                <div style="margin-top: 28px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                    <h3 style="font-size: 1.2rem; font-weight: 800;">Wallet Transactions</h3>
-                </div>
-
-                <div style="overflow-x: auto;">
-                    <table class="clay-table">
-                        <thead>
-                            <tr>
-                                <th>Description</th>
-                                <th>Type</th>
-                                <th>Amount</th>
-                                <th>Timestamp</th>
-                            </tr>
-                        </thead>
-                        <tbody id="transactions-body">
-                            <!-- Populated dynamically via api/wallet.php -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Features Section -->
-    <section class="section" id="features-section">
-        <div class="section-header">
-            <div class="clay-badge badge-coral">🚀 Enterprise Backbone</div>
-            <h2>Why Millions Choose ONE VOICE</h2>
-            <p>Engineered on high-performance cloud infrastructure for uncompromised call quality.</p>
-        </div>
-
-        <div class="features-grid">
-            <div class="clay-card feature-box">
-                <div class="feature-icon-wrapper" style="background:#e0e7ff; color:var(--clay-primary);">
-                    📡
-                </div>
-                <h3 class="feature-title">Edge-Routed PSTN Termination</h3>
-                <p class="feature-desc">
-                    Voice traffic routes through regional Anycast PoPs directly to tier-1 telecom carriers, ensuring near-zero jitter and latency below 65ms.
-                </p>
-            </div>
-
-            <div class="clay-card feature-box">
-                <div class="feature-icon-wrapper" style="background:#d1fae5; color:var(--clay-mint-dark);">
-                    🔒
-                </div>
-                <h3 class="feature-title">Double-Entry Ledger Security</h3>
-                <p class="feature-desc">
-                    Every second of calling and every dollar topped up is recorded in an ACID-compliant ledger powered by Neon PostgreSQL to ensure zero billing discrepancies.
-                </p>
-            </div>
-
-            <div class="clay-card feature-box">
-                <div class="feature-icon-wrapper" style="background:#ffe4e6; color:var(--clay-coral-dark);">
-                    📱
-                </div>
-                <h3 class="feature-title">Call Landlines & Mobiles</h3>
-                <p class="feature-desc">
-                    The person on the other end does not need the ONE VOICE app or an internet connection. Their actual phone rings like a standard cellular call.
-                </p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Mobile App Download Banner -->
-    <section class="section" id="download-section">
-        <div class="download-banner">
-            <div>
-                <span class="clay-badge badge-primary" style="margin-bottom: 12px;">📲 Native Experience</span>
-                <h2>Get ONE VOICE for iOS and Android</h2>
-                <p style="margin-top: 12px; font-size: 1.1rem; color: #c7d2fe;">
-                    Enjoy CallKit integration, native dialer contacts syncing, low-data HD audio codecs, and biometric wallet security on the go.
-                </p>
-                <div class="download-badges">
-                    <a href="#" class="store-badge" onclick="alert('iOS App Store release build available via TestFlight & App Store.'); return false;">
-                        <span style="font-size:1.6rem;">🍏</span>
-                        <div>
-                            <div style="font-size:0.7rem; text-transform:uppercase;">Download on the</div>
-                            <div style="font-size:1.05rem;">Apple App Store</div>
+                        <div class="wallet-balance-display">
+                            <div class="balance-label" data-i18n="activeCallingCredit">Available Calling Credit</div>
+                            <div class="balance-amount" id="wallet-balance">$15.00</div>
+                            <span style="font-size:0.85rem; color:var(--text-muted);">Auto-deducted per second during calls</span>
                         </div>
-                    </a>
-                    <a href="#" class="store-badge" onclick="alert('Android APK & Google Play release build available.'); return false;">
-                        <span style="font-size:1.6rem;">🤖</span>
-                        <div>
-                            <div style="font-size:0.7rem; text-transform:uppercase;">Get it on</div>
-                            <div style="font-size:1.05rem;">Google Play</div>
+
+                        <div style="margin-bottom: 12px; font-weight: 700; font-size: 0.95rem;">Select Quick Recharge Amount:</div>
+                        <div class="topup-chips">
+                            <button class="topup-chip-btn" data-amount="5">$5</button>
+                            <button class="topup-chip-btn active" data-amount="10">$10</button>
+                            <button class="topup-chip-btn" data-amount="20">$20</button>
+                            <button class="topup-chip-btn" data-amount="50">$50</button>
                         </div>
-                    </a>
+
+                        <div class="clay-input-box" style="margin-bottom: 20px;">
+                            <input type="number" id="custom-topup-input" class="clay-input" placeholder="Or enter custom USD amount..." value="10" min="1" step="1">
+                        </div>
+                    </div>
+
+                    <button class="clay-btn clay-btn-secondary trigger-topup" style="width: 100%;" data-i18n="topUpNow">
+                        ⚡ Instant Wallet Top-Up
+                    </button>
+                </div>
+
+                <!-- Right: Recent Activity / Transactions & Call Logs -->
+                <div class="clay-card table-container">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+                        <h3 style="font-size: 1.2rem; font-weight: 800;" data-i18n="recentCalls">Recent Call Detail Records</h3>
+                        <span class="clay-badge">Real-time sync</span>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table class="clay-table">
+                            <thead>
+                                <tr>
+                                    <th>Destination</th>
+                                    <th>Number</th>
+                                    <th>Duration</th>
+                                    <th>Cost</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="call-logs-body">
+                                <!-- Populated dynamically via api/calls.php -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div style="margin-top: 28px; display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <h3 style="font-size: 1.2rem; font-weight: 800;" data-i18n="walletTransactions">Wallet Transactions</h3>
+                    </div>
+
+                    <div style="overflow-x: auto;">
+                        <table class="clay-table">
+                            <thead>
+                                <tr>
+                                    <th>Description</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Timestamp</th>
+                                </tr>
+                            </thead>
+                            <tbody id="transactions-body">
+                                <!-- Populated dynamically via api/wallet.php -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
+        </section>
 
-            <div style="text-align: center; background: rgba(255,255,255,0.1); padding: 32px; border-radius: var(--radius-lg); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">
-                <div style="font-size: 5rem; line-height: 1;">📱</div>
-                <h4 style="margin-top: 12px; font-size: 1.1rem;">Scan to Download</h4>
-                <p style="font-size: 0.85rem; color: #a5b4fc; margin-top: 4px;">Universal Smart Link for iOS & Android</p>
+        <!-- ====================================================
+             10. FEATURES SECTION
+             ==================================================== -->
+        <section class="section" id="features-section">
+            <div class="section-header">
+                <div class="clay-badge badge-coral">🚀 Enterprise Backbone</div>
+                <h2>Why Millions Choose ONE VOICE</h2>
+                <p>Engineered on high-performance cloud infrastructure for uncompromised call quality.</p>
             </div>
-        </div>
-    </section>
+
+            <div class="features-grid">
+                <div class="clay-card feature-box">
+                    <div class="feature-icon-wrapper" style="background:#e0e7ff; color:var(--clay-primary);">📡</div>
+                    <h3 class="feature-title">Edge-Routed PSTN Termination</h3>
+                    <p class="feature-desc">
+                        Voice traffic routes through regional Anycast PoPs directly to tier-1 telecom carriers, ensuring near-zero jitter and latency below 65ms.
+                    </p>
+                </div>
+
+                <div class="clay-card feature-box">
+                    <div class="feature-icon-wrapper" style="background:#d1fae5; color:var(--clay-mint-dark);">🔒</div>
+                    <h3 class="feature-title">Double-Entry Ledger Security</h3>
+                    <p class="feature-desc">
+                        Every second of calling and every dollar topped up is recorded in an ACID-compliant ledger powered by Neon PostgreSQL to ensure zero billing discrepancies.
+                    </p>
+                </div>
+
+                <div class="clay-card feature-box">
+                    <div class="feature-icon-wrapper" style="background:#ffe4e6; color:var(--clay-coral-dark);">📱</div>
+                    <h3 class="feature-title">Call Landlines & Mobiles</h3>
+                    <p class="feature-desc">
+                        The person on the other end does not need the ONE VOICE app or an internet connection. Their actual phone rings like a standard cellular call.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================================================
+             11. MOBILE APP DOWNLOAD SECTION
+             ==================================================== -->
+        <section class="section" id="download-section">
+            <div class="download-banner">
+                <div>
+                    <span class="clay-badge badge-primary" style="margin-bottom: 12px;">📲 Native Experience</span>
+                    <h2>Get ONE VOICE for iOS and Android</h2>
+                    <p style="margin-top: 12px; font-size: 1.1rem; color: #c7d2fe;">
+                        Enjoy CallKit integration, native dialer contacts syncing, low-data HD audio codecs, and biometric wallet security on the go.
+                    </p>
+                    <div class="download-badges">
+                        <a href="#" class="store-badge" onclick="alert('iOS App Store build available via TestFlight.'); return false;">
+                            <span style="font-size:1.6rem;">🍏</span>
+                            <div>
+                                <div style="font-size:0.7rem; text-transform:uppercase;">Download on the</div>
+                                <div style="font-size:1.05rem;">Apple App Store</div>
+                            </div>
+                        </a>
+                        <a href="#" class="store-badge" onclick="alert('Android APK available on Google Play.'); return false;">
+                            <span style="font-size:1.6rem;">🤖</span>
+                            <div>
+                                <div style="font-size:0.7rem; text-transform:uppercase;">Get it on</div>
+                                <div style="font-size:1.05rem;">Google Play</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+
+                <div style="text-align: center; background: rgba(255,255,255,0.1); padding: 32px; border-radius: var(--radius-lg); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.2);">
+                    <div style="font-size: 5rem; line-height: 1;">📱</div>
+                    <h4 style="margin-top: 12px; font-size: 1.1rem;">Scan to Download</h4>
+                    <p style="font-size: 0.85rem; color: #a5b4fc; margin-top: 4px;">Universal Smart Link for iOS & Android</p>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ====================================================
+         MODALS
+         ==================================================== -->
 
     <!-- Top-Up Modal -->
     <div class="clay-modal" id="topup-modal">
@@ -407,31 +796,47 @@
         </div>
     </div>
 
-    <!-- Sign In / OTP Verification Modal -->
-    <div class="clay-modal" id="auth-modal">
+    <!-- Add Contact Modal -->
+    <div class="clay-modal" id="add-contact-modal">
         <div class="clay-card modal-body">
-            <button class="modal-close-btn" onclick="closeAuthModal()">✕</button>
+            <button class="modal-close-btn" onclick="closeAddContactModal()">✕</button>
             <div style="text-align: center; margin-bottom: 24px;">
-                <div style="width:52px; height:52px; border-radius:50%; background:#e0e7ff; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; font-size:1.5rem;">🔐</div>
-                <h3 style="font-size: 1.4rem; font-weight: 800;">Welcome to ONE VOICE</h3>
-                <p style="color:var(--text-secondary); font-size:0.9rem;">Sign in with your phone number to sync your wallet</p>
+                <div style="width:52px; height:52px; border-radius:50%; background:#e0e7ff; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; font-size:1.5rem;">👥</div>
+                <h3 style="font-size: 1.4rem; font-weight: 800;" data-i18n="addContact">Add New Contact</h3>
             </div>
 
-            <form id="auth-form">
-                <div style="margin-bottom: 16px;">
-                    <label style="font-size:0.85rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Full Name</label>
-                    <input type="text" id="auth-name" class="clay-input" value="Alex Morgan" required style="margin-top:6px;">
+            <form id="form-add-contact">
+                <div class="auth-form-group">
+                    <label class="auth-label" data-i18n="contactName">Contact Name</label>
+                    <input type="text" id="contact-input-name" class="clay-input" placeholder="e.g. Aminu Kano" required>
                 </div>
-
-                <div style="margin-bottom: 24px;">
-                    <label style="font-size:0.85rem; font-weight:700; color:var(--text-muted); text-transform:uppercase;">Mobile Phone (E.164)</label>
-                    <input type="tel" id="auth-phone" class="clay-input" value="+1 (415) 555-2671" required style="margin-top:6px;">
+                <div class="auth-form-group">
+                    <label class="auth-label" data-i18n="contactPhone">Phone Number</label>
+                    <input type="tel" id="contact-input-phone" class="clay-input" placeholder="+234 803 123 4567" required>
                 </div>
-
-                <button type="submit" class="clay-btn clay-btn-primary" style="width: 100%;">
-                    Verify & Continue
+                <div class="auth-form-group">
+                    <label class="auth-label">Country</label>
+                    <input type="text" id="contact-input-country" class="clay-input" placeholder="Nigeria" value="Nigeria">
+                </div>
+                <button type="submit" class="clay-btn clay-btn-primary" style="width: 100%;" data-i18n="saveContact">
+                    Save Contact
                 </button>
             </form>
+        </div>
+    </div>
+
+    <!-- Logout Confirmation Modal -->
+    <div class="clay-modal" id="logout-modal">
+        <div class="clay-card modal-body" style="text-align: center;">
+            <div style="width:60px; height:60px; border-radius:50%; background:#fee2e2; color:var(--clay-coral-dark); display:flex; align-items:center; justify-content:center; margin:0 auto 16px; font-size:1.8rem;">🚪</div>
+            <h3 style="font-size: 1.4rem; font-weight: 800;" data-i18n="logoutConfirmTitle">Confirm Logout</h3>
+            <p style="color:var(--text-secondary); margin: 12px 0 24px;" data-i18n="logoutConfirmMsg">
+                Are you sure you want to end your secure authenticated session?
+            </p>
+            <div style="display:flex; gap:12px; justify-content:center;">
+                <button class="clay-btn clay-btn-white" onclick="closeLogoutModal()" data-i18n="cancel">Cancel</button>
+                <button class="clay-btn clay-btn-danger" id="btn-confirm-logout" data-i18n="confirmLogout">Yes, Logout</button>
+            </div>
         </div>
     </div>
 
@@ -457,6 +862,7 @@
     </footer>
 
     <!-- JavaScript Bundle -->
+    <script src="js/translations.js"></script>
     <script src="js/dtmf.js"></script>
     <script src="js/app.js"></script>
 </body>
