@@ -143,6 +143,33 @@ const MIME_TYPES = {
     '.ico': 'image/x-icon'
 };
 
+const staticAssets = {};
+try {
+    const htmlPath = path.join(__dirname, 'index.html');
+    if (fs.existsSync(htmlPath)) {
+        staticAssets['/'] = fs.readFileSync(htmlPath, 'utf8');
+        staticAssets['/index.html'] = staticAssets['/'];
+    }
+    const cssPath = path.join(__dirname, 'css', 'clay.css');
+    if (fs.existsSync(cssPath)) {
+        staticAssets['/css/clay.css'] = fs.readFileSync(cssPath, 'utf8');
+    }
+    const jsAppPath = path.join(__dirname, 'js', 'app.js');
+    if (fs.existsSync(jsAppPath)) {
+        staticAssets['/js/app.js'] = fs.readFileSync(jsAppPath, 'utf8');
+    }
+    const jsDtmfPath = path.join(__dirname, 'js', 'dtmf.js');
+    if (fs.existsSync(jsDtmfPath)) {
+        staticAssets['/js/dtmf.js'] = fs.readFileSync(jsDtmfPath, 'utf8');
+    }
+    const jsTransPath = path.join(__dirname, 'js', 'translations.js');
+    if (fs.existsSync(jsTransPath)) {
+        staticAssets['/js/translations.js'] = fs.readFileSync(jsTransPath, 'utf8');
+    }
+} catch (e) {
+    console.error('Error preloading static assets:', e);
+}
+
 function getAllUsers(store) {
     const list = [];
     if (store.user) list.push(store.user);
@@ -200,9 +227,21 @@ const requestHandler = (req, res) => {
         return;
     }
 
-    const rawUrl = req.headers['x-forwarded-uri'] || req.headers['x-matched-path'] || req.url || '/';
+    const reqParsed = url.parse(req.url || '/', true);
+    const rawUrl = req.headers['x-forwarded-uri'] || req.url || '/';
     const parsedUrl = url.parse(rawUrl, true);
-    const pathname = parsedUrl.pathname;
+    const pathname = parsedUrl.pathname || '/';
+    const cleanPath = pathname.replace(/\.(php|js)$/, '');
+    const reqCleanPath = (reqParsed.pathname || '').replace(/\.(php|js)$/, '');
+
+    const isRates = cleanPath === '/api/rates' || reqCleanPath === '/api/rates';
+    const isWallet = cleanPath === '/api/wallet' || reqCleanPath === '/api/wallet';
+    const isWebhook = cleanPath === '/api/webhook_payment' || reqCleanPath === '/api/webhook_payment';
+    const isAdmin = cleanPath === '/api/admin' || reqCleanPath === '/api/admin';
+    const isCalls = cleanPath === '/api/calls' || reqCleanPath === '/api/calls';
+    const isContacts = cleanPath === '/api/contacts' || reqCleanPath === '/api/contacts';
+    const isSettings = cleanPath === '/api/settings' || reqCleanPath === '/api/settings';
+    const isAuth = cleanPath === '/api/auth' || reqCleanPath === '/api/auth';
 
     const sendJson = (data, status = 200) => {
         res.writeHead(status, { 'Content-Type': 'application/json' });
@@ -223,7 +262,7 @@ const requestHandler = (req, res) => {
     };
 
     // 1. API: Rates
-    if (pathname === '/api/rates.php' || pathname === '/api/rates') {
+    if (isRates) {
         const search = (parsedUrl.query.search || '').toLowerCase().trim();
         let filtered = defaultRates;
         if (search) {
@@ -237,7 +276,7 @@ const requestHandler = (req, res) => {
     }
 
     // 2. API: Wallet (Customer Balance, Virtual Account, Revenue Sharing, Phone Transfer)
-    if (pathname === '/api/wallet.php' || pathname === '/api/wallet') {
+    if (isWallet) {
         const store = getStore();
         if (req.method === 'GET') {
             if (parsedUrl.query.lookup_phone) {
@@ -459,7 +498,7 @@ const requestHandler = (req, res) => {
     }
 
     // 3. API: Webhook Ingestion (Paystack / Flutterwave / Monnify)
-    if (pathname === '/api/webhook_payment.php' || pathname === '/api/webhook_payment') {
+    if (isWebhook) {
         const store = getStore();
         return parseBody((body) => {
             const data = body.data || body;
@@ -505,7 +544,7 @@ const requestHandler = (req, res) => {
     }
 
     // 4. API: Admin Finance & Revenue Sharing Control
-    if (pathname === '/api/admin.php' || pathname === '/api/admin') {
+    if (isAdmin) {
         const store = getStore();
         if (req.method === 'GET') {
             let totalGross = 0;
@@ -589,7 +628,7 @@ const requestHandler = (req, res) => {
     }
 
     // 5. API: Calls (Billing with Wholesale Cost & Margin in NGN)
-    if (pathname === '/api/calls.php' || pathname === '/api/calls') {
+    if (isCalls) {
         const store = getStore();
         if (req.method === 'GET') {
             const activeUser = getActiveUser(req, store);
@@ -686,7 +725,7 @@ const requestHandler = (req, res) => {
     }
 
     // 6. API: Contacts
-    if (pathname === '/api/contacts.php' || pathname === '/api/contacts') {
+    if (isContacts) {
         const store = getStore();
         if (req.method === 'GET') {
             return sendJson({ success: true, contacts: store.contacts || [] });
@@ -713,7 +752,7 @@ const requestHandler = (req, res) => {
     }
 
     // 7. API: Settings (Profile, Phone Change with OTP, Password)
-    if (pathname === '/api/settings.php' || pathname === '/api/settings') {
+    if (isSettings) {
         const store = getStore();
         if (req.method === 'POST') {
             return parseBody((body) => {
@@ -850,7 +889,7 @@ const requestHandler = (req, res) => {
     }
 
     // 8. API: Auth
-    if (pathname === '/api/auth.php' || pathname === '/api/auth') {
+    if (isAuth) {
         const store = getStore();
         if (req.method === 'GET') {
             const activeUser = getActiveUser(req, store);
@@ -967,24 +1006,59 @@ const requestHandler = (req, res) => {
     }
 
     // Static File Serving
-    let safePath = (pathname === '/' || pathname === '') ? '/index.html' : pathname;
-    let filePath = path.join(process.cwd(), safePath);
-    if (!fs.existsSync(filePath)) {
-        filePath = path.join(__dirname, safePath);
+    let normPath = pathname;
+    if (normPath === '/' || normPath === '' || normPath === '/server' || normPath === '/server.js') {
+        normPath = '/index.html';
+    }
+    let reqNormPath = reqParsed.pathname;
+    if (reqNormPath === '/' || reqNormPath === '' || reqNormPath === '/server' || reqNormPath === '/server.js') {
+        reqNormPath = '/index.html';
     }
 
-    fs.stat(filePath, (err, stats) => {
-        if (err || !stats.isFile()) {
-            res.writeHead(404, { 'Content-Type': 'text/plain' });
-            res.end('404 Not Found');
+    const cached = staticAssets[normPath] || staticAssets[reqNormPath];
+    if (cached) {
+        const ext = path.extname(normPath === '/index.html' ? 'index.html' : normPath).toLowerCase();
+        const contentType = MIME_TYPES[ext] || 'text/html; charset=utf-8';
+        res.writeHead(200, {
+            'Content-Type': contentType,
+            'Cache-Control': 'public, max-age=3600'
+        });
+        res.end(cached);
+        return;
+    }
+
+    let safePath = normPath.replace(/^\/+/, '');
+    const possiblePaths = [
+        path.join(__dirname, safePath),
+        path.join(process.cwd(), safePath),
+        path.resolve(safePath)
+    ];
+
+    let filePath = null;
+    for (const p of possiblePaths) {
+        try {
+            if (fs.existsSync(p) && fs.statSync(p).isFile()) {
+                filePath = p;
+                break;
+            }
+        } catch (e) {}
+    }
+
+    if (!filePath) {
+        if (staticAssets['/index.html']) {
+            res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
+            res.end(staticAssets['/index.html']);
             return;
         }
+        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        res.end('404 Not Found');
+        return;
+    }
 
-        const ext = path.extname(filePath).toLowerCase();
-        const contentType = MIME_TYPES[ext] || 'application/octet-stream';
-        res.writeHead(200, { 'Content-Type': contentType });
-        fs.createReadStream(filePath).pipe(res);
-    });
+    const ext = path.extname(filePath).toLowerCase();
+    const contentType = MIME_TYPES[ext] || 'application/octet-stream';
+    res.writeHead(200, { 'Content-Type': contentType });
+    fs.createReadStream(filePath).pipe(res);
 };
 
 const server = http.createServer(requestHandler);
