@@ -16,6 +16,7 @@
     { "source": "/api/admin.php", "destination": "/api/admin.js" },
     { "source": "/api/contacts.php", "destination": "/api/contacts.js" },
     { "source": "/api/settings.php", "destination": "/api/settings.js" },
+    { "source": "/api/debug", "destination": "/api/debug.js" },
     { "source": "/api/(.*)", "destination": "/api/bridge.js" },
     { "source": "/(.*)", "destination": "/server.js" }
   ]
