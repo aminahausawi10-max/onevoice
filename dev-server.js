@@ -181,6 +181,16 @@ try {
     if (fs.existsSync(swPath)) {
         staticAssets['/sw.js'] = fs.readFileSync(swPath, 'utf8');
     }
+    const assetsDir = path.join(__dirname, 'assets');
+    if (fs.existsSync(assetsDir)) {
+        const files = fs.readdirSync(assetsDir);
+        files.forEach(f => {
+            const fPath = path.join(assetsDir, f);
+            if (fs.statSync(fPath).isFile()) {
+                staticAssets['/assets/' + f] = fs.readFileSync(fPath);
+            }
+        });
+    }
 } catch (e) {
     console.error('Error preloading static assets:', e);
 }
