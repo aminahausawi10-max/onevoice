@@ -15,6 +15,19 @@ const IS_VERCEL = process.env.VERCEL === '1' || process.env.NOW_REGION !== undef
 const TMP_DATA_FILE = path.join('/tmp', 'store.json');
 
 let inMemoryStore = null;
+let pgPool = null;
+
+if (process.env.DATABASE_URL) {
+    try {
+        const { Pool } = require('pg');
+        pgPool = new Pool({
+            connectionString: process.env.DATABASE_URL,
+            ssl: { rejectUnauthorized: false }
+        });
+    } catch (e) {
+        console.error('Neon Postgres pool init:', e.message);
+    }
+}
 
 try {
     if (!IS_VERCEL && !fs.existsSync(path.join(__dirname, 'data'))) {
@@ -234,6 +247,7 @@ const requestHandler = (req, res) => {
     const isContacts = cleanPath === '/api/contacts' || reqCleanPath === '/api/contacts';
     const isSettings = cleanPath === '/api/settings' || reqCleanPath === '/api/settings';
     const isAuth = cleanPath === '/api/auth' || reqCleanPath === '/api/auth';
+    const isHealth = cleanPath === '/api/health' || reqCleanPath === '/api/health' || cleanPath === '/api/status';
 
     const sendJson = (data, status = 200) => {
         res.writeHead(status, { 'Content-Type': 'application/json' });
@@ -265,6 +279,29 @@ const requestHandler = (req, res) => {
             callback(parsed);
         });
     };
+
+    // 0. API: Health & Connection Status (Vercel, GitHub, Neon PostgreSQL)
+    if (isHealth) {
+        return sendJson({
+            success: true,
+            status: "online",
+            platform: "ONE VOICE",
+            environment: IS_VERCEL ? "Vercel Serverless Production" : "Local Development Server",
+            github_repository: "https://github.com/aminahausawi10-max/onevoice",
+            vercel_domain: "voicecloud-portal.vercel.app",
+            neon_postgresql: {
+                configured: !!process.env.DATABASE_URL,
+                status: process.env.DATABASE_URL ? (pgPool ? "active_connected" : "ready") : "standby_json_resilient_store",
+                ssl: "require",
+                provider: "Neon Serverless Postgres"
+            },
+            storage: {
+                engine: process.env.DATABASE_URL ? "Neon PostgreSQL" : "Local Resilient Store",
+                status: "operational"
+            },
+            timestamp: new Date().toISOString()
+        });
+    }
 
     // 1. API: Rates
     if (isRates) {

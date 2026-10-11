@@ -1,26 +1,13 @@
 /**
- * ONE VOICE - Single Page Application Router & Financial Controller
- * Implements:
- * - Phone-Number as Unique Account Number & Dedicated Virtual NUBAN
- * - Fund Wallet via Bank Payment with Server-Enforced Revenue Sharing
- * - Telephony with Nigerian Retail Rates vs Wholesale Carrier Margins
- * - Administrator Finance Dashboard & Ledger Reconciliation
+ * ONE VOICE - Web Application Controller
  */
 
 // Global clipboard helper
 window.copyText = (text, message = 'Copied to clipboard!') => {
-    if (navigator.clipboard) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
         navigator.clipboard.writeText(text).then(() => {
             if (window.showToast) window.showToast(message, 'success');
-        });
-    } else {
-        const temp = document.createElement('input');
-        temp.value = text;
-        document.body.appendChild(temp);
-        temp.select();
-        document.execCommand('copy');
-        temp.remove();
-        if (window.showToast) window.showToast(message, 'success');
+        }).catch(() => {});
     }
 };
 
@@ -360,12 +347,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const userMemberDisplay = document.getElementById('user-member-display');
     const dialerBalancePill = document.getElementById('dialer-balance-pill');
 
-    // Virtual Bank Elements
+    // Account Information Elements
     const walletBankName = document.getElementById('wallet-bank-name');
-    const walletVirtualNuban = document.getElementById('wallet-virtual-nuban');
     const walletAccountName = document.getElementById('wallet-account-name');
     const walletPhoneAccount = document.getElementById('wallet-phone-account');
-    const modalVirtualNuban = document.getElementById('modal-virtual-nuban');
 
     // Modal Revenue Split Elements
     const modalDepositInput = document.getElementById('modal-deposit-amount');
