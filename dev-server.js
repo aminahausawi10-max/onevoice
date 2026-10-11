@@ -249,6 +249,17 @@ const requestHandler = (req, res) => {
     };
 
     const parseBody = (callback) => {
+        if (req.body !== undefined && req.body !== null) {
+            if (typeof req.body === 'object' && !Buffer.isBuffer(req.body)) {
+                return callback(req.body);
+            }
+            try {
+                const str = Buffer.isBuffer(req.body) ? req.body.toString('utf8') : req.body.toString();
+                return callback(str ? JSON.parse(str) : {});
+            } catch (e) {
+                return sendJson({ success: false, message: 'Invalid JSON payload' }, 400);
+            }
+        }
         let body = '';
         req.on('data', chunk => { body += chunk; });
         req.on('end', () => {
