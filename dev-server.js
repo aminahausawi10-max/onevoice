@@ -257,7 +257,7 @@ const requestHandler = (req, res) => {
                 const str = Buffer.isBuffer(req.body) ? req.body.toString('utf8') : req.body.toString();
                 return callback(str ? JSON.parse(str) : {});
             } catch (e) {
-                return sendJson({ success: false, message: 'Invalid JSON payload' }, 400);
+                return sendJson({ success: false, message: 'Invalid JSON payload from req.body', err: e.message, bodyType: typeof req.body }, 400);
             }
         }
         let body = '';
@@ -267,7 +267,7 @@ const requestHandler = (req, res) => {
                 const parsed = body ? JSON.parse(body) : {};
                 callback(parsed);
             } catch (err) {
-                sendJson({ success: false, message: 'Invalid JSON payload' }, 400);
+                sendJson({ success: false, message: 'Invalid JSON payload from stream', err: err.message, bodyLen: body.length, raw: body }, 400);
             }
         });
     };
