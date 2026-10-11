@@ -27,7 +27,7 @@
       "currency": "NGN"
     },
     "3": {
-      "balance": 0,
+      "balance": 9000,
       "currency": "NGN"
     }
   },
@@ -44,8 +44,45 @@
     "paystack_public_key": "pk_test_a8e259b3294c7b884d5df688172082b2024b176f"
   },
   "transactions": [],
-  "wallet_ledger": [],
-  "platform_revenue_ledger": [],
+  "wallet_ledger": [
+    {
+      "id": 1,
+      "user_id": 3,
+      "transaction_type": "bank_deposit",
+      "gross_amount": 10000,
+      "platform_fee": 1000,
+      "net_credited": 9000,
+      "balance_before": 0,
+      "balance_after": 9000,
+      "channel": "opay_transfer",
+      "recipient_phone_account": "09090809080",
+      "admin_momo_account": "9090809080 (MoMo PSB)",
+      "admin_momo_payout_ref": "MOMO-PAYOUT-1791709721619",
+      "provider_reference": "OPAY-1791709721495",
+      "internal_reference": "OV-DEP-WMPDN11",
+      "narration": "Deposit to Account 09090809080 - 10% Admin Share (₦1000.00) sent directly to MoMo 9090809080",
+      "status": "successful",
+      "created_at": "10/11/2026, 10:08:41 AM"
+    }
+  ],
+  "platform_revenue_ledger": [
+    {
+      "id": 1,
+      "source_type": "deposit_share",
+      "source_reference": "OV-DEP-WMPDN11",
+      "user_id": 3,
+      "user_phone": "09090809080",
+      "user_name": "Amina Ahmed Inuwa",
+      "gross_deposit": 10000,
+      "amount": 1000,
+      "payout_destination": "MoMo PSB: 9090809080 (Amina Ahmed Inuwa)",
+      "payout_reference": "MOMO-PAYOUT-1791709721619",
+      "settlement_status": "dispatched_direct_to_momo",
+      "cumulative_platform_revenue": 1000,
+      "settled_at": "10/11/2026, 10:08:41 AM",
+      "created_at": "10/11/2026, 10:08:41 AM"
+    }
+  ],
   "call_logs": [],
   "contacts": [
     {
