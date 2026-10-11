@@ -1,9 +1,9 @@
 {
   "version": 2,
   "rewrites": [
-    { "source": "/api/rates.php", "destination": "/api/rates.js" },
-    { "source": "/api/wallet.php", "destination": "/api/wallet.js" },
-    { "source": "/api/calls.php", "destination": "/api/calls.js" },
-    { "source": "/api/auth.php", "destination": "/api/auth.js" }
+    {
+      "source": "/api/(.*)",
+      "destination": "/api/bridge.js"
+    }
   ]
 }

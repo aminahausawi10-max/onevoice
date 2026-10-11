@@ -11,19 +11,27 @@ const url = require('url');
 
 const PORT = process.env.PORT || 3000;
 const DATA_FILE = path.join(__dirname, 'data', 'store.json');
+const IS_VERCEL = process.env.VERCEL === '1' || process.env.NOW_REGION !== undefined;
+const TMP_DATA_FILE = path.join('/tmp', 'store.json');
 
-if (!fs.existsSync(path.join(__dirname, 'data'))) {
-    fs.mkdirSync(path.join(__dirname, 'data'), { recursive: true });
-}
+let inMemoryStore = null;
+
+try {
+    if (!IS_VERCEL && !fs.existsSync(path.join(__dirname, 'data'))) {
+        fs.mkdirSync(path.join(__dirname, 'data'), { recursive: true });
+    }
+} catch (e) {}
 
 const otpSessions = new Map();
 const passwordResetSessions = new Map();
 
 function getStore() {
+    if (inMemoryStore) return inMemoryStore;
     let store = {};
-    if (fs.existsSync(DATA_FILE)) {
+    const targetFile = (IS_VERCEL && fs.existsSync(TMP_DATA_FILE)) ? TMP_DATA_FILE : DATA_FILE;
+    if (fs.existsSync(targetFile)) {
         try {
-            store = JSON.parse(fs.readFileSync(DATA_FILE, 'utf8'));
+            store = JSON.parse(fs.readFileSync(targetFile, 'utf8'));
         } catch (e) {
             store = {};
         }
@@ -95,7 +103,14 @@ function getStore() {
 }
 
 function saveStore(data) {
-    fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+    inMemoryStore = data;
+    try {
+        if (IS_VERCEL) {
+            fs.writeFileSync(TMP_DATA_FILE, JSON.stringify(data, null, 2));
+        } else {
+            fs.writeFileSync(DATA_FILE, JSON.stringify(data, null, 2));
+        }
+    } catch (e) {}
 }
 
 const defaultRates = [
@@ -174,7 +189,7 @@ function getUserWallet(userId, store) {
     return store.wallets[userId];
 }
 
-const server = http.createServer((req, res) => {
+const requestHandler = (req, res) => {
     res.setHeader('Access-Control-Allow-Origin', '*');
     res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
     res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-User-Id, X-Paystack-Signature, X-Webhook-Secret');
@@ -966,8 +981,14 @@ const server = http.createServer((req, res) => {
         res.writeHead(200, { 'Content-Type': contentType });
         fs.createReadStream(filePath).pipe(res);
     });
-});
+};
 
-server.listen(PORT, () => {
-    console.log(`ONE VOICE Web Application running at http://localhost:${PORT}`);
-});
+const server = http.createServer(requestHandler);
+
+if (require.main === module) {
+    server.listen(PORT, () => {
+        console.log(`ONE VOICE Web Application running at http://localhost:${PORT}`);
+    });
+}
+
+module.exports = requestHandler;
