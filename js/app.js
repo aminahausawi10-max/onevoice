@@ -262,6 +262,17 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ----------------------------------------------------
+    function formatPhoneToAccountNumber(phone) {
+        if (!phone) return '9090809080';
+        let digits = phone.toString().replace(/[^0-9]/g, '');
+        let tenDigits = digits.length > 10 ? digits.slice(-10) : digits;
+        if (tenDigits.startsWith('0')) {
+            tenDigits = tenDigits.replace(/^0+/, '');
+        }
+        return tenDigits;
+    }
+
+    // ----------------------------------------------------
     // 3. User Authentication Setup
     // ----------------------------------------------------
     function setAuthenticatedUI(user) {
@@ -281,15 +292,22 @@ document.addEventListener('DOMContentLoaded', () => {
         if (userMemberDisplay) userMemberDisplay.textContent = `Member ID: ${user.member_id || 'OV-784920'}`;
 
         const phoneNum = user.phone || '+2348031234567';
-        if (dashPhoneAccount) dashPhoneAccount.textContent = phoneNum;
-        if (walletPhoneAccount) walletPhoneAccount.textContent = phoneNum;
+        const accountNum = formatPhoneToAccountNumber(phoneNum);
 
-        if (walletPhoneAccount) walletPhoneAccount.textContent = phoneNum;
+        if (dashPhoneAccount) dashPhoneAccount.textContent = accountNum;
+        if (walletPhoneAccount) walletPhoneAccount.textContent = accountNum;
         if (walletAccountName) walletAccountName.textContent = "ONE VOICE / " + user.name;
         const modalUserPhone = document.getElementById('modal-user-phone-account');
         const modalUserName = document.getElementById('modal-user-name-account');
-        if (modalUserPhone) modalUserPhone.textContent = phoneNum;
+        if (modalUserPhone) modalUserPhone.textContent = accountNum;
         if (modalUserName) modalUserName.textContent = "ONE VOICE / " + user.name;
+
+        // Hide Admin menu links for all non-admin users
+        const navAdminLi = document.getElementById('nav-admin-li');
+        const mobileDockAdmin = document.getElementById('mobile-dock-admin');
+        const isAdmin = user.role === 'admin';
+        if (navAdminLi) navAdminLi.style.display = isAdmin ? 'block' : 'none';
+        if (mobileDockAdmin) mobileDockAdmin.style.display = isAdmin ? 'flex' : 'none';
 
         if (dashLangBadge) {
             dashLangBadge.textContent = (user.language === 'ha') ? 'Hausa (ha)' : 'English (en)';
@@ -489,24 +507,27 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 updateBalanceUI(userWalletBalance);
 
-                if (data.admin_bank) {
-                    if (walletBankName) walletBankName.textContent = data.admin_bank.bank_name;
-                    if (walletVirtualNuban) walletVirtualNuban.textContent = data.admin_bank.account_number;
-                    if (walletAccountName) walletAccountName.textContent = data.admin_bank.account_name;
-                    if (modalVirtualNuban) modalVirtualNuban.textContent = data.admin_bank.account_number;
-                } else if (data.virtual_account) {
-                    if (walletBankName) walletBankName.textContent = data.virtual_account.bank_name;
-                    if (walletVirtualNuban) walletVirtualNuban.textContent = data.virtual_account.virtual_account_number;
-                    if (walletAccountName) walletAccountName.textContent = data.virtual_account.account_name;
-                    if (modalVirtualNuban) modalVirtualNuban.textContent = data.virtual_account.virtual_account_number;
-                }
-                const modalUserRemarkPhone = document.getElementById('modal-user-remark-phone');
-                if (modalUserRemarkPhone && currentUser) {
-                    modalUserRemarkPhone.textContent = currentUser.phone;
-                }
-                if (walletPhoneAccount && currentUser) {
-                    walletPhoneAccount.textContent = currentUser.phone;
-                }
+                const RANDOM_BANKS = [
+                    "Kuda Microfinance Bank",
+                    "Wema Bank",
+                    "Moniepoint MFB",
+                    "OPay (Paycom)",
+                    "Palmpay",
+                    "Sterling Bank",
+                    "Providus Bank",
+                    "FairMoney MFB"
+                ];
+                const assignedBank = data.virtual_account?.bank_name || data.bank_name || RANDOM_BANKS[(currentUser?.id || 1) % RANDOM_BANKS.length];
+                if (walletBankName) walletBankName.textContent = assignedBank;
+                const modalUserBank = document.getElementById('modal-user-bank-name');
+                if (modalUserBank) modalUserBank.textContent = assignedBank;
+                const modalBankHint = document.getElementById('modal-bank-hint');
+                if (modalBankHint) modalBankHint.textContent = assignedBank;
+
+                const accountNum = formatPhoneToAccountNumber(currentUser?.phone || data.account_number);
+                if (walletPhoneAccount) walletPhoneAccount.textContent = accountNum;
+                const modalUserPhone = document.getElementById('modal-user-phone-account');
+                if (modalUserPhone) modalUserPhone.textContent = accountNum;
 
                 updateModalSplitPreview();
                 if (data.transactions) renderTransactions(data.transactions);
@@ -574,7 +595,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         const modalUserPhone = document.getElementById('modal-user-phone-account');
         const modalUserName = document.getElementById('modal-user-name-account');
-        if (modalUserPhone && currentUser) modalUserPhone.textContent = currentUser.phone;
+        if (modalUserPhone && currentUser) modalUserPhone.textContent = formatPhoneToAccountNumber(currentUser.phone);
         if (modalUserName && currentUser) modalUserName.textContent = "ONE VOICE / " + currentUser.name;
         updateModalSplitPreview();
         if (topupModal) topupModal.classList.add('active');
@@ -584,13 +605,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const triggerTopupBtns = document.querySelectorAll('.trigger-topup');
     triggerTopupBtns.forEach(btn => btn.addEventListener('click', window.openTopupModal));
 
-    // Reusable Deposit Execution Function
-    async function completeDeposit(amount, channel = 'phone_account_deposit', ref = null) {
-        if (!ref) ref = 'BANK-MOMO-' + Date.now();
+    // Reusable Deposit Execution Function (Internal Bank Simulation - No External API)
+    async function completeDeposit(amount, channel = 'bank_transfer', ref = null) {
+        if (!ref) ref = 'DEP-' + Date.now();
         const btnConfirm = document.getElementById('btn-confirm-topup');
-        const btnPaystack = document.getElementById('btn-paystack-pay');
-        if (btnConfirm) { btnConfirm.disabled = true; btnConfirm.textContent = 'Processing & Sending 10% to MoMo...'; }
-        if (btnPaystack) { btnPaystack.disabled = true; }
+        if (btnConfirm) { btnConfirm.disabled = true; btnConfirm.textContent = 'Processing Deposit...'; }
 
         try {
             const res = await apiFetch('api/wallet.php', {
@@ -609,61 +628,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 userWalletBalance = parseFloat(data.new_balance);
                 updateBalanceUI(userWalletBalance);
                 const b = data.deposit_breakdown;
-                showToast(`🎉 ₦${b.net_credited_to_user.toFixed(2)} credited to your wallet! Admin 10% share (₦${b.platform_revenue_share.toFixed(2)}) sent directly to Admin MoMo (9090809080)`, 'success');
+                showToast(`🎉 ₦${b.net_credited_to_user.toFixed(2)} credited to your wallet successfully!`, 'success');
                 closeTopupModal();
                 loadWalletData();
             } else {
-                showToast(data.message || 'Payment verification failed', 'error');
+                showToast(data.message || 'Deposit verification failed', 'error');
             }
         } catch (err) {
-            showToast('Bank gateway connection failed', 'error');
+            showToast('Deposit could not be completed', 'error');
         } finally {
-            if (btnConfirm) { btnConfirm.disabled = false; btnConfirm.textContent = '⚡ Confirm Deposit To My Account & Split Share'; }
-            if (btnPaystack) { btnPaystack.disabled = false; }
+            if (btnConfirm) { btnConfirm.disabled = false; btnConfirm.textContent = '⚡ Complete Deposit to Wallet'; }
         }
     }
 
-    // Method 1: Paystack Live API Checkout
-    const paystackPayBtn = document.getElementById('btn-paystack-pay');
-    if (paystackPayBtn) {
-        paystackPayBtn.addEventListener('click', () => {
-            const amount = parseFloat(modalDepositInput ? modalDepositInput.value : selectedTopupAmount);
-            if (amount < 10) {
-                showToast('Minimum deposit is ₦10.00', 'error');
-                return;
-            }
-
-            const email = currentUser ? (currentUser.email || 'customer@onevoice.app') : 'customer@onevoice.app';
-            const phone = currentUser ? (currentUser.phone || '09090809080') : '09090809080';
-            const koboAmount = Math.round(amount * 100);
-
-            if (typeof PaystackPop !== 'undefined') {
-                const handler = PaystackPop.setup({
-                    key: 'pk_test_a8e259b3294c7b884d5df688172082b2024b176f',
-                    email: email,
-                    amount: koboAmount,
-                    currency: 'NGN',
-                    ref: 'OV-PSK-' + Math.floor((Math.random() * 1000000000) + 1),
-                    metadata: {
-                        custom_fields: [
-                            { display_name: "ONE VOICE Account", variable_name: "phone", value: phone }
-                        ]
-                    },
-                    callback: function(response) {
-                        completeDeposit(amount, 'paystack', response.reference);
-                    },
-                    onClose: function() {
-                        showToast('Paystack payment window closed', 'info');
-                    }
-                });
-                handler.openIframe();
-            } else {
-                completeDeposit(amount, 'paystack', 'PSTK-' + Date.now());
-            }
-        });
-    }
-
-    // Method 2: Direct OPay Transfer Confirmation (Account 9090809080)
     const confirmTopupBtn = document.getElementById('btn-confirm-topup');
     if (confirmTopupBtn) {
         confirmTopupBtn.addEventListener('click', () => {
@@ -672,7 +649,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Minimum deposit is ₦10.00', 'error');
                 return;
             }
-            completeDeposit(amount, 'opay_transfer', 'OPAY-' + Date.now());
+            completeDeposit(amount, 'bank_transfer', 'DEP-' + Date.now());
         });
     }
 

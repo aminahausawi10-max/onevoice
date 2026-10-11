@@ -293,37 +293,43 @@ const requestHandler = (req, res) => {
             const sharePct = (store.settings && store.settings.platform_revenue_share_pct) || 10.0;
             const userLedger = (store.wallet_ledger || []).filter(e => !e.user_id || e.user_id === activeUser.id);
 
-            const cleanUserPhone = (activeUser.phone || '').replace(/[^0-9]/g, '').slice(-10);
-            const adminMoMo = {
-                bank_name: "MoMo PSB (MTN MoMo)",
-                account_number: "9090809080",
-                account_name: "Amina Ahmed Inuwa (ONE VOICE Admin)",
-                network: "MTN MoMo PSB"
-            };
+            const cleanUserPhone = (activeUser.phone || '').replace(/[^0-9]/g, '');
+            let accountNum = cleanUserPhone.length > 10 ? cleanUserPhone.slice(-10) : cleanUserPhone;
+            if (accountNum.startsWith('0')) {
+                accountNum = accountNum.replace(/^0+/, '');
+            }
+
+            const RANDOM_BANKS = [
+                "Kuda Microfinance Bank",
+                "Wema Bank",
+                "Moniepoint MFB",
+                "OPay (Paycom)",
+                "Palmpay",
+                "Sterling Bank",
+                "Providus Bank",
+                "FairMoney MFB"
+            ];
+            const assignedBank = RANDOM_BANKS[(activeUser.id || 1) % RANDOM_BANKS.length];
 
             return sendJson({
                 success: true,
                 balance: parseFloat(userWallet.balance || 0),
                 currency: (store.settings && store.settings.currency) || 'NGN',
-                account_number: activeUser.phone,
-                user_account_number: activeUser.phone,
-                user_phone_10digit: cleanUserPhone,
+                account_number: accountNum,
+                user_account_number: accountNum,
+                user_phone_10digit: accountNum,
                 user_account_name: "ONE VOICE / " + activeUser.name,
-                admin_momo: adminMoMo,
+                bank_name: assignedBank,
                 virtual_account: {
-                    bank_name: "MoMo PSB / OPay",
-                    virtual_account_number: cleanUserPhone,
+                    bank_name: assignedBank,
+                    virtual_account_number: accountNum,
                     account_name: "ONE VOICE / " + activeUser.name,
                     beneficiary_phone: activeUser.phone,
-                    user_account_number: activeUser.phone
-                },
-                paystack: {
-                    public_key: (store.settings && store.settings.paystack_public_key) || 'pk_test_a8e259b3294c7b884d5df688172082b2024b176f'
+                    user_account_number: accountNum
                 },
                 revenue_sharing: {
                     platform_share_pct: sharePct,
-                    customer_wallet_pct: (100.0 - sharePct),
-                    admin_momo_account: "9090809080 (MoMo PSB)"
+                    customer_wallet_pct: (100.0 - sharePct)
                 },
                 transactions: userLedger.slice(-20).reverse()
             });
@@ -428,8 +434,8 @@ const requestHandler = (req, res) => {
                 if (activeUser.id === 1) store.wallet.balance = balanceAfter;
 
                 const momoPayoutRef = 'MOMO-PAYOUT-' + Date.now();
-                const internalRef = 'OV-DEP-' + Math.random().toString(36).substring(2, 9).toUpperCase();
-                const narration = `Deposit to Account ${activeUser.phone} - 10% Admin Share (₦${platformFee.toFixed(2)}) sent directly to MoMo 9090809080`;
+                const userAcc = (activeUser.phone || '').replace(/[^0-9]/g, '').slice(-10).replace(/^0+/, '');
+                const narration = `Wallet Deposit to Account ${userAcc} (Net credited ₦${netCredit.toFixed(2)})`;
 
                 if (!store.wallet_ledger) store.wallet_ledger = [];
                 store.wallet_ledger.push({
