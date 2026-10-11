@@ -9,6 +9,9 @@
     <!-- Claymorphism CSS -->
     <link rel="stylesheet" href="css/clay.css">
     
+    <!-- Paystack Official Payment Gateway SDK -->
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    
     <!-- Favicon -->
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎙️</text></svg>">
 </head>
@@ -477,49 +480,49 @@
             <div class="virtual-bank-card">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                     <div>
-                        <span class="clay-badge badge-mint">🏦 Dedicated Bank Transfer Details</span>
-                        <h3 style="font-size:1.4rem; font-weight:800; margin-top:6px;">Your ONE VOICE Virtual Account</h3>
+                        <span class="clay-badge badge-mint">🏦 Official Bank Transfer Deposit Details</span>
+                        <h3 style="font-size:1.4rem; font-weight:800; margin-top:6px;">Transfer to Admin OPay Account</h3>
                         <p style="color:var(--text-secondary); font-size:0.9rem;">
-                            Make a standard bank transfer from GTBank, Access, Zenith, OPay, Palmpay, Kuda, etc. Funds credit your wallet automatically upon confirmation.
+                            Transfer directly from any Nigerian bank app (OPay, Kuda, GTBank, Access, Zenith, Palmpay, Moniepoint) to the official ONE VOICE OPay account below. Your phone number is your account reference.
                         </p>
                     </div>
                     <div class="revenue-split-preview">
-                        <span>Revenue Rule: <strong>10% Platform Fee</strong></span>
-                        <span style="color:var(--clay-mint-dark);">You Receive: <strong>90% Credit</strong></span>
+                        <span>Platform Rule: <strong>10% Admin Share</strong></span>
+                        <span style="color:var(--clay-mint-dark);">You Receive: <strong>90% Wallet Credit</strong></span>
                     </div>
                 </div>
 
                 <div class="bank-detail-grid">
                     <div class="bank-detail-item">
                         <div>
-                            <div class="bank-detail-label">Bank Name</div>
-                            <div class="bank-detail-val" id="wallet-bank-name">Wema Bank</div>
+                            <div class="bank-detail-label">Admin Bank Name</div>
+                            <div class="bank-detail-val" id="wallet-bank-name">OPay (Paycom)</div>
                         </div>
-                        <button class="clay-action-icon-btn" onclick="copyText('Wema Bank', 'Bank Name copied!')" title="Copy">📋</button>
+                        <button class="clay-action-icon-btn" onclick="copyText('OPay', 'Bank Name copied!')" title="Copy">📋</button>
+                    </div>
+
+                    <div class="bank-detail-item" style="border: 2px solid var(--clay-primary);">
+                        <div>
+                            <div class="bank-detail-label">Admin OPay Account Number</div>
+                            <div class="bank-detail-val" id="wallet-virtual-nuban" style="color:var(--clay-primary); font-size:1.4rem;">9090809080</div>
+                        </div>
+                        <button class="clay-action-icon-btn" onclick="copyText('9090809080', 'Admin OPay Account copied!')" title="Copy">📋</button>
                     </div>
 
                     <div class="bank-detail-item">
                         <div>
-                            <div class="bank-detail-label">Virtual NUBAN Account</div>
-                            <div class="bank-detail-val" id="wallet-virtual-nuban">9803123456</div>
+                            <div class="bank-detail-label">Beneficiary Account Name</div>
+                            <div class="bank-detail-val" id="wallet-account-name">ONE VOICE / Amina Ahmed Inuwa</div>
                         </div>
-                        <button class="clay-action-icon-btn" onclick="copyText('9803123456', 'Account Number copied!')" title="Copy">📋</button>
+                        <button class="clay-action-icon-btn" onclick="copyText('Amina Ahmed Inuwa', 'Beneficiary copied!')" title="Copy">📋</button>
                     </div>
 
                     <div class="bank-detail-item">
                         <div>
-                            <div class="bank-detail-label">Beneficiary Name</div>
-                            <div class="bank-detail-val" id="wallet-account-name">ONE VOICE / Alex Morgan</div>
-                        </div>
-                        <button class="clay-action-icon-btn" onclick="copyText('ONE VOICE / Alex Morgan', 'Beneficiary copied!')" title="Copy">📋</button>
-                    </div>
-
-                    <div class="bank-detail-item">
-                        <div>
-                            <div class="bank-detail-label">ONE VOICE Account No. (Phone)</div>
+                            <div class="bank-detail-label">Your ONE VOICE Account (Transfer Narration)</div>
                             <div class="bank-detail-val" id="wallet-phone-account">+2348031234567</div>
                         </div>
-                        <button class="clay-action-icon-btn" onclick="copyText('+2348031234567', 'Phone Number copied!')" title="Copy">📋</button>
+                        <button class="clay-action-icon-btn" onclick="copyText(document.getElementById('wallet-phone-account').textContent, 'Phone Number copied!')" title="Copy">📋</button>
                     </div>
                 </div>
             </div>
@@ -1205,50 +1208,65 @@
 
     <!-- Fund Wallet / Bank Transfer Modal with Revenue Split Preview -->
     <div class="clay-modal" id="topup-modal">
-        <div class="clay-card modal-body" style="max-width: 480px;">
+        <div class="clay-card modal-body" style="max-width: 500px;">
             <button class="modal-close-btn" onclick="closeTopupModal()">✕</button>
-            <div style="text-align: center; margin-bottom: 20px;">
-                <div style="width:56px; height:56px; border-radius:50%; background:#d1fae5; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; font-size:1.6rem;">🏦</div>
-                <h3 style="font-size: 1.4rem; font-weight: 800;">Fund Wallet Via Bank Transfer</h3>
-                <p style="color:var(--text-secondary); font-size:0.88rem;">Automated revenue sharing applied to every bank deposit</p>
+            <div style="text-align: center; margin-bottom: 16px;">
+                <div style="width:56px; height:56px; border-radius:50%; background:#d1fae5; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:1.6rem;">🏦</div>
+                <h3 style="font-size: 1.35rem; font-weight: 800;">Fund Your ONE VOICE Wallet</h3>
+                <p style="color:var(--text-secondary); font-size:0.85rem;">Official OPay Account Transfer & Verified Paystack API</p>
             </div>
 
-            <!-- Virtual Account Details Summary in Modal -->
-            <div style="background:#f8fafc; border-radius:var(--radius-md); padding:16px; margin-bottom:18px; box-shadow:var(--clay-inset-carved); font-size:0.85rem;">
-                <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-                    <span style="color:var(--text-muted);">Bank Name:</span>
-                    <strong>Wema Bank (ONE VOICE NUBAN)</strong>
+            <!-- Admin Official OPay Account Box -->
+            <div style="background:#f1f5f9; border-radius:var(--radius-md); padding:14px 16px; margin-bottom:16px; border:2px solid #818cf8; box-shadow:var(--clay-inset-carved); font-size:0.85rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <span style="color:var(--text-muted); font-weight:700;">Admin Deposit Bank:</span>
+                    <strong style="color:var(--text-primary); font-size:0.95rem;">OPay (Paycom)</strong>
                 </div>
-                <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
-                    <span style="color:var(--text-muted);">Virtual Account:</span>
-                    <strong id="modal-virtual-nuban">9803123456</strong>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <span style="color:var(--text-muted); font-weight:700;">Admin Account Number:</span>
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <strong style="color:var(--clay-primary); font-size:1.25rem; font-family:var(--font-mono);" id="modal-virtual-nuban">9090809080</strong>
+                        <button type="button" class="clay-action-icon-btn" style="width:28px; height:28px; font-size:0.75rem;" onclick="copyText('9090809080', 'Admin OPay Account copied!')" title="Copy">📋</button>
+                    </div>
                 </div>
-                <div style="display:flex; justify-content:space-between;">
-                    <span style="color:var(--text-muted);">Beneficiary Account Name:</span>
-                    <strong>ONE VOICE / Alex Morgan</strong>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <span style="color:var(--text-muted); font-weight:700;">Account Name:</span>
+                    <strong style="color:var(--text-primary);">ONE VOICE / Amina Ahmed Inuwa</strong>
+                </div>
+                <div style="display:flex; justify-content:space-between; align-items:center; padding-top:6px; border-top:1px dashed #cbd5e1;">
+                    <span style="color:var(--text-muted); font-weight:700;">Transfer Remark / Narration:</span>
+                    <strong style="color:var(--clay-mint-dark); font-family:var(--font-mono);" id="modal-user-remark-phone">+2348031234567</strong>
                 </div>
             </div>
 
-            <div class="auth-form-group">
+            <div class="auth-form-group" style="margin-bottom:12px;">
                 <label class="auth-label">Deposit Amount (NGN ₦)</label>
-                <input type="number" id="modal-deposit-amount" class="clay-input" value="10000" min="100" step="500">
+                <input type="number" id="modal-deposit-amount" class="clay-input" value="1000" min="10" step="10" placeholder="e.g. 50, 500, 1000">
             </div>
 
             <!-- Server-Calculated Split Preview -->
-            <div class="revenue-split-preview" id="modal-split-preview">
+            <div class="revenue-split-preview" id="modal-split-preview" style="margin-bottom:16px;">
                 <div>
-                    <div>Platform Share (<span id="modal-share-pct-label">10%</span>):</div>
-                    <strong style="color:var(--clay-coral-dark);" id="modal-platform-cut-val">₦1,000.00</strong>
+                    <div>Admin Share (<span id="modal-share-pct-label">10%</span>):</div>
+                    <strong style="color:var(--clay-coral-dark);" id="modal-platform-cut-val">₦100.00</strong>
                 </div>
                 <div style="text-align:right;">
                     <div>Wallet Credit (90%):</div>
-                    <strong style="color:var(--clay-mint-dark);" id="modal-net-credit-val">₦9,000.00</strong>
+                    <strong style="color:var(--clay-mint-dark);" id="modal-net-credit-val">₦900.00</strong>
                 </div>
             </div>
 
-            <button class="clay-btn clay-btn-primary" id="btn-confirm-topup" style="width: 100%;">
-                Confirm Bank Transfer & Fund
-            </button>
+            <div style="display:flex; flex-direction:column; gap:10px;">
+                <!-- Paystack Gateway API Option -->
+                <button type="button" class="clay-btn clay-btn-primary" id="btn-paystack-pay" style="width: 100%; padding:12px; font-size:0.92rem;">
+                    ⚡ Pay With Paystack API (Card, Transfer, USSD, OPay)
+                </button>
+
+                <!-- Direct OPay Transfer Confirmation Option -->
+                <button type="button" class="clay-btn clay-btn-secondary" id="btn-confirm-topup" style="width: 100%; padding:12px; font-size:0.92rem;">
+                    🏦 I Have Transferred To Admin OPay (Confirm Deposit)
+                </button>
+            </div>
         </div>
     </div>
 

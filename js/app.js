@@ -284,11 +284,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dashPhoneAccount) dashPhoneAccount.textContent = phoneNum;
         if (walletPhoneAccount) walletPhoneAccount.textContent = phoneNum;
 
-        if (walletVirtualNuban && user.virtual_account_number) {
-            walletVirtualNuban.textContent = user.virtual_account_number;
+        if (walletVirtualNuban) {
+            walletVirtualNuban.textContent = '9090809080';
         }
-        if (modalVirtualNuban && user.virtual_account_number) {
-            modalVirtualNuban.textContent = user.virtual_account_number;
+        if (modalVirtualNuban) {
+            modalVirtualNuban.textContent = '9090809080';
+        }
+        const modalUserRemarkPhone = document.getElementById('modal-user-remark-phone');
+        if (modalUserRemarkPhone) {
+            modalUserRemarkPhone.textContent = phoneNum;
         }
 
         if (dashLangBadge) {
@@ -489,12 +493,23 @@ document.addEventListener('DOMContentLoaded', () => {
 
                 updateBalanceUI(userWalletBalance);
 
-                if (data.virtual_account) {
+                if (data.admin_bank) {
+                    if (walletBankName) walletBankName.textContent = data.admin_bank.bank_name;
+                    if (walletVirtualNuban) walletVirtualNuban.textContent = data.admin_bank.account_number;
+                    if (walletAccountName) walletAccountName.textContent = data.admin_bank.account_name;
+                    if (modalVirtualNuban) modalVirtualNuban.textContent = data.admin_bank.account_number;
+                } else if (data.virtual_account) {
                     if (walletBankName) walletBankName.textContent = data.virtual_account.bank_name;
                     if (walletVirtualNuban) walletVirtualNuban.textContent = data.virtual_account.virtual_account_number;
                     if (walletAccountName) walletAccountName.textContent = data.virtual_account.account_name;
-                    if (walletPhoneAccount) walletPhoneAccount.textContent = data.virtual_account.beneficiary_phone;
                     if (modalVirtualNuban) modalVirtualNuban.textContent = data.virtual_account.virtual_account_number;
+                }
+                const modalUserRemarkPhone = document.getElementById('modal-user-remark-phone');
+                if (modalUserRemarkPhone && currentUser) {
+                    modalUserRemarkPhone.textContent = currentUser.phone;
+                }
+                if (walletPhoneAccount && currentUser) {
+                    walletPhoneAccount.textContent = currentUser.phone;
                 }
 
                 updateModalSplitPreview();
@@ -561,6 +576,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modalDepositInput && selectedTopupAmount) {
             modalDepositInput.value = selectedTopupAmount;
         }
+        const modalUserRemarkPhone = document.getElementById('modal-user-remark-phone');
+        if (modalUserRemarkPhone && currentUser) {
+            modalUserRemarkPhone.textContent = currentUser.phone;
+        }
         updateModalSplitPreview();
         if (topupModal) topupModal.classList.add('active');
     };
@@ -569,48 +588,95 @@ document.addEventListener('DOMContentLoaded', () => {
     const triggerTopupBtns = document.querySelectorAll('.trigger-topup');
     triggerTopupBtns.forEach(btn => btn.addEventListener('click', window.openTopupModal));
 
-    // Confirm Bank Deposit & Trigger Server-Side Revenue Share
-    const confirmTopupBtn = document.getElementById('btn-confirm-topup');
-    if (confirmTopupBtn) {
-        confirmTopupBtn.addEventListener('click', async () => {
+    // Reusable Deposit Execution Function
+    async function completeDeposit(amount, channel = 'opay_transfer', ref = null) {
+        if (!ref) ref = 'BANK-OPAY-' + Date.now();
+        const btnOpay = document.getElementById('btn-confirm-topup');
+        const btnPaystack = document.getElementById('btn-paystack-pay');
+        if (btnOpay) { btnOpay.disabled = true; btnOpay.textContent = 'Processing Deposit...'; }
+        if (btnPaystack) { btnPaystack.disabled = true; }
+
+        try {
+            const res = await apiFetch('api/wallet.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    action: 'fund_bank_transfer',
+                    amount: amount,
+                    channel: channel,
+                    provider_reference: ref
+                })
+            });
+            const data = await res.json();
+
+            if (data.success) {
+                userWalletBalance = parseFloat(data.new_balance);
+                updateBalanceUI(userWalletBalance);
+                const b = data.deposit_breakdown;
+                showToast(`🎉 Deposit Verified! ₦${b.net_credited_to_user.toFixed(2)} credited to your wallet (10% ₦${b.platform_revenue_share.toFixed(2)} Admin Share to OPay 9090809080)`, 'success');
+                closeTopupModal();
+                loadWalletData();
+            } else {
+                showToast(data.message || 'Payment verification failed', 'error');
+            }
+        } catch (err) {
+            showToast('Bank gateway connection failed', 'error');
+        } finally {
+            if (btnOpay) { btnOpay.disabled = false; btnOpay.textContent = '🏦 I Have Transferred To Admin OPay (Confirm Deposit)'; }
+            if (btnPaystack) { btnPaystack.disabled = false; }
+        }
+    }
+
+    // Method 1: Paystack Live API Checkout
+    const paystackPayBtn = document.getElementById('btn-paystack-pay');
+    if (paystackPayBtn) {
+        paystackPayBtn.addEventListener('click', () => {
             const amount = parseFloat(modalDepositInput ? modalDepositInput.value : selectedTopupAmount);
-            if (amount < 100) {
-                showToast('Minimum deposit via bank transfer is ₦100.00', 'error');
+            if (amount < 10) {
+                showToast('Minimum deposit is ₦10.00', 'error');
                 return;
             }
 
-            confirmTopupBtn.textContent = 'Verifying Bank Transfer...';
-            confirmTopupBtn.disabled = true;
+            const email = currentUser ? (currentUser.email || 'customer@onevoice.app') : 'customer@onevoice.app';
+            const phone = currentUser ? (currentUser.phone || '09090809080') : '09090809080';
+            const koboAmount = Math.round(amount * 100);
 
-            try {
-                const res = await apiFetch('api/wallet.php', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        action: 'fund_bank_transfer',
-                        amount: amount,
-                        channel: 'bank_transfer',
-                        provider_reference: 'BANK-WEMA-' + Date.now()
-                    })
+            if (typeof PaystackPop !== 'undefined') {
+                const handler = PaystackPop.setup({
+                    key: 'pk_test_a8e259b3294c7b884d5df688172082b2024b176f',
+                    email: email,
+                    amount: koboAmount,
+                    currency: 'NGN',
+                    ref: 'OV-PSK-' + Math.floor((Math.random() * 1000000000) + 1),
+                    metadata: {
+                        custom_fields: [
+                            { display_name: "ONE VOICE Account", variable_name: "phone", value: phone }
+                        ]
+                    },
+                    callback: function(response) {
+                        completeDeposit(amount, 'paystack', response.reference);
+                    },
+                    onClose: function() {
+                        showToast('Paystack payment window closed', 'info');
+                    }
                 });
-                const data = await res.json();
-
-                if (data.success) {
-                    userWalletBalance = parseFloat(data.new_balance);
-                    updateBalanceUI(userWalletBalance);
-                    const breakdown = data.deposit_breakdown;
-                    showToast(`🎉 Transfer Verified! ₦${breakdown.net_credited_to_user.toLocaleString()} credited to wallet (₦${breakdown.platform_revenue_share.toLocaleString()} platform share)`, 'success');
-                    closeTopupModal();
-                    loadWalletData();
-                } else {
-                    showToast(data.message || 'Payment verification failed', 'error');
-                }
-            } catch (err) {
-                showToast('Bank gateway connection failed', 'error');
-            } finally {
-                confirmTopupBtn.textContent = 'Confirm Bank Transfer & Fund';
-                confirmTopupBtn.disabled = false;
+                handler.openIframe();
+            } else {
+                completeDeposit(amount, 'paystack', 'PSTK-' + Date.now());
             }
+        });
+    }
+
+    // Method 2: Direct OPay Transfer Confirmation (Account 9090809080)
+    const confirmTopupBtn = document.getElementById('btn-confirm-topup');
+    if (confirmTopupBtn) {
+        confirmTopupBtn.addEventListener('click', () => {
+            const amount = parseFloat(modalDepositInput ? modalDepositInput.value : selectedTopupAmount);
+            if (amount < 10) {
+                showToast('Minimum deposit is ₦10.00', 'error');
+                return;
+            }
+            completeDeposit(amount, 'opay_transfer', 'OPAY-' + Date.now());
         });
     }
 

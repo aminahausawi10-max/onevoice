@@ -199,15 +199,16 @@ if ($method === 'POST') {
         exit;
     }
 
-    if ($action === 'fund_bank_transfer' || $action === 'topup') {
+    if ($action === 'fund_bank_transfer' || $action === 'topup' || $action === 'verify_paystack' || $action === 'confirm_opay_transfer') {
         $grossAmount = floatval($input['amount'] ?? 0);
-        $providerRef = trim($input['provider_reference'] ?? ('BANK-NIBSS-' . strtoupper(substr(md5(uniqid()), 0, 12))));
-        $channel = $input['channel'] ?? 'bank_transfer';
-        $userId = 1;
+        $providerRef = trim($input['provider_reference'] ?? ('BANK-OPAY-' . strtoupper(substr(md5(uniqid()), 0, 12))));
+        $channel = $input['channel'] ?? 'opay_transfer';
+        $store = getLocalStore();
+        $userId = $_SESSION['user_id'] ?? ($store['active_user_id'] ?? 1);
 
-        if ($grossAmount < 100.00) {
+        if ($grossAmount < 10.00) {
             http_response_code(400);
-            echo json_encode(["success" => false, "message" => "Minimum deposit via bank transfer is ₦100.00."]);
+            echo json_encode(["success" => false, "message" => "Minimum deposit is ₦10.00."]);
             exit;
         }
 
