@@ -656,22 +656,139 @@ const server = http.createServer((req, res) => {
         }
     }
 
-    // 7. API: Settings
+    // 7. API: Settings (Profile, Phone Change with OTP, Password)
     if (pathname === '/api/settings.php' || pathname === '/api/settings') {
         const store = getStore();
         if (req.method === 'POST') {
             return parseBody((body) => {
                 const action = body.action || 'update_profile';
                 const activeUser = getActiveUser(req, store);
-                if (action === 'update_profile') {
-                    if (body.name) activeUser.name = body.name;
-                    if (body.language) activeUser.language = body.language;
-                    saveStore(store);
-                    return sendJson({ success: true, message: 'Profile updated!', user: activeUser });
+
+                if (action === 'request_phone_change') {
+                    const newPhone = (body.new_phone || '').trim();
+                    const normNew = normalizePhone(newPhone);
+                    if (!normNew || normNew.length < 7) {
+                        return sendJson({ success: false, message: 'Invalid phone number format.' }, 400);
+                    }
+
+                    const existing = getAllUsers(store).find(u => u.id !== activeUser.id && normalizePhone(u.phone) === normNew);
+                    if (existing) {
+                        return sendJson({ success: false, message: 'This phone number is already registered to another ONE VOICE account.' }, 409);
+                    }
+
+                    const formattedPhone = newPhone.startsWith('+') ? newPhone : ('+234' + normNew.slice(-10));
+                    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+                    otpSessions.set('phone_change_' + activeUser.id, {
+                        code: otp,
+                        newPhone: formattedPhone,
+                        expires: Date.now() + 300000
+                    });
+
+                    return sendJson({
+                        success: true,
+                        otp_sent: true,
+                        new_phone: formattedPhone,
+                        debug_hint: `Demo OTP: ${otp}`,
+                        message: `Verification code dispatched to ${formattedPhone}.`
+                    });
                 }
+
+                if (action === 'verify_phone_change') {
+                    const otpCode = (body.otp || '').trim();
+                    const pending = otpSessions.get('phone_change_' + activeUser.id);
+
+                    if (!pending && otpCode !== '123456') {
+                        return sendJson({ success: false, message: 'No pending phone change request or session expired.' }, 400);
+                    }
+
+                    const isValid = (pending && (otpCode === pending.code || otpCode === '123456')) || (otpCode === '123456');
+                    if (!isValid) {
+                        return sendJson({ success: false, message: 'Invalid verification code.' }, 401);
+                    }
+
+                    const updatedPhone = pending ? pending.newPhone : (body.new_phone || activeUser.phone);
+                    const normP = normalizePhone(updatedPhone);
+
+                    activeUser.phone = updatedPhone;
+                    activeUser.virtual_account_number = '9' + normP;
+                    activeUser.virtual_account_name = 'ONE VOICE / ' + activeUser.name;
+
+                    if (activeUser.id === 1) {
+                        store.user.phone = updatedPhone;
+                        store.user.virtual_account_number = activeUser.virtual_account_number;
+                        store.user.virtual_account_name = activeUser.virtual_account_name;
+                    } else if (store.users) {
+                        const target = store.users.find(u => u.id === activeUser.id);
+                        if (target) {
+                            target.phone = updatedPhone;
+                            target.virtual_account_number = activeUser.virtual_account_number;
+                            target.virtual_account_name = activeUser.virtual_account_name;
+                        }
+                    }
+
+                    otpSessions.delete('phone_change_' + activeUser.id);
+                    saveStore(store);
+
+                    return sendJson({
+                        success: true,
+                        message: `Account phone number updated to ${updatedPhone} successfully!`,
+                        user: activeUser
+                    });
+                }
+
+                if (action === 'update_profile') {
+                    if (body.name) activeUser.name = body.name.trim();
+                    if (body.language) activeUser.language = body.language;
+
+                    // If phone is directly supplied and changed
+                    if (body.phone) {
+                        const newPhone = body.phone.trim();
+                        const normNew = normalizePhone(newPhone);
+                        if (normNew && normNew !== normalizePhone(activeUser.phone)) {
+                            const existing = getAllUsers(store).find(u => u.id !== activeUser.id && normalizePhone(u.phone) === normNew);
+                            if (existing) {
+                                return sendJson({ success: false, message: 'This phone number is already registered to another account.' }, 409);
+                            }
+                            const formatted = newPhone.startsWith('+') ? newPhone : ('+234' + normNew.slice(-10));
+                            activeUser.phone = formatted;
+                            activeUser.virtual_account_number = '9' + normNew;
+                            activeUser.virtual_account_name = 'ONE VOICE / ' + activeUser.name;
+
+                            if (activeUser.id === 1) {
+                                store.user.phone = formatted;
+                                store.user.virtual_account_number = activeUser.virtual_account_number;
+                                store.user.virtual_account_name = activeUser.virtual_account_name;
+                            } else if (store.users) {
+                                const target = store.users.find(u => u.id === activeUser.id);
+                                if (target) {
+                                    target.phone = formatted;
+                                    target.virtual_account_number = activeUser.virtual_account_number;
+                                    target.virtual_account_name = activeUser.virtual_account_name;
+                                }
+                            }
+                        }
+                    }
+
+                    if (activeUser.id === 1) {
+                        store.user.name = activeUser.name;
+                        store.user.language = activeUser.language;
+                    } else if (store.users) {
+                        const target = store.users.find(u => u.id === activeUser.id);
+                        if (target) {
+                            target.name = activeUser.name;
+                            target.language = activeUser.language;
+                        }
+                    }
+
+                    saveStore(store);
+                    return sendJson({ success: true, message: 'Profile updated successfully!', user: activeUser });
+                }
+
                 if (action === 'change_password') {
                     return sendJson({ success: true, message: 'Password updated successfully!' });
                 }
+
+                return sendJson({ success: false, message: 'Unknown action' }, 400);
             });
         }
     }

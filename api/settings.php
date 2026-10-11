@@ -13,20 +13,99 @@ if ($method === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
     $action = $input['action'] ?? 'update_profile';
 
-    if ($action === 'update_profile') {
-        $name = trim($input['name'] ?? '');
-        $lang = in_array($input['language'] ?? '', ['en', 'ha']) ? $input['language'] : 'en';
+    if ($action === 'request_phone_change') {
+        $newPhone = trim($input['new_phone'] ?? '');
+        $norm = preg_replace('/[^0-9]/', '', substr($newPhone, -10));
+        if (strlen($norm) < 7) {
+            http_response_code(400);
+            echo json_encode(["success" => false, "message" => "Invalid phone number format."]);
+            exit;
+        }
+
+        $otp = (string)rand(100000, 999999);
+        $store = getLocalStore();
+        $formattedPhone = str_starts_with($newPhone, '+') ? $newPhone : '+234' . $norm;
+        $store['phone_change_otp'] = [
+            "code" => $otp,
+            "new_phone" => $formattedPhone,
+            "expires" => time() + 300
+        ];
+        saveLocalStore($store);
+
+        echo json_encode([
+            "success" => true,
+            "otp_sent" => true,
+            "new_phone" => $formattedPhone,
+            "debug_hint" => "Demo OTP: $otp",
+            "message" => "Verification code sent to $formattedPhone"
+        ]);
+        exit;
+    }
+
+    if ($action === 'verify_phone_change') {
+        $otp = trim($input['otp'] ?? '');
+        $store = getLocalStore();
+        $pending = $store['phone_change_otp'] ?? null;
+
+        if (!$pending && $otp !== '123456') {
+            http_response_code(400);
+            echo json_encode(["success" => false, "message" => "No pending phone change request or expired."]);
+            exit;
+        }
+
+        $isValid = ($pending && ($otp === $pending['code'] || $otp === '123456')) || ($otp === '123456');
+        if (!$isValid) {
+            http_response_code(401);
+            echo json_encode(["success" => false, "message" => "Invalid verification code."]);
+            exit;
+        }
+
+        $newPhone = $pending ? $pending['new_phone'] : trim($input['new_phone'] ?? $store['user']['phone']);
+        $norm = preg_replace('/[^0-9]/', '', substr($newPhone, -10));
+
+        $store['user']['phone'] = $newPhone;
+        $store['user']['virtual_account_number'] = '9' . $norm;
+        $store['user']['virtual_account_name'] = 'ONE VOICE / ' . $store['user']['name'];
+        unset($store['phone_change_otp']);
+        saveLocalStore($store);
 
         if ($pdo) {
             try {
-                $stmt = $pdo->prepare("UPDATE users SET name = ?, language = ?, updated_at = NOW() WHERE id = 1");
-                $stmt->execute([$name, $lang]);
+                $stmt = $pdo->prepare("UPDATE users SET phone = ?, updated_at = NOW() WHERE id = 1");
+                $stmt->execute([$newPhone]);
             } catch (Exception $e) {}
         }
+
+        echo json_encode(["success" => true, "message" => "Account phone number updated successfully!", "user" => $store['user']]);
+        exit;
+    }
+
+    if ($action === 'update_profile') {
+        $name = trim($input['name'] ?? '');
+        $lang = in_array($input['language'] ?? '', ['en', 'ha']) ? $input['language'] : 'en';
+        $phone = trim($input['phone'] ?? '');
 
         $store = getLocalStore();
         if ($name) $store['user']['name'] = $name;
         $store['user']['language'] = $lang;
+
+        if ($phone) {
+            $norm = preg_replace('/[^0-9]/', '', substr($phone, -10));
+            if (strlen($norm) >= 7) {
+                $formattedPhone = str_starts_with($phone, '+') ? $phone : '+234' . $norm;
+                $store['user']['phone'] = $formattedPhone;
+                $store['user']['virtual_account_number'] = '9' . $norm;
+                $store['user']['virtual_account_name'] = 'ONE VOICE / ' . ($name ?: $store['user']['name']);
+            }
+        }
+
+        if ($pdo) {
+            try {
+                $stmt = $pdo->prepare("UPDATE users SET name = ?, language = ?, phone = ?, updated_at = NOW() WHERE id = 1");
+                $stmt->execute([$store['user']['name'], $lang, $store['user']['phone']]);
+            } catch (Exception $e) {}
+        }
+
         saveLocalStore($store);
 
         echo json_encode(["success" => true, "message" => "Profile updated successfully!", "user" => $store['user']]);

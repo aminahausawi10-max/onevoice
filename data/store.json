@@ -14,19 +14,28 @@
     "is_verified": true
   },
   "wallet": {
-    "balance": 0.00,
+    "balance": 0,
     "currency": "NGN"
   },
   "wallets": {
-    "1": { "balance": 0.00, "currency": "NGN" },
-    "2": { "balance": 0.00, "currency": "NGN" },
-    "3": { "balance": 0.00, "currency": "NGN" }
+    "1": {
+      "balance": 0,
+      "currency": "NGN"
+    },
+    "2": {
+      "balance": 0,
+      "currency": "NGN"
+    },
+    "3": {
+      "balance": 0,
+      "currency": "NGN"
+    }
   },
   "settings": {
-    "platform_revenue_share_pct": 10.0,
-    "platform_fixed_fee": 0.0,
-    "nigeria_call_rate_per_min": 12.00,
-    "carrier_wholesale_cost_per_min": 8.50,
+    "platform_revenue_share_pct": 10,
+    "platform_fixed_fee": 0,
+    "nigeria_call_rate_per_min": 12,
+    "carrier_wholesale_cost_per_min": 8.5,
     "currency": "NGN",
     "virtual_bank_provider": "Wema Bank (ONE VOICE NUBAN)"
   },

@@ -280,6 +280,16 @@ document.addEventListener('DOMContentLoaded', () => {
             dashLangBadge.textContent = (user.language === 'ha') ? 'Hausa (ha)' : 'English (en)';
         }
 
+        const settingsNameEl = document.getElementById('settings-name');
+        const settingsPhoneEl = document.getElementById('settings-phone');
+        const settingsLangEl = document.getElementById('settings-language');
+        const modalCurPhoneEl = document.getElementById('modal-current-phone');
+
+        if (settingsNameEl) settingsNameEl.value = user.name || '';
+        if (settingsPhoneEl) settingsPhoneEl.value = phoneNum;
+        if (settingsLangEl) settingsLangEl.value = user.language || 'en';
+        if (modalCurPhoneEl) modalCurPhoneEl.textContent = phoneNum;
+
         loadWalletData();
         loadCallLogs();
     }
@@ -1324,6 +1334,230 @@ document.addEventListener('DOMContentLoaded', () => {
                     loadContacts();
                 }
             } catch (err) {}
+        });
+    }
+
+    // ----------------------------------------------------
+    // 8b. Settings Profile & Secure Phone Number Change
+    // ----------------------------------------------------
+    const changePhoneModal = document.getElementById('change-phone-modal');
+    const modalCurrentPhone = document.getElementById('modal-current-phone');
+    const modalNewPhoneInput = document.getElementById('modal-new-phone-input');
+    const formRequestPhoneChange = document.getElementById('form-request-phone-change');
+    const phoneChangeOtpBox = document.getElementById('phone-change-otp-box');
+    const modalPhoneOtpInput = document.getElementById('modal-phone-otp-input');
+    const phoneChangeOtpHint = document.getElementById('phone-change-otp-hint');
+    const btnSendPhoneOtp = document.getElementById('btn-send-phone-otp');
+    const btnConfirmPhoneChange = document.getElementById('btn-confirm-phone-change');
+    const btnResendPhoneOtp = document.getElementById('btn-resend-phone-otp');
+    const btnOpenChangePhone = document.getElementById('btn-open-change-phone');
+    const formUpdateProfile = document.getElementById('form-update-profile');
+    const formChangePassword = document.getElementById('form-change-password');
+    const settingsPhoneInput = document.getElementById('settings-phone');
+    const settingsNameInput = document.getElementById('settings-name');
+    const settingsLangInput = document.getElementById('settings-language');
+
+    let pendingNewPhone = '';
+
+    window.openChangePhoneModal = () => {
+        const curPhone = (currentUser ? currentUser.phone : '+2348031234567');
+        if (modalCurrentPhone) modalCurrentPhone.textContent = curPhone;
+
+        if (settingsPhoneInput && settingsPhoneInput.value && settingsPhoneInput.value.trim() !== curPhone) {
+            if (modalNewPhoneInput) modalNewPhoneInput.value = settingsPhoneInput.value.trim();
+        } else {
+            if (modalNewPhoneInput) modalNewPhoneInput.value = '';
+        }
+
+        if (phoneChangeOtpBox) phoneChangeOtpBox.style.display = 'none';
+        if (modalPhoneOtpInput) modalPhoneOtpInput.value = '';
+        if (phoneChangeOtpHint) phoneChangeOtpHint.textContent = '';
+        if (btnSendPhoneOtp) {
+            btnSendPhoneOtp.disabled = false;
+            btnSendPhoneOtp.textContent = '📲 Send Verification OTP to New Number';
+        }
+        if (changePhoneModal) changePhoneModal.classList.add('active');
+    };
+
+    window.closeChangePhoneModal = () => {
+        if (changePhoneModal) changePhoneModal.classList.remove('active');
+    };
+
+    if (btnOpenChangePhone) {
+        btnOpenChangePhone.addEventListener('click', window.openChangePhoneModal);
+    }
+
+    if (formRequestPhoneChange) {
+        formRequestPhoneChange.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newPhone = modalNewPhoneInput.value.trim();
+            if (!newPhone || newPhone.length < 7) {
+                showToast('Please enter a valid phone number', 'error');
+                return;
+            }
+
+            if (btnSendPhoneOtp) {
+                btnSendPhoneOtp.disabled = true;
+                btnSendPhoneOtp.textContent = 'Sending OTP...';
+            }
+
+            try {
+                const res = await apiFetch('api/settings.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'request_phone_change',
+                        new_phone: newPhone
+                    })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    pendingNewPhone = data.new_phone || newPhone;
+                    showToast(data.message, 'success');
+                    if (data.debug_hint) {
+                        setTimeout(() => showToast(`🔑 ${data.debug_hint}`, 'info'), 800);
+                        if (phoneChangeOtpHint) phoneChangeOtpHint.textContent = `💡 Hint: ${data.debug_hint}`;
+                    }
+                    if (phoneChangeOtpBox) phoneChangeOtpBox.style.display = 'block';
+                    if (modalPhoneOtpInput) modalPhoneOtpInput.focus();
+                } else {
+                    showToast(data.message || 'Failed to send OTP to new number', 'error');
+                }
+            } catch (err) {
+                showToast('Connection error while requesting phone change', 'error');
+            } finally {
+                if (btnSendPhoneOtp) {
+                    btnSendPhoneOtp.disabled = false;
+                    btnSendPhoneOtp.textContent = '📲 Resend OTP to New Number';
+                }
+            }
+        });
+    }
+
+    if (btnResendPhoneOtp) {
+        btnResendPhoneOtp.addEventListener('click', () => {
+            if (formRequestPhoneChange) formRequestPhoneChange.dispatchEvent(new Event('submit'));
+        });
+    }
+
+    if (btnConfirmPhoneChange) {
+        btnConfirmPhoneChange.addEventListener('click', async () => {
+            const otpCode = modalPhoneOtpInput.value.trim();
+            if (!otpCode) {
+                showToast('Please enter the 6-digit OTP code', 'error');
+                return;
+            }
+
+            btnConfirmPhoneChange.disabled = true;
+            btnConfirmPhoneChange.textContent = 'Verifying...';
+
+            try {
+                const res = await apiFetch('api/settings.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'verify_phone_change',
+                        otp: otpCode,
+                        new_phone: pendingNewPhone
+                    })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    currentUser = data.user;
+                    setAuthenticatedUI(currentUser);
+                    showToast(`🎉 ${data.message}`, 'success');
+                    closeChangePhoneModal();
+                    loadWalletData();
+                } else {
+                    showToast(data.message || 'Invalid OTP code', 'error');
+                }
+            } catch (err) {
+                showToast('Verification server error', 'error');
+            } finally {
+                btnConfirmPhoneChange.disabled = false;
+                btnConfirmPhoneChange.textContent = '✓ Verify & Update Account';
+            }
+        });
+    }
+
+    if (formUpdateProfile) {
+        formUpdateProfile.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const newName = settingsNameInput ? settingsNameInput.value.trim() : '';
+            const newLang = settingsLangInput ? settingsLangInput.value : 'en';
+            const newPhone = settingsPhoneInput ? settingsPhoneInput.value.trim() : '';
+
+            // If phone was changed in the input field, prompt to verify it via modal
+            if (currentUser && newPhone && newPhone !== currentUser.phone) {
+                showToast('Phone number changed! Please verify with SMS OTP.', 'info');
+                window.openChangePhoneModal();
+                return;
+            }
+
+            try {
+                const res = await apiFetch('api/settings.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'update_profile',
+                        name: newName,
+                        language: newLang
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    currentUser = data.user;
+                    setAuthenticatedUI(currentUser);
+                    if (window.locManager) window.locManager.setLanguage(newLang);
+                    showToast('Profile updated successfully!', 'success');
+                } else {
+                    showToast(data.message || 'Failed to update profile', 'error');
+                }
+            } catch (err) {
+                showToast('Network error updating profile', 'error');
+            }
+        });
+    }
+
+    if (formChangePassword) {
+        formChangePassword.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const oldPass = document.getElementById('settings-old-pass').value;
+            const newPass = document.getElementById('settings-new-pass').value;
+            const confirmPass = document.getElementById('settings-confirm-pass').value;
+
+            if (newPass.length < 8) {
+                showToast('Password must be at least 8 characters long', 'error');
+                return;
+            }
+            if (newPass !== confirmPass) {
+                showToast('Passwords do not match', 'error');
+                return;
+            }
+
+            try {
+                const res = await apiFetch('api/settings.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'change_password',
+                        old_password: oldPass,
+                        new_password: newPass,
+                        confirm_password: confirmPass
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Password changed successfully!', 'success');
+                    formChangePassword.reset();
+                } else {
+                    showToast(data.message || 'Failed to update password', 'error');
+                }
+            } catch (err) {
+                showToast('Network error updating password', 'error');
+            }
         });
     }
 
