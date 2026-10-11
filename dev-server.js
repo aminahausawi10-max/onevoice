@@ -150,10 +150,12 @@ const MIME_TYPES = {
     '.css': 'text/css',
     '.js': 'application/javascript',
     '.json': 'application/json',
+    '.webmanifest': 'application/manifest+json',
     '.png': 'image/png',
     '.jpg': 'image/jpeg',
     '.svg': 'image/svg+xml',
-    '.ico': 'image/x-icon'
+    '.ico': 'image/x-icon',
+    '.webp': 'image/webp'
 };
 
 const staticAssets = {};
@@ -170,6 +172,14 @@ try {
     const jsAppPath = path.join(__dirname, 'js', 'app.js');
     if (fs.existsSync(jsAppPath)) {
         staticAssets['/js/app.js'] = fs.readFileSync(jsAppPath, 'utf8');
+    }
+    const manifestPath = path.join(__dirname, 'manifest.json');
+    if (fs.existsSync(manifestPath)) {
+        staticAssets['/manifest.json'] = fs.readFileSync(manifestPath, 'utf8');
+    }
+    const swPath = path.join(__dirname, 'sw.js');
+    if (fs.existsSync(swPath)) {
+        staticAssets['/sw.js'] = fs.readFileSync(swPath, 'utf8');
     }
 } catch (e) {
     console.error('Error preloading static assets:', e);
@@ -882,9 +892,10 @@ const requestHandler = (req, res) => {
 
                 if (action === 'update_profile') {
                     if (body.name) activeUser.name = body.name.trim();
+                    if (body.email) activeUser.email = body.email.trim();
                     if (body.language) activeUser.language = body.language;
 
-                    // If phone is directly supplied and changed
+                    // If phone is supplied and changed
                     if (body.phone) {
                         const newPhone = body.phone.trim();
                         const normNew = normalizePhone(newPhone);
@@ -894,19 +905,23 @@ const requestHandler = (req, res) => {
                                 return sendJson({ success: false, message: 'This phone number is already registered to another account.' }, 409);
                             }
                             const formatted = newPhone.startsWith('+') ? newPhone : ('+234' + normNew.slice(-10));
+                            const account10 = normNew.slice(-10); // Remove leading 0 for 10-digit account number
                             activeUser.phone = formatted;
-                            activeUser.virtual_account_number = '9' + normNew;
+                            activeUser.virtual_account_number = account10;
+                            activeUser.account_number = account10;
                             activeUser.virtual_account_name = 'ONE VOICE / ' + activeUser.name;
 
                             if (activeUser.id === 1) {
                                 store.user.phone = formatted;
-                                store.user.virtual_account_number = activeUser.virtual_account_number;
+                                store.user.virtual_account_number = account10;
+                                store.user.account_number = account10;
                                 store.user.virtual_account_name = activeUser.virtual_account_name;
                             } else if (store.users) {
                                 const target = store.users.find(u => u.id === activeUser.id);
                                 if (target) {
                                     target.phone = formatted;
-                                    target.virtual_account_number = activeUser.virtual_account_number;
+                                    target.virtual_account_number = account10;
+                                    target.account_number = account10;
                                     target.virtual_account_name = activeUser.virtual_account_name;
                                 }
                             }
@@ -915,11 +930,13 @@ const requestHandler = (req, res) => {
 
                     if (activeUser.id === 1) {
                         store.user.name = activeUser.name;
+                        store.user.email = activeUser.email;
                         store.user.language = activeUser.language;
                     } else if (store.users) {
                         const target = store.users.find(u => u.id === activeUser.id);
                         if (target) {
                             target.name = activeUser.name;
+                            target.email = activeUser.email;
                             target.language = activeUser.language;
                         }
                     }
@@ -929,6 +946,27 @@ const requestHandler = (req, res) => {
                 }
 
                 if (action === 'change_password') {
+                    const currentPass = (body.current_password || body.old_password || '').trim();
+                    const newPass = (body.new_password || '').trim();
+
+                    if (!newPass || newPass.length < 6) {
+                        return sendJson({ success: false, message: 'New password must be at least 6 characters.' }, 400);
+                    }
+
+                    if (activeUser.password && currentPass && activeUser.password !== currentPass) {
+                        return sendJson({ success: false, message: 'Current password is incorrect.' }, 400);
+                    }
+
+                    activeUser.password = newPass;
+                    if (activeUser.id === 1) {
+                        store.user.password = newPass;
+                    } else if (store.users) {
+                        const target = store.users.find(u => u.id === activeUser.id);
+                        if (target) {
+                            target.password = newPass;
+                        }
+                    }
+                    saveStore(store);
                     return sendJson({ success: true, message: 'Password updated successfully!' });
                 }
 
@@ -1068,10 +1106,15 @@ const requestHandler = (req, res) => {
     if (cached) {
         const ext = path.extname(normPath === '/index.html' ? 'index.html' : normPath).toLowerCase();
         const contentType = MIME_TYPES[ext] || 'text/html; charset=utf-8';
-        res.writeHead(200, {
+        const isSw = normPath === '/sw.js' || reqNormPath === '/sw.js';
+        const headers = {
             'Content-Type': contentType,
-            'Cache-Control': 'public, max-age=3600'
-        });
+            'Cache-Control': isSw ? 'no-cache, no-store, must-revalidate' : 'public, max-age=3600'
+        };
+        if (isSw) {
+            headers['Service-Worker-Allowed'] = '/';
+        }
+        res.writeHead(200, headers);
         res.end(cached);
         return;
     }

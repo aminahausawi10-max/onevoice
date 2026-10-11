@@ -89,9 +89,44 @@ html, body {
 
 .brand-logo-wrap {
     display: flex;
-    flex-direction: column;
+    flex-direction: row;
     align-items: center;
+    gap: 8px;
     text-decoration: none;
+}
+
+.header-logo-icon {
+    width: 32px;
+    height: 32px;
+    object-fit: contain;
+    border-radius: 8px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.header-right-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.header-install-btn {
+    background: #ecfdf5;
+    color: var(--primary-green-dark);
+    border: 1px solid #a7f3d0;
+    font-size: 0.8rem;
+    font-weight: 700;
+    padding: 6px 12px;
+    border-radius: var(--radius-pill);
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    transition: all 0.2s ease;
+}
+
+.header-install-btn:hover {
+    background: var(--primary-green);
+    color: #ffffff;
 }
 
 .brand-logo-text {
@@ -329,22 +364,115 @@ html, body {
     font-weight: 500;
 }
 
-.welcome-globe-container {
-    margin: 24px auto;
-    width: 250px;
-    height: 250px;
-    position: relative;
+.welcome-logo-badge-container {
+    margin: 16px auto 12px;
     display: flex;
-    align-items: center;
     justify-content: center;
+    align-items: center;
 }
 
-.welcome-globe-img {
-    width: 220px;
-    height: 220px;
+.welcome-official-logo {
+    width: 200px;
+    max-width: 70vw;
+    height: auto;
+    aspect-ratio: 1 / 1;
     object-fit: contain;
-    filter: drop-shadow(0 15px 30px rgba(37, 99, 235, 0.25));
-    border-radius: 50%;
+    border-radius: 28px;
+    box-shadow: 0 16px 36px rgba(37, 99, 235, 0.22), 0 4px 12px rgba(16, 185, 129, 0.15);
+    background: #ffffff;
+    padding: 6px;
+    transition: transform 0.3s ease;
+}
+
+.welcome-official-logo:hover {
+    transform: scale(1.03);
+}
+
+.auth-logo-badge {
+    width: 58px;
+    height: 58px;
+    object-fit: contain;
+    border-radius: 14px;
+    margin: 0 auto 10px;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.15);
+    background: #ffffff;
+    display: block;
+}
+
+.drawer-brand-logo {
+    width: 60px;
+    height: 60px;
+    object-fit: contain;
+    border-radius: 14px;
+    margin-bottom: 12px;
+    background: #ffffff;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.drawer-install-item {
+    background: #ecfdf5 !important;
+    color: var(--primary-green-dark) !important;
+    font-weight: 700 !important;
+    border: 1px solid #a7f3d0 !important;
+}
+
+/* PWA Dashboard Install Banner */
+.pwa-install-banner {
+    background: linear-gradient(135deg, #ecfdf5 0%, #eff6ff 100%);
+    border: 1px solid #a7f3d0;
+    border-radius: var(--radius-card);
+    padding: 12px 14px;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.08);
+}
+
+.pwa-banner-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.pwa-banner-icon {
+    width: 38px;
+    height: 38px;
+    border-radius: 10px;
+    object-fit: contain;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    background: #ffffff;
+    flex-shrink: 0;
+}
+
+.pwa-banner-title {
+    font-size: 0.88rem;
+    font-weight: 700;
+    color: var(--text-primary);
+}
+
+.pwa-banner-sub {
+    font-size: 0.74rem;
+    color: var(--text-secondary);
+}
+
+.btn-sm-install {
+    background: var(--primary-green);
+    color: #ffffff;
+    border: none;
+    padding: 7px 14px;
+    border-radius: var(--radius-pill);
+    font-weight: 700;
+    font-size: 0.82rem;
+    cursor: pointer;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+    transition: all 0.2s ease;
+}
+
+.btn-sm-install:hover {
+    background: var(--primary-green-dark);
 }
 
 .welcome-actions-wrap {
@@ -1217,3 +1345,117 @@ html, body {
     from { opacity: 0; transform: translateY(-12px); }
     to { opacity: 1; transform: translateY(0); }
 }
+
+/* ==========================================================
+   Settings Screen & Action Buttons
+   ========================================================== */
+.btn-blue-pill {
+    width: 100%;
+    padding: 15px 20px;
+    background: linear-gradient(135deg, var(--primary-blue), #1d4ed8);
+    color: #ffffff;
+    border: none;
+    border-radius: var(--radius-pill);
+    font-family: var(--font-main);
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+}
+
+.btn-blue-pill:active {
+    transform: scale(0.98);
+}
+
+.settings-profile-badge {
+    background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-card);
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 16px;
+}
+
+.settings-avatar-circle {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.6rem;
+    flex-shrink: 0;
+}
+
+.settings-badge-name {
+    font-weight: 800;
+    font-size: 1.05rem;
+    color: var(--text-primary);
+}
+
+.settings-badge-phone {
+    font-size: 0.82rem;
+    color: var(--text-secondary);
+    margin-top: 1px;
+}
+
+.settings-badge-id {
+    display: inline-block;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: var(--primary-green-dark);
+    background: #dcfce7;
+    padding: 2px 8px;
+    border-radius: 10px;
+    margin-top: 4px;
+}
+
+.settings-card {
+    background: #ffffff;
+    border: 1px solid var(--border-light);
+    border-radius: var(--radius-card);
+    padding: 18px 16px;
+    margin-bottom: 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.03);
+}
+
+.settings-card-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.settings-card-icon {
+    font-size: 1.35rem;
+    width: 36px;
+    height: 36px;
+    border-radius: 10px;
+    background: #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.settings-card-title {
+    font-weight: 800;
+    font-size: 0.96rem;
+    color: var(--text-primary);
+}
+
+.settings-card-sub {
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+    margin-top: 2px;
+}
+

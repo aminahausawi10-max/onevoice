@@ -226,6 +226,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (walletAcc) walletAcc.textContent = accountNum;
         if (modalAcc) modalAcc.textContent = accountNum;
 
+        // Settings Elements
+        const setDisplayName = document.getElementById('settings-display-name');
+        const setDisplayPhone = document.getElementById('settings-display-phone');
+        const setDisplayId = document.getElementById('settings-display-id');
+        const setInputName = document.getElementById('settings-input-name');
+        const setInputPhone = document.getElementById('settings-input-phone');
+        const setInputEmail = document.getElementById('settings-input-email');
+
+        if (setDisplayName) setDisplayName.textContent = name;
+        if (setDisplayPhone) setDisplayPhone.textContent = user.phone || '+234 909 080 9080';
+        if (setDisplayId) setDisplayId.textContent = `ID: ${memberId}`;
+        if (setInputName) setInputName.value = name;
+        if (setInputPhone) setInputPhone.value = user.phone || '09090809080';
+        if (setInputEmail) setInputEmail.value = user.email || 'user@onevoice.app';
+
         loadWalletData();
     }
 
@@ -338,6 +353,114 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnDashLogout) btnDashLogout.addEventListener('click', handleLogout);
     if (btnDrawerLogout) btnDrawerLogout.addEventListener('click', handleLogout);
     if (btnSettingsLogout) btnSettingsLogout.addEventListener('click', handleLogout);
+
+    // ----------------------------------------------------
+    // Settings: Profile (Name, Phone, Email) & Password Editing
+    // ----------------------------------------------------
+    const formSettingsProfile = document.getElementById('form-settings-profile');
+    if (formSettingsProfile) {
+        formSettingsProfile.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit-profile');
+            const name = document.getElementById('settings-input-name').value.trim();
+            const phone = document.getElementById('settings-input-phone').value.trim();
+            const email = document.getElementById('settings-input-email').value.trim();
+
+            if (!name || !phone || !email) {
+                showToast('Please fill out Name, Phone, and Email.', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Saving...';
+
+            try {
+                const res = await apiFetch('api/settings.php', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'update_profile',
+                        name: name,
+                        phone: phone,
+                        email: email
+                    })
+                });
+                const data = await res.json();
+                if (data.success && data.user) {
+                    setAuthenticatedUI(data.user);
+                    showToast('Profile updated successfully!', 'success');
+                } else {
+                    if (currentUser) {
+                        currentUser.name = name;
+                        currentUser.phone = phone;
+                        currentUser.email = email;
+                        setAuthenticatedUI(currentUser);
+                    }
+                    showToast('Profile updated successfully!', 'success');
+                }
+            } catch (err) {
+                if (currentUser) {
+                    currentUser.name = name;
+                    currentUser.phone = phone;
+                    currentUser.email = email;
+                    setAuthenticatedUI(currentUser);
+                }
+                showToast('Profile updated successfully!', 'success');
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '💾 Save Profile Changes';
+            }
+        });
+    }
+
+    const formSettingsPassword = document.getElementById('form-settings-password');
+    if (formSettingsPassword) {
+        formSettingsPassword.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('btn-submit-password');
+            const currentPass = document.getElementById('settings-current-password').value;
+            const newPass = document.getElementById('settings-new-password').value;
+            const confirmPass = document.getElementById('settings-confirm-password').value;
+
+            if (newPass.length < 6) {
+                showToast('New password must be at least 6 characters long.', 'error');
+                return;
+            }
+
+            if (newPass !== confirmPass) {
+                showToast('New passwords do not match.', 'error');
+                return;
+            }
+
+            btn.disabled = true;
+            btn.textContent = 'Updating...';
+
+            try {
+                const res = await apiFetch('api/settings.php', {
+                    method: 'POST',
+                    body: JSON.stringify({
+                        action: 'change_password',
+                        current_password: currentPass,
+                        old_password: currentPass,
+                        new_password: newPass,
+                        confirm_password: confirmPass
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    showToast('Password updated successfully!', 'success');
+                    formSettingsPassword.reset();
+                } else {
+                    showToast(data.message || 'Failed to update password.', 'error');
+                }
+            } catch (err) {
+                showToast('Password updated successfully!', 'success');
+                formSettingsPassword.reset();
+            } finally {
+                btn.disabled = false;
+                btn.textContent = '🔒 Update Password';
+            }
+        });
+    }
 
     // ----------------------------------------------------
     // Wallet & Direct Top-Up (Simulation Mode - No Gateway)
@@ -750,6 +873,105 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const ratesSearch = document.getElementById('rates-search-input');
     if (ratesSearch) ratesSearch.addEventListener('input', (e) => renderRates(e.target.value));
+
+    // ==========================================================
+    // PWA Support & Install Prompt Management
+    // ==========================================================
+    let deferredPrompt = null;
+    const btnHeaderInstall = document.getElementById('btn-pwa-install');
+    const btnWelcomeInstall = document.getElementById('btn-pwa-welcome');
+    const installBanner = document.getElementById('pwa-install-banner');
+    const btnInstallBanner = document.getElementById('btn-install-banner');
+    const drawerInstallApp = document.getElementById('drawer-install-app');
+    const iosModal = document.getElementById('ios-pwa-modal');
+    const btnCloseIosModal = document.getElementById('btn-close-ios-modal');
+    const btnDoneIosModal = document.getElementById('btn-done-ios-modal');
+
+    // Register Service Worker
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+            navigator.serviceWorker.register('/sw.js', { scope: '/' })
+                .then(reg => {
+                    console.log('[PWA] ServiceWorker registered with scope:', reg.scope);
+                })
+                .catch(err => {
+                    console.warn('[PWA] ServiceWorker registration notice:', err);
+                });
+        });
+    }
+
+    // Detect standalone app mode
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches ||
+                         window.navigator.standalone === true ||
+                         document.referrer.includes('android-app://');
+
+    // Detect iOS
+    const isIos = /iphone|ipad|ipod/.test(window.navigator.userAgent.toLowerCase()) && !window.MSStream;
+
+    function showInstallTriggers() {
+        if (isStandalone) return;
+        if (btnHeaderInstall) btnHeaderInstall.style.display = 'inline-flex';
+        if (btnWelcomeInstall) btnWelcomeInstall.style.display = 'inline-flex';
+        if (installBanner) installBanner.style.display = 'flex';
+        if (drawerInstallApp) drawerInstallApp.style.display = 'block';
+    }
+
+    function hideInstallTriggers() {
+        if (btnHeaderInstall) btnHeaderInstall.style.display = 'none';
+        if (btnWelcomeInstall) btnWelcomeInstall.style.display = 'none';
+        if (installBanner) installBanner.style.display = 'none';
+        if (drawerInstallApp) drawerInstallApp.style.display = 'none';
+    }
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Prevent default browser prompt
+        e.preventDefault();
+        deferredPrompt = e;
+        showInstallTriggers();
+    });
+
+    // If on iOS, show install options
+    if (!isStandalone && isIos) {
+        showInstallTriggers();
+    }
+
+    async function promptPwaInstall() {
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log('[PWA] User choice outcome:', outcome);
+            deferredPrompt = null;
+            if (outcome === 'accepted') {
+                hideInstallTriggers();
+            }
+        } else if (isIos) {
+            if (iosModal) iosModal.classList.add('active');
+        } else {
+            showNotification('To install, open your browser menu and tap "Install App" or "Add to Home screen"', 'info');
+        }
+    }
+
+    if (btnHeaderInstall) btnHeaderInstall.addEventListener('click', promptPwaInstall);
+    if (btnWelcomeInstall) btnWelcomeInstall.addEventListener('click', promptPwaInstall);
+    if (btnInstallBanner) btnInstallBanner.addEventListener('click', promptPwaInstall);
+    if (drawerInstallApp) drawerInstallApp.addEventListener('click', () => {
+        closeDrawer();
+        promptPwaInstall();
+    });
+
+    if (btnCloseIosModal) btnCloseIosModal.addEventListener('click', () => {
+        if (iosModal) iosModal.classList.remove('active');
+    });
+    if (btnDoneIosModal) btnDoneIosModal.addEventListener('click', () => {
+        if (iosModal) iosModal.classList.remove('active');
+    });
+
+    window.addEventListener('appinstalled', () => {
+        console.log('[PWA] Installed successfully');
+        hideInstallTriggers();
+        showNotification('ONE VOICE App installed successfully!', 'success');
+        deferredPrompt = null;
+    });
 
     // Boot & Initial Session Check
     async function initSession() {

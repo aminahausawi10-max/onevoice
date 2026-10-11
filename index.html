@@ -5,8 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>ONE VOICE — Cloud Calling & Global Voice Platform</title>
     <meta name="description" content="Connect the world with ONE VOICE. Crystal clear calling anywhere, anytime.">
+    <!-- PWA & Mobile Web App Meta -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#10b981">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="ONE VOICE">
+    <link rel="apple-touch-icon" href="assets/apple-touch-icon.png">
+    <link rel="icon" type="image/png" sizes="64x64" href="assets/favicon.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="assets/icon-192.png">
     <link rel="stylesheet" href="css/clay.css">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎙️</text></svg>">
 </head>
 <body>
 
@@ -16,16 +25,17 @@
         <!-- Top Header Bar (Shown when authenticated or on inner pages) -->
         <header class="app-top-header" id="app-top-header" style="display: none;">
             <button class="header-icon-btn" id="btn-open-drawer" title="Menu">☰</button>
-            <div class="brand-logo-wrap">
+            <div class="brand-logo-wrap nav-page-btn" data-page="home" style="cursor: pointer;">
+                <img src="assets/icon-192.png" alt="ONE VOICE" class="header-logo-icon">
                 <div class="brand-logo-text">
                     <span class="brand-one">ONE</span>
                     <span class="brand-voice">VOICE</span>
                 </div>
-                <div class="brand-wave-icon">
-                    <svg class="brand-wave-svg" viewBox="0 0 24 16"><path d="M2 13a15 15 0 0 1 20 0M5 10a10 10 0 0 1 14 0M8 7a5 5 0 0 1 8 0M11 4a1 1 0 0 1 2 0"/></svg>
-                </div>
             </div>
-            <button class="header-icon-btn nav-page-btn" data-page="settings" title="Settings">⚙️</button>
+            <div class="header-right-actions">
+                <button class="header-install-btn" id="btn-pwa-install" title="Install App" style="display: none;">📲 Install</button>
+                <button class="header-icon-btn nav-page-btn" data-page="settings" title="Settings">⚙️</button>
+            </div>
         </header>
 
         <!-- ====================================================
@@ -33,42 +43,20 @@
              ==================================================== -->
         <section class="app-page active" id="page-welcome">
             <div class="welcome-screen-wrap">
-                <div class="welcome-hero-header">
-                    <div class="welcome-logo-big">
-                        <span class="brand-one">ONE</span>
-                        <span class="brand-voice">VOICE</span>
-                    </div>
-                    <div class="welcome-wave-big">
-                        <svg class="brand-wave-svg" style="width:36px; height:24px; stroke-width:3;" viewBox="0 0 24 16"><path d="M2 13a15 15 0 0 1 20 0M5 10a10 10 0 0 1 14 0M8 7a5 5 0 0 1 8 0M11 4a1 1 0 0 1 2 0"/></svg>
-                    </div>
-                    <div class="welcome-tagline">Connect the World</div>
-                    <div class="welcome-subtagline">Call Anywhere, Anytime.</div>
+                <!-- Official ONE VOICE Logo Badge Hero -->
+                <div class="welcome-logo-badge-container">
+                    <img src="assets/logo.png" alt="ONE VOICE - Connect the World" class="welcome-official-logo">
                 </div>
 
-                <!-- Globe Art Illustration -->
-                <div class="welcome-globe-container">
-                    <svg viewBox="0 0 200 200" width="210" height="210" style="filter: drop-shadow(0 15px 30px rgba(37,99,235,0.28));">
-                        <defs>
-                            <linearGradient id="globeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#38bdf8"/>
-                                <stop offset="50%" stop-color="#0284c7"/>
-                                <stop offset="100%" stop-color="#1e3a8a"/>
-                            </linearGradient>
-                            <linearGradient id="landGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                                <stop offset="0%" stop-color="#34d399"/>
-                                <stop offset="100%" stop-color="#059669"/>
-                            </linearGradient>
-                        </defs>
-                        <circle cx="100" cy="100" r="85" fill="url(#globeGrad)"/>
-                        <path d="M45,70 Q60,50 85,60 Q110,70 120,55 Q135,45 150,60 Q155,80 140,105 Q120,130 90,120 Q65,115 50,95 Z" fill="url(#landGrad)" opacity="0.9"/>
-                        <path d="M70,130 Q90,145 110,140 Q130,135 140,150 Q120,165 95,165 Q70,160 65,145 Z" fill="url(#landGrad)" opacity="0.85"/>
-                        <ellipse cx="100" cy="100" rx="92" ry="35" fill="none" stroke="#67e8f9" stroke-width="2.5" opacity="0.75" transform="rotate(-25 100 100)"/>
-                    </svg>
+                <div class="welcome-hero-header">
+                    <div class="welcome-tagline">Connect the World</div>
+                    <div class="welcome-subtagline">Call Anywhere, Anytime.</div>
                 </div>
 
                 <div class="welcome-actions-wrap">
                     <button class="btn-green-pill nav-page-btn" data-page="register">Create Account</button>
                     <button class="btn-outline-pill nav-page-btn" data-page="login">Login</button>
+                    <button class="btn-outline-pill btn-pwa-install-trigger" id="btn-pwa-welcome" style="display: none; border-color: var(--primary-green); color: var(--primary-green-dark); font-weight: 700;">📲 Install App</button>
 
                     <div class="welcome-lang-selector">
                         <button class="welcome-lang-btn active" data-lang="en">🌐 English ⌵</button>
@@ -90,13 +78,12 @@
             </div>
 
             <div class="auth-brand-center">
+                <img src="assets/icon-192.png" alt="ONE VOICE" class="auth-logo-badge">
                 <div class="brand-logo-text" style="justify-content:center;">
                     <span class="brand-one">ONE</span>
                     <span class="brand-voice">VOICE</span>
                 </div>
-                <div class="brand-wave-icon" style="justify-content:center;">
-                    <svg class="brand-wave-svg" viewBox="0 0 24 16"><path d="M2 13a15 15 0 0 1 20 0M5 10a10 10 0 0 1 14 0M8 7a5 5 0 0 1 8 0M11 4a1 1 0 0 1 2 0"/></svg>
-                </div>
+                <div class="welcome-subtagline" style="font-size:0.85rem; margin-top:2px;">Connect the World</div>
             </div>
 
             <form id="form-register">
@@ -169,14 +156,12 @@
             </div>
 
             <div class="auth-brand-center" style="margin-top: -10px;">
+                <img src="assets/icon-192.png" alt="ONE VOICE" class="auth-logo-badge">
                 <div class="brand-logo-text" style="justify-content:center; font-size:1.9rem;">
                     <span class="brand-one">ONE</span>
                     <span class="brand-voice">VOICE</span>
                 </div>
-                <div class="brand-wave-icon" style="justify-content:center; margin-bottom:18px;">
-                    <svg class="brand-wave-svg" viewBox="0 0 24 16"><path d="M2 13a15 15 0 0 1 20 0M5 10a10 10 0 0 1 14 0M8 7a5 5 0 0 1 8 0M11 4a1 1 0 0 1 2 0"/></svg>
-                </div>
-                <div class="auth-form-title">Login to Your Account</div>
+                <div class="auth-form-title" style="margin-top: 6px;">Login to Your Account</div>
             </div>
 
             <form id="form-login" style="margin-top: 14px;">
@@ -214,6 +199,18 @@
                     <div class="user-greeting-name">Hello, <span id="dash-user-name">Amina Ahmed</span></div>
                     <div class="user-member-id" id="dash-member-id">Member ID: OV-880993</div>
                 </div>
+            </div>
+
+            <!-- PWA Quick Install Banner -->
+            <div class="pwa-install-banner" id="pwa-install-banner" style="display: none;">
+                <div class="pwa-banner-left">
+                    <img src="assets/icon-192.png" alt="ONE VOICE App" class="pwa-banner-icon">
+                    <div>
+                        <div class="pwa-banner-title">Install ONE VOICE App</div>
+                        <div class="pwa-banner-sub">Add to phone home screen for quick calling</div>
+                    </div>
+                </div>
+                <button class="btn-sm-install" id="btn-install-banner">Install</button>
             </div>
 
             <!-- Green Wallet Balance Banner -->
@@ -425,20 +422,106 @@
              PAGE: SETTINGS (#page-settings)
              ==================================================== -->
         <section class="app-page" id="page-settings">
-            <h2 style="font-size:1.35rem; font-weight:800; margin-bottom:16px;">Settings</h2>
-            <div style="display:flex; flex-direction:column; gap:12px;">
-                <div style="background:#f8fafc; border:1px solid var(--border-light); border-radius:var(--radius-lg); padding:16px;">
-                    <div style="font-weight:700; margin-bottom:8px;">Language Preference</div>
-                    <div style="display:flex; gap:8px;">
-                        <button class="btn-outline-pill welcome-lang-btn active" data-lang="en" style="flex:1; padding:8px;">English</button>
-                        <button class="btn-outline-pill welcome-lang-btn" data-lang="ha" style="flex:1; padding:8px;">Hausa</button>
+            <div class="auth-header-bar" style="margin-bottom:14px;">
+                <button class="header-icon-btn nav-page-btn" data-page="home" style="border:none; background:none;">←</button>
+                <div class="auth-header-title">Account Settings</div>
+                <div style="width:38px;"></div>
+            </div>
+
+            <!-- Profile Summary Card -->
+            <div class="settings-profile-badge">
+                <div class="settings-avatar-circle" id="settings-avatar-icon">👤</div>
+                <div class="settings-badge-info">
+                    <div class="settings-badge-name" id="settings-display-name">Alex Morgan</div>
+                    <div class="settings-badge-phone" id="settings-display-phone">+234 803 123 4567</div>
+                    <div class="settings-badge-id" id="settings-display-id">ID: OV-784920</div>
+                </div>
+            </div>
+
+            <!-- Section 1: Edit Profile (Name, Phone Number, Email) -->
+            <div class="settings-card">
+                <div class="settings-card-header">
+                    <span class="settings-card-icon">👤</span>
+                    <div>
+                        <div class="settings-card-title">Edit Profile Information</div>
+                        <div class="settings-card-sub">Change your Name, Phone Number, and Email</div>
                     </div>
                 </div>
 
-                <button class="btn-outline-pill" id="btn-settings-logout" style="border-color:#ef4444; color:#ef4444; margin-top:20px;">
-                    🚪 Logout of Account
-                </button>
+                <form id="form-settings-profile" style="margin-top: 14px;">
+                    <div class="form-input-group">
+                        <span class="form-input-icon">👤</span>
+                        <input type="text" id="settings-input-name" class="app-input" placeholder="Full Name" required>
+                    </div>
+
+                    <div class="form-input-group">
+                        <span class="form-input-icon">📱</span>
+                        <input type="tel" id="settings-input-phone" class="app-input" placeholder="Phone Number (e.g. 09090809080)" required>
+                    </div>
+                    <div style="font-size:0.75rem; color:var(--text-secondary); margin:-6px 0 12px 6px;">
+                        💡 Changing your phone number also updates your 10-digit account number automatically.
+                    </div>
+
+                    <div class="form-input-group">
+                        <span class="form-input-icon">✉️</span>
+                        <input type="email" id="settings-input-email" class="app-input" placeholder="Email Address" required>
+                    </div>
+
+                    <button type="submit" class="btn-green-pill" id="btn-submit-profile">💾 Save Profile Info</button>
+                </form>
             </div>
+
+            <!-- Section 2: Edit Password -->
+            <div class="settings-card">
+                <div class="settings-card-header">
+                    <span class="settings-card-icon">🔒</span>
+                    <div>
+                        <div class="settings-card-title">Change Password</div>
+                        <div class="settings-card-sub">Update your account login password</div>
+                    </div>
+                </div>
+
+                <form id="form-settings-password" style="margin-top: 14px;">
+                    <div class="form-input-group">
+                        <span class="form-input-icon">🔑</span>
+                        <input type="password" id="settings-current-password" class="app-input" placeholder="Current Password">
+                        <button type="button" class="form-input-eye" onclick="togglePassVisibility('settings-current-password')">👁️</button>
+                    </div>
+
+                    <div class="form-input-group">
+                        <span class="form-input-icon">🔒</span>
+                        <input type="password" id="settings-new-password" class="app-input" placeholder="New Password (min. 6 characters)" required>
+                        <button type="button" class="form-input-eye" onclick="togglePassVisibility('settings-new-password')">👁️</button>
+                    </div>
+
+                    <div class="form-input-group">
+                        <span class="form-input-icon">🛡️</span>
+                        <input type="password" id="settings-confirm-password" class="app-input" placeholder="Confirm New Password" required>
+                        <button type="button" class="form-input-eye" onclick="togglePassVisibility('settings-confirm-password')">👁️</button>
+                    </div>
+
+                    <button type="submit" class="btn-blue-pill" id="btn-submit-password">🔒 Update Password</button>
+                </form>
+            </div>
+
+            <!-- Section 3: Language Preference -->
+            <div class="settings-card">
+                <div class="settings-card-header">
+                    <span class="settings-card-icon">🌐</span>
+                    <div>
+                        <div class="settings-card-title">Language Preference</div>
+                        <div class="settings-card-sub">Choose interface language</div>
+                    </div>
+                </div>
+                <div style="display:flex; gap:10px; margin-top:12px;">
+                    <button class="btn-outline-pill welcome-lang-btn active" data-lang="en" style="flex:1; padding:10px;">🇬🇧 English</button>
+                    <button class="btn-outline-pill welcome-lang-btn" data-lang="ha" style="flex:1; padding:10px;">🇳🇬 Hausa</button>
+                </div>
+            </div>
+
+            <button class="btn-outline-pill" id="btn-settings-logout" style="border-color:#ef4444; color:#ef4444; margin:16px 0 24px;">
+                🚪 Logout of Account
+            </button>
         </section>
 
         <!-- ====================================================
@@ -530,12 +613,14 @@
         <div class="drawer-backdrop" id="drawer-backdrop"></div>
         <div class="side-drawer-panel" id="side-drawer-panel">
             <div class="drawer-user-header">
+                <img src="assets/logo.png" alt="ONE VOICE" class="drawer-brand-logo">
                 <div class="drawer-avatar">👤</div>
                 <div class="drawer-user-name" id="drawer-user-name">Amina Ahmed</div>
                 <div class="drawer-user-id" id="drawer-user-id">Member ID: OV-880993</div>
             </div>
 
             <div class="drawer-menu-list">
+                <div class="drawer-menu-item drawer-install-item" id="drawer-install-app" style="display: none;">📲 Install App (PWA)</div>
                 <div class="drawer-menu-item nav-page-btn" data-page="home">🏠 Home</div>
                 <div class="drawer-menu-item nav-page-btn" data-page="dialer">📞 Make Call</div>
                 <div class="drawer-menu-item nav-page-btn" data-page="contacts">👥 Contacts</div>
@@ -627,6 +712,25 @@
                     </div>
                     <button type="submit" class="btn-green-pill" id="btn-confirm-transfer">💸 Send Transfer</button>
                 </form>
+            </div>
+        <!-- iOS PWA Install Guide Modal -->
+        <div class="app-modal-overlay" id="ios-pwa-modal">
+            <div class="app-modal-card">
+                <div class="modal-header-row">
+                    <div class="modal-title">Install ONE VOICE App</div>
+                    <button class="modal-close-x" id="btn-close-ios-modal">✕</button>
+                </div>
+                <div style="text-align:center; margin:10px 0 16px;">
+                    <img src="assets/icon-192.png" alt="ONE VOICE" style="width:72px; height:72px; border-radius:18px; box-shadow:0 6px 16px rgba(0,0,0,0.12);">
+                    <div style="font-weight:800; font-size:1.1rem; margin-top:8px; color:var(--text-primary);">ONE VOICE Mobile</div>
+                    <div style="font-size:0.82rem; color:var(--text-secondary);">Install to your iPhone or iPad home screen</div>
+                </div>
+                <div style="background:#f8fafc; border:1px solid var(--border-light); border-radius:14px; padding:14px; font-size:0.85rem; line-height:1.6; margin-bottom:16px;">
+                    <div style="margin-bottom:8px;"><strong>Step 1:</strong> Tap the <strong>Share</strong> button <span style="font-size:1.1rem;">⎋</span> in Safari.</div>
+                    <div style="margin-bottom:8px;"><strong>Step 2:</strong> Scroll down and choose <strong>Add to Home Screen</strong> <span style="font-size:1.1rem;">⊞</span>.</div>
+                    <div><strong>Step 3:</strong> Tap <strong>Add</strong> in the top right corner.</div>
+                </div>
+                <button class="btn-green-pill" id="btn-done-ios-modal">Got It</button>
             </div>
         </div>
 

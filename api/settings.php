@@ -82,11 +82,13 @@ if ($method === 'POST') {
 
     if ($action === 'update_profile') {
         $name = trim($input['name'] ?? '');
+        $email = trim($input['email'] ?? '');
         $lang = in_array($input['language'] ?? '', ['en', 'ha']) ? $input['language'] : 'en';
         $phone = trim($input['phone'] ?? '');
 
         $store = getLocalStore();
         if ($name) $store['user']['name'] = $name;
+        if ($email) $store['user']['email'] = $email;
         $store['user']['language'] = $lang;
 
         if ($phone) {
@@ -94,15 +96,16 @@ if ($method === 'POST') {
             if (strlen($norm) >= 7) {
                 $formattedPhone = str_starts_with($phone, '+') ? $phone : '+234' . $norm;
                 $store['user']['phone'] = $formattedPhone;
-                $store['user']['virtual_account_number'] = '9' . $norm;
+                $store['user']['virtual_account_number'] = $norm;
+                $store['user']['account_number'] = $norm;
                 $store['user']['virtual_account_name'] = 'ONE VOICE / ' . ($name ?: $store['user']['name']);
             }
         }
 
         if ($pdo) {
             try {
-                $stmt = $pdo->prepare("UPDATE users SET name = ?, language = ?, phone = ?, updated_at = NOW() WHERE id = 1");
-                $stmt->execute([$store['user']['name'], $lang, $store['user']['phone']]);
+                $stmt = $pdo->prepare("UPDATE users SET name = ?, email = ?, language = ?, phone = ?, updated_at = NOW() WHERE id = 1");
+                $stmt->execute([$store['user']['name'], $store['user']['email'] ?? '', $lang, $store['user']['phone']]);
             } catch (Exception $e) {}
         }
 
