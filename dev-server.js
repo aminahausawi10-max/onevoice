@@ -250,25 +250,27 @@ const requestHandler = (req, res) => {
 
     const parseBody = (callback) => {
         if (req.body !== undefined && req.body !== null) {
-            if (typeof req.body === 'object' && !Buffer.isBuffer(req.body)) {
-                return callback(req.body);
+            let parsed = req.body;
+            if (typeof req.body !== 'object' || Buffer.isBuffer(req.body)) {
+                try {
+                    const str = Buffer.isBuffer(req.body) ? req.body.toString('utf8') : req.body.toString();
+                    parsed = str ? JSON.parse(str) : {};
+                } catch (e) {
+                    return sendJson({ success: false, message: 'Invalid JSON payload' }, 400);
+                }
             }
-            try {
-                const str = Buffer.isBuffer(req.body) ? req.body.toString('utf8') : req.body.toString();
-                return callback(str ? JSON.parse(str) : {});
-            } catch (e) {
-                return sendJson({ success: false, message: 'Invalid JSON payload from req.body', err: e.message, bodyType: typeof req.body }, 400);
-            }
+            return callback(parsed);
         }
         let body = '';
         req.on('data', chunk => { body += chunk; });
         req.on('end', () => {
+            let parsed = {};
             try {
-                const parsed = body ? JSON.parse(body) : {};
-                callback(parsed);
+                parsed = body ? JSON.parse(body) : {};
             } catch (err) {
-                sendJson({ success: false, message: 'Invalid JSON payload from stream', err: err.message, bodyLen: body.length, raw: body }, 400);
+                return sendJson({ success: false, message: 'Invalid JSON payload' }, 400);
             }
+            callback(parsed);
         });
     };
 
@@ -445,6 +447,7 @@ const requestHandler = (req, res) => {
                 if (activeUser.id === 1) store.wallet.balance = balanceAfter;
 
                 const momoPayoutRef = 'MOMO-PAYOUT-' + Date.now();
+                const internalRef = 'OV-DEP-' + Math.random().toString(36).substring(2, 9).toUpperCase();
                 const userAcc = (activeUser.phone || '').replace(/[^0-9]/g, '').slice(-10).replace(/^0+/, '');
                 const narration = `Wallet Deposit to Account ${userAcc} (Net credited ₦${netCredit.toFixed(2)})`;
 
