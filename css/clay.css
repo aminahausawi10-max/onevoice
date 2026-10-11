@@ -1623,3 +1623,44 @@ footer {
     font-weight: 800;
     margin: 6px 0;
 }
+
+/* Dialer Destination Country Selector & Chips */
+.dialer-country-card {
+    background: #ffffff;
+    border-radius: var(--radius-xl);
+    box-shadow: var(--clay-shadow-md), var(--clay-inset);
+    transition: all 0.25s ease;
+}
+
+.country-chip-btn {
+    border: none;
+    outline: none;
+    background: #f1f5f9;
+    padding: 8px 14px;
+    border-radius: 20px;
+    font-size: 0.82rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    cursor: pointer;
+    box-shadow: var(--clay-shadow-sm), var(--clay-inset);
+    transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.country-chip-btn:hover {
+    transform: translateY(-2px);
+    color: var(--clay-primary);
+}
+
+.country-chip-btn.active {
+    background: linear-gradient(135deg, var(--clay-primary), var(--clay-primary-dark));
+    color: #ffffff;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4), inset 1px 1px 2px rgba(255, 255, 255, 0.6);
+}
+
+.screen-country-banner {
+    box-shadow: inset 1px 1px 2px rgba(0, 0, 0, 0.05);
+}
+

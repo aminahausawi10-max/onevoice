@@ -233,7 +233,7 @@
                         Available Wallet Balance
                     </div>
                     <div style="font-size:2.8rem; font-weight:800; color:var(--clay-mint-dark); font-family:var(--font-mono);" id="dash-wallet-balance">
-                        ₦18,000.00
+                        ₦0.00
                     </div>
                     <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:2px;">
                         Revenue Share: 10% Platform | 90% Wallet
@@ -320,19 +320,73 @@
             <div class="page-header-box">
                 <div>
                     <h2 data-i18n="navDialer">Make Call</h2>
-                    <p>Call any real mobile or landline across Nigeria and worldwide with verified per-second billing.</p>
+                    <p>Select your destination country, check real-time calling rates, and place calls with verified per-second billing.</p>
                 </div>
                 <div style="display:flex; gap:12px; align-items:center;">
                     <button class="clay-btn clay-btn-white nav-page-btn" data-page="contacts">
                         👥 Open Contacts
                     </button>
                     <button class="clay-btn clay-btn-secondary trigger-topup">
-                        💳 Wallet: <span id="dialer-balance-pill">₦18,000.00</span>
+                        💳 Wallet: <span id="dialer-balance-pill">₦0.00</span>
                     </button>
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: center; padding: 20px 0;">
+            <!-- Prominent Country Selector & Rate Calculator Card -->
+            <div class="clay-card dialer-country-card" style="max-width: 580px; margin: 0 auto 24px; padding: 20px 24px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom: 12px; flex-wrap:wrap; gap:8px;">
+                    <label for="dialer-country-select" style="font-weight: 800; font-size: 1.05rem; color: var(--text-primary); display: flex; align-items: center; gap: 8px;">
+                        <span>🌍 Choose Destination Country:</span>
+                    </label>
+                    <span class="clay-badge badge-primary" id="dialer-rate-badge">Rate: ₦12.00 / min</span>
+                </div>
+                
+                <div class="clay-input-box" style="margin-bottom: 12px;">
+                    <select id="dialer-country-select" class="clay-input" style="font-size: 1rem; font-weight: 700; cursor: pointer; height: 50px;">
+                        <option value="NG" data-dial="+234" data-rate="12.00" data-flag="🇳🇬" selected>🇳🇬 Nigeria (All Networks) — +234 (₦12.00/min)</option>
+                        <option value="US" data-dial="+1" data-rate="18.00" data-flag="🇺🇸">🇺🇸 United States — +1 (₦18.00/min)</option>
+                        <option value="GB" data-dial="+44" data-rate="22.00" data-flag="🇬🇧">🇬🇧 United Kingdom — +44 (₦22.00/min)</option>
+                        <option value="CA" data-dial="+1" data-rate="18.00" data-flag="🇨🇦">🇨🇦 Canada — +1 (₦18.00/min)</option>
+                        <option value="GH" data-dial="+233" data-rate="35.00" data-flag="🇬🇭">🇬🇭 Ghana — +233 (₦35.00/min)</option>
+                        <option value="SA" data-dial="+966" data-rate="40.00" data-flag="🇸🇦">🇸🇦 Saudi Arabia — +966 (₦40.00/min)</option>
+                        <option value="AE" data-dial="+971" data-rate="42.00" data-flag="🇦🇪">🇦🇪 United Arab Emirates — +971 (₦42.00/min)</option>
+                        <option value="NE" data-dial="+227" data-rate="45.00" data-flag="🇳🇪">🇳🇪 Niger — +227 (₦45.00/min)</option>
+                        <option value="CM" data-dial="+237" data-rate="40.00" data-flag="🇨🇲">🇨🇲 Cameroon — +237 (₦40.00/min)</option>
+                        <option value="ZA" data-dial="+27" data-rate="28.00" data-flag="🇿🇦">🇿🇦 South Africa — +27 (₦28.00/min)</option>
+                        <option value="KE" data-dial="+254" data-rate="32.00" data-flag="🇰🇪">🇰🇪 Kenya — +254 (₦32.00/min)</option>
+                        <option value="IN" data-dial="+91" data-rate="15.00" data-flag="🇮🇳">🇮🇳 India — +91 (₦15.00/min)</option>
+                        <option value="CN" data-dial="+86" data-rate="20.00" data-flag="🇨🇳">🇨🇳 China — +86 (₦20.00/min)</option>
+                        <option value="DE" data-dial="+49" data-rate="25.00" data-flag="🇩🇪">🇩🇪 Germany — +49 (₦25.00/min)</option>
+                        <option value="FR" data-dial="+33" data-rate="25.00" data-flag="🇫🇷">🇫🇷 France — +33 (₦25.00/min)</option>
+                        <option value="MY" data-dial="+60" data-rate="22.00" data-flag="🇲🇾">🇲🇾 Malaysia — +60 (₦22.00/min)</option>
+                    </select>
+                </div>
+
+                <!-- Quick Country Shortcut Chips -->
+                <div class="country-shortcut-chips" style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 12px;">
+                    <button type="button" class="country-chip-btn active" data-code="NG" data-dial="+234" data-rate="12.00" data-flag="🇳🇬">🇳🇬 Nigeria</button>
+                    <button type="button" class="country-chip-btn" data-code="US" data-dial="+1" data-rate="18.00" data-flag="🇺🇸">🇺🇸 USA</button>
+                    <button type="button" class="country-chip-btn" data-code="GB" data-dial="+44" data-rate="22.00" data-flag="🇬🇧">🇬🇧 UK</button>
+                    <button type="button" class="country-chip-btn" data-code="SA" data-dial="+966" data-rate="40.00" data-flag="🇸🇦">🇸🇦 Saudi</button>
+                    <button type="button" class="country-chip-btn" data-code="GH" data-dial="+233" data-rate="35.00" data-flag="🇬🇭">🇬🇭 Ghana</button>
+                    <button type="button" class="country-chip-btn" data-code="NE" data-dial="+227" data-rate="45.00" data-flag="🇳🇪">🇳🇪 Niger</button>
+                    <button type="button" class="country-chip-btn" data-code="CA" data-dial="+1" data-rate="18.00" data-flag="🇨🇦">🇨🇦 Canada</button>
+                </div>
+
+                <!-- Live Affordability Estimator -->
+                <div style="display:flex; justify-content:space-between; align-items:center; padding-top:10px; border-top: 1px dashed rgba(148, 163, 184, 0.4); font-size:0.88rem;">
+                    <div>
+                        <span style="color:var(--text-muted);">Affordable Call Time:</span>
+                        <strong id="dialer-available-mins" style="color:var(--clay-primary); margin-left:4px;">0 mins</strong>
+                    </div>
+                    <div>
+                        <span style="color:var(--text-muted);">Current Wallet:</span>
+                        <strong id="dialer-wallet-stat" style="color:var(--clay-mint-dark); margin-left:4px;">₦0.00</strong>
+                    </div>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: center; padding: 10px 0 20px;">
                 <!-- Clay Phone Mockup Frame -->
                 <div class="clay-phone" id="dialer-card" style="margin: 0;">
                     <div class="phone-island">
@@ -340,6 +394,12 @@
                     </div>
 
                     <div class="phone-screen">
+                        <!-- Screen Country Banner -->
+                        <div class="screen-country-banner" id="screen-country-banner" style="background:#f1f5f9; border-radius:18px; padding:6px 12px; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center; font-size:0.82rem; font-weight:700;">
+                            <span id="screen-country-text">🇳🇬 Nigeria (+234)</span>
+                            <span class="clay-badge badge-mint" id="screen-country-rate" style="padding:2px 8px; font-size:0.75rem;">₦12.00/min</span>
+                        </div>
+
                         <div class="dial-display">
                             <div class="dial-country-preview" id="dial-country">
                                 🇳🇬 Nigeria (All Networks) <span style="color:var(--clay-primary);font-weight:700;">(₦12.00/min)</span>
@@ -470,7 +530,7 @@
 
                         <div class="wallet-balance-display">
                             <div class="balance-label" data-i18n="activeCallingCredit">Available Calling Credit</div>
-                            <div class="balance-amount" id="wallet-balance">₦18,000.00</div>
+                            <div class="balance-amount" id="wallet-balance">₦0.00</div>
                             <span style="font-size:0.85rem; color:var(--text-muted);">Auto-deducted per second during calls (@ ₦12/min)</span>
                         </div>
 
@@ -558,25 +618,25 @@
             <div class="admin-kpi-grid">
                 <div class="admin-kpi-card">
                     <span class="bank-detail-label">Total Gross Deposits</span>
-                    <div class="admin-kpi-val" style="color:var(--text-primary);" id="admin-gross-deposits">₦20,000.00</div>
+                    <div class="admin-kpi-val" style="color:var(--text-primary);" id="admin-gross-deposits">₦0.00</div>
                     <span style="font-size:0.8rem; color:var(--text-muted);">From bank transfers</span>
                 </div>
 
                 <div class="admin-kpi-card" style="border: 2px solid var(--clay-mint);">
                     <span class="bank-detail-label" style="color:var(--clay-mint-dark);">ONE VOICE Platform Share (10%)</span>
-                    <div class="admin-kpi-val" style="color:var(--clay-mint-dark);" id="admin-platform-rev">₦2,000.00</div>
+                    <div class="admin-kpi-val" style="color:var(--clay-mint-dark);" id="admin-platform-rev">₦0.00</div>
                     <span style="font-size:0.8rem; color:var(--clay-mint-dark);">Automated revenue earned</span>
                 </div>
 
                 <div class="admin-kpi-card">
                     <span class="bank-detail-label">Customer Wallet Liabilities</span>
-                    <div class="admin-kpi-val" style="color:var(--clay-primary);" id="admin-customer-balances">₦18,000.00</div>
+                    <div class="admin-kpi-val" style="color:var(--clay-primary);" id="admin-customer-balances">₦0.00</div>
                     <span style="font-size:0.8rem; color:var(--text-muted);">Available in user wallets</span>
                 </div>
 
                 <div class="admin-kpi-card">
                     <span class="bank-detail-label">Telephony Margin</span>
-                    <div class="admin-kpi-val" style="color:var(--clay-coral-dark);" id="admin-telephony-margin">₦7.00</div>
+                    <div class="admin-kpi-val" style="color:var(--clay-coral-dark);" id="admin-telephony-margin">₦0.00</div>
                     <span style="font-size:0.8rem; color:var(--text-muted);">Retail rate - Wholesale cost</span>
                 </div>
             </div>

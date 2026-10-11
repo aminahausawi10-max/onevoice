@@ -34,8 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
     let otpSecondsLeft = 300;
     let pendingLoginIdentifier = '';
     
-    // Financial State (NGN)
-    let userWalletBalance = 18000.00;
+    // Financial State (NGN) - Real ledger-backed, zero mock balance
+    let userWalletBalance = 0.00;
     let currentCurrency = 'NGN';
     let platformSharePct = 10.0;
     let selectedTopupAmount = 10000;
@@ -46,8 +46,9 @@ document.addEventListener('DOMContentLoaded', () => {
     let callTimer = null;
     let callSeconds = 0;
     let isCallActive = false;
-    let currentCallRate = 12.00; // ₦12.00/min Nigeria
+    let currentCallRate = 12.00; // ₦12.00/min Nigeria default
     let activeCallCountry = 'Nigeria (All Networks)';
+    let activeCallFlag = '🇳🇬';
 
     // ----------------------------------------------------
     // DOM Elements
@@ -86,9 +87,16 @@ document.addEventListener('DOMContentLoaded', () => {
     const modalPlatformCutVal = document.getElementById('modal-platform-cut-val');
     const modalNetCreditVal = document.getElementById('modal-net-credit-val');
 
-    // Dialer Elements
+    // Dialer & Country Picker Elements
     const dialDisplay = document.getElementById('dial-number');
     const dialCountry = document.getElementById('dial-country');
+    const dialerCountrySelect = document.getElementById('dialer-country-select');
+    const dialerRateBadge = document.getElementById('dialer-rate-badge');
+    const dialerAvailableMins = document.getElementById('dialer-available-mins');
+    const dialerWalletStat = document.getElementById('dialer-wallet-stat');
+    const screenCountryText = document.getElementById('screen-country-text');
+    const screenCountryRate = document.getElementById('screen-country-rate');
+    const countryChipBtns = document.querySelectorAll('.country-chip-btn');
     const callingOverlay = document.getElementById('calling-overlay');
     const overlayName = document.getElementById('overlay-country-name');
     const overlayNumber = document.getElementById('overlay-phone-number');
@@ -451,6 +459,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dashWalletBalance) dashWalletBalance.textContent = formatted;
         if (navBalanceDisplay) navBalanceDisplay.textContent = formatted;
         if (dialerBalancePill) dialerBalancePill.textContent = formatted;
+        updateCallEstimator();
     }
 
     // Live Revenue Split calculation in Deposit Modal
@@ -718,22 +727,78 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (dialClearBtn) {
         dialClearBtn.addEventListener('click', () => {
-            currentDialNumber = '+234';
+            currentDialNumber = activeCallFlag === '🇳🇬' ? '+234' : (currentDialNumber.split(' ')[0] || '+234');
             updateDialDisplay();
         });
     }
 
+    // Supported Countries Table
+    const countryDatabase = [
+        { code: 'NG', dial: '+234', name: 'Nigeria (All Networks)', rate: 12.00, flag: '🇳🇬' },
+        { code: 'US', dial: '+1', name: 'United States', rate: 18.00, flag: '🇺🇸' },
+        { code: 'GB', dial: '+44', name: 'United Kingdom', rate: 22.00, flag: '🇬🇧' },
+        { code: 'CA', dial: '+1', name: 'Canada', rate: 18.00, flag: '🇨🇦' },
+        { code: 'GH', dial: '+233', name: 'Ghana', rate: 35.00, flag: '🇬🇭' },
+        { code: 'SA', dial: '+966', name: 'Saudi Arabia', rate: 40.00, flag: '🇸🇦' },
+        { code: 'AE', dial: '+971', name: 'United Arab Emirates', rate: 42.00, flag: '🇦🇪' },
+        { code: 'NE', dial: '+227', name: 'Niger', rate: 45.00, flag: '🇳🇪' },
+        { code: 'CM', dial: '+237', name: 'Cameroon', rate: 40.00, flag: '🇨🇲' },
+        { code: 'ZA', dial: '+27', name: 'South Africa', rate: 28.00, flag: '🇿🇦' },
+        { code: 'KE', dial: '+254', name: 'Kenya', rate: 32.00, flag: '🇰🇪' },
+        { code: 'IN', dial: '+91', name: 'India', rate: 15.00, flag: '🇮🇳' },
+        { code: 'CN', dial: '+86', name: 'China', rate: 20.00, flag: '🇨🇳' },
+        { code: 'DE', dial: '+49', name: 'Germany', rate: 25.00, flag: '🇩🇪' },
+        { code: 'FR', dial: '+33', name: 'France', rate: 25.00, flag: '🇫🇷' },
+        { code: 'MY', dial: '+60', name: 'Malaysia', rate: 22.00, flag: '🇲🇾' }
+    ];
+
     function detectCountry(number) {
-        if (!number) return { name: 'Enter Nigerian / Global Number', rate: 12.00, flag: '🇳🇬' };
+        if (!number) return { name: 'Nigeria (All Networks)', rate: 12.00, flag: '🇳🇬', code: 'NG' };
         const cleaned = number.replace(/\s+/g, '');
 
         if (cleaned.startsWith('+234') || cleaned.startsWith('234') || cleaned.startsWith('080') || cleaned.startsWith('081') || cleaned.startsWith('090') || cleaned.startsWith('070')) {
-            return { name: 'Nigeria (All Networks)', rate: 12.00, flag: '🇳🇬' };
+            return { name: 'Nigeria (All Networks)', rate: 12.00, flag: '🇳🇬', code: 'NG' };
         }
-        if (cleaned.startsWith('+1') || cleaned.startsWith('1')) return { name: 'USA / Canada', rate: 18.00, flag: '🇺🇸' };
-        if (cleaned.startsWith('+44') || cleaned.startsWith('44')) return { name: 'United Kingdom', rate: 25.00, flag: '🇬🇧' };
-        if (cleaned.startsWith('+233')) return { name: 'Ghana', rate: 65.00, flag: '🇬🇭' };
-        return { name: 'International Call', rate: 25.00, flag: '🌐' };
+        if (cleaned.startsWith('+966')) return { name: 'Saudi Arabia', rate: 40.00, flag: '🇸🇦', code: 'SA' };
+        if (cleaned.startsWith('+971')) return { name: 'United Arab Emirates', rate: 42.00, flag: '🇦🇪', code: 'AE' };
+        if (cleaned.startsWith('+233')) return { name: 'Ghana', rate: 35.00, flag: '🇬🇭', code: 'GH' };
+        if (cleaned.startsWith('+227')) return { name: 'Niger', rate: 45.00, flag: '🇳🇪', code: 'NE' };
+        if (cleaned.startsWith('+237')) return { name: 'Cameroon', rate: 40.00, flag: '🇨🇲', code: 'CM' };
+        if (cleaned.startsWith('+254')) return { name: 'Kenya', rate: 32.00, flag: '🇰🇪', code: 'KE' };
+        if (cleaned.startsWith('+27')) return { name: 'South Africa', rate: 28.00, flag: '🇿🇦', code: 'ZA' };
+        if (cleaned.startsWith('+91')) return { name: 'India', rate: 15.00, flag: '🇮🇳', code: 'IN' };
+        if (cleaned.startsWith('+86')) return { name: 'China', rate: 20.00, flag: '🇨🇳', code: 'CN' };
+        if (cleaned.startsWith('+44') || cleaned.startsWith('44')) return { name: 'United Kingdom', rate: 22.00, flag: '🇬🇧', code: 'GB' };
+        if (cleaned.startsWith('+1') || cleaned.startsWith('1')) return { name: 'United States / Canada', rate: 18.00, flag: '🇺🇸', code: 'US' };
+        if (cleaned.startsWith('+49')) return { name: 'Germany', rate: 25.00, flag: '🇩🇪', code: 'DE' };
+        if (cleaned.startsWith('+33')) return { name: 'France', rate: 25.00, flag: '🇫🇷', code: 'FR' };
+        if (cleaned.startsWith('+60')) return { name: 'Malaysia', rate: 22.00, flag: '🇲🇾', code: 'MY' };
+        return { name: 'International Call', rate: 35.00, flag: '🌐', code: 'INTL' };
+    }
+
+    function updateCallEstimator() {
+        if (dialerWalletStat) {
+            dialerWalletStat.textContent = `₦${userWalletBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+        }
+        if (dialerAvailableMins) {
+            if (userWalletBalance <= 0 || currentCallRate <= 0) {
+                dialerAvailableMins.textContent = '0 mins (Fund Wallet)';
+                dialerAvailableMins.style.color = 'var(--clay-coral-dark)';
+            } else {
+                const mins = Math.floor(userWalletBalance / currentCallRate);
+                dialerAvailableMins.textContent = `${mins} min${mins === 1 ? '' : 's'}`;
+                dialerAvailableMins.style.color = 'var(--clay-mint-dark)';
+            }
+        }
+        if (dialerRateBadge) {
+            dialerRateBadge.textContent = `Rate: ₦${currentCallRate.toFixed(2)} / min`;
+        }
+        if (screenCountryRate) {
+            screenCountryRate.textContent = `₦${currentCallRate.toFixed(2)}/min`;
+        }
+        if (screenCountryText) {
+            screenCountryText.textContent = `${activeCallFlag} ${activeCallCountry.split('(')[0].trim()}`;
+        }
     }
 
     function updateDialDisplay() {
@@ -742,10 +807,80 @@ document.addEventListener('DOMContentLoaded', () => {
         const detected = detectCountry(currentDialNumber);
         activeCallCountry = detected.name;
         currentCallRate = detected.rate;
+        activeCallFlag = detected.flag;
+
         if (dialCountry) {
             dialCountry.innerHTML = `${detected.flag} ${detected.name} <span style="color:var(--clay-primary);font-weight:700;">(₦${detected.rate.toFixed(2)}/min)</span>`;
         }
+
+        // Sync dropdown & chips if recognized
+        if (detected.code && dialerCountrySelect && dialerCountrySelect.value !== detected.code) {
+            const hasOption = Array.from(dialerCountrySelect.options).some(o => o.value === detected.code);
+            if (hasOption) dialerCountrySelect.value = detected.code;
+        }
+
+        countryChipBtns.forEach(btn => {
+            if (btn.getAttribute('data-code') === detected.code) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        updateCallEstimator();
     }
+
+    // Country Dropdown Change Listener
+    if (dialerCountrySelect) {
+        dialerCountrySelect.addEventListener('change', () => {
+            const opt = dialerCountrySelect.options[dialerCountrySelect.selectedIndex];
+            if (opt) {
+                const dial = opt.getAttribute('data-dial') || '+234';
+                const rate = parseFloat(opt.getAttribute('data-rate') || '12.00');
+                const flag = opt.getAttribute('data-flag') || '🇳🇬';
+                const code = opt.value;
+
+                currentDialNumber = dial;
+                currentCallRate = rate;
+                activeCallFlag = flag;
+                activeCallCountry = opt.text.split('—')[0].trim();
+
+                countryChipBtns.forEach(btn => {
+                    if (btn.getAttribute('data-code') === code) {
+                        btn.classList.add('active');
+                    } else {
+                        btn.classList.remove('active');
+                    }
+                });
+
+                updateDialDisplay();
+            }
+        });
+    }
+
+    // Country Shortcut Chips Listeners
+    countryChipBtns.forEach(chip => {
+        chip.addEventListener('click', () => {
+            countryChipBtns.forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+
+            const code = chip.getAttribute('data-code');
+            const dial = chip.getAttribute('data-dial') || '+234';
+            const rate = parseFloat(chip.getAttribute('data-rate') || '12.00');
+            const flag = chip.getAttribute('data-flag') || '🇳🇬';
+
+            currentDialNumber = dial;
+            currentCallRate = rate;
+            activeCallFlag = flag;
+            activeCallCountry = chip.textContent.trim();
+
+            if (dialerCountrySelect) {
+                dialerCountrySelect.value = code;
+            }
+
+            updateDialDisplay();
+        });
+    });
 
     if (callBtn) callBtn.addEventListener('click', startCall);
     if (endCallBtn) endCallBtn.addEventListener('click', endCall);
@@ -756,8 +891,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        if (userWalletBalance < 12.00) {
-            showToast('Insufficient wallet credit! Minimum ₦12.00 required to start call.', 'error');
+        const minRequired = (currentCallRate / 60.0); // Cost for at least 1 second
+        if (userWalletBalance <= 0 || userWalletBalance < minRequired) {
+            showToast(`Insufficient balance (₦${userWalletBalance.toFixed(2)}). Please fund your wallet via bank transfer to call ${activeCallCountry}.`, 'error');
             openTopupModal();
             return;
         }
@@ -785,7 +921,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
 
             overlayStatus.textContent = 'Connected (HD Telecom)';
-            showToast('Call connected to Nigerian carrier gateway', 'success');
+            showToast(`Call connected to ${activeCallCountry} gateway`, 'success');
 
             callTimer = setInterval(() => {
                 callSeconds++;

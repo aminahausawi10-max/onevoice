@@ -129,13 +129,9 @@ if ($method === 'POST') {
                 $stmt->execute([$memberId, $name, $phone, $email, $passwordHash]);
                 $userId = $stmt->fetchColumn();
 
-                // Create initial wallet
-                $wStmt = $pdo->prepare("INSERT INTO wallets (user_id, balance, currency) VALUES (?, 15.00, 'USD')");
+                // Create initial wallet with 0.00 NGN (real funded payments only)
+                $wStmt = $pdo->prepare("INSERT INTO wallets (user_id, balance, currency) VALUES (?, 0.00, 'NGN')");
                 $wStmt->execute([$userId]);
-
-                // Create Welcome Transaction
-                $tStmt = $pdo->prepare("INSERT INTO transactions (user_id, type, amount, balance_after, description, reference) VALUES (?, 'topup', 15.00, 15.00, 'Welcome Bonus Calling Credit', ?)");
-                $tStmt->execute([$userId, 'REF-WELCOME-' . $userId]);
 
                 // Audit log
                 $aStmt = $pdo->prepare("INSERT INTO audit_logs (user_id, action, details) VALUES (?, 'register', 'New account registration')");

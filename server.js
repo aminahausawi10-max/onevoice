@@ -64,61 +64,19 @@ function getStore() {
     }
 
     if (!store.wallet) {
-        store.wallet = { balance: 18000.00, currency: "NGN" };
+        store.wallet = { balance: 0.00, currency: "NGN" };
     }
 
-    if (!store.wallet_ledger || store.wallet_ledger.length === 0) {
-        store.wallet_ledger = [
-            {
-                id: 1,
-                user_id: 1,
-                transaction_type: "bank_deposit",
-                gross_amount: 20000.00,
-                platform_fee: 2000.00,
-                net_credited: 18000.00,
-                balance_before: 0.00,
-                balance_after: 18000.00,
-                channel: "bank_transfer",
-                provider_reference: "BANK-WEMA-9803123456-01",
-                internal_reference: "OV-DEP-99201",
-                narration: "Bank Transfer via Wema NUBAN - Platform Share: 10% (₦2,000.00)",
-                status: "successful",
-                created_at: new Date(Date.now() - 10800000).toLocaleString()
-            }
-        ];
+    if (!store.wallet_ledger) {
+        store.wallet_ledger = [];
     }
 
-    if (!store.platform_revenue_ledger || store.platform_revenue_ledger.length === 0) {
-        store.platform_revenue_ledger = [
-            {
-                id: 1,
-                source_type: "deposit_share",
-                source_reference: "OV-DEP-99201",
-                user_id: 1,
-                amount: 2000.00,
-                cumulative_platform_revenue: 2000.00,
-                settlement_status: "settled",
-                settled_at: new Date(Date.now() - 10800000).toLocaleString(),
-                created_at: new Date(Date.now() - 10800000).toLocaleString()
-            }
-        ];
+    if (!store.platform_revenue_ledger) {
+        store.platform_revenue_ledger = [];
     }
 
     if (!store.call_logs) {
-        store.call_logs = [
-            {
-                id: 1,
-                destination_number: "+2348023456789",
-                destination_country: "Nigeria (MTN)",
-                duration_seconds: 120,
-                retail_rate_per_min: 12.00,
-                cost: 24.00,
-                carrier_cost: 17.00,
-                platform_margin: 7.00,
-                status: "completed",
-                created_at: new Date(Date.now() - 3600000).toLocaleString()
-            }
-        ];
+        store.call_logs = [];
     }
 
     if (!store.contacts) {
@@ -139,13 +97,20 @@ function saveStore(data) {
 const defaultRates = [
     { country_name: "Nigeria (All Networks)", country_code: "NG", dial_code: "+234", flag: "🇳🇬", rate: 12.00, roaming: 45.00, popular: true },
     { country_name: "United States", country_code: "US", dial_code: "+1", flag: "🇺🇸", rate: 18.00, roaming: 180.00, popular: true },
-    { country_name: "United Kingdom", country_code: "GB", dial_code: "+44", flag: "🇬🇧", rate: 25.00, roaming: 250.00, popular: true },
-    { country_name: "Ghana", country_code: "GH", dial_code: "+233", flag: "🇬🇭", rate: 65.00, roaming: 350.00, popular: true },
-    { country_name: "Kenya", country_code: "KE", dial_code: "+254", flag: "🇰🇪", rate: 75.00, roaming: 320.00, popular: true },
-    { country_name: "South Africa", country_code: "ZA", dial_code: "+27", flag: "🇿🇦", rate: 55.00, roaming: 280.00, popular: true },
+    { country_name: "United Kingdom", country_code: "GB", dial_code: "+44", flag: "🇬🇧", rate: 22.00, roaming: 220.00, popular: true },
     { country_name: "Canada", country_code: "CA", dial_code: "+1", flag: "🇨🇦", rate: 18.00, roaming: 180.00, popular: true },
-    { country_name: "India", country_code: "IN", dial_code: "+91", flag: "🇮🇳", rate: 22.00, roaming: 220.00, popular: true },
-    { country_name: "United Arab Emirates", country_code: "AE", dial_code: "+971", flag: "🇦🇪", rate: 95.00, roaming: 400.00, popular: true }
+    { country_name: "Ghana", country_code: "GH", dial_code: "+233", flag: "🇬🇭", rate: 35.00, roaming: 250.00, popular: true },
+    { country_name: "Saudi Arabia", country_code: "SA", dial_code: "+966", flag: "🇸🇦", rate: 40.00, roaming: 280.00, popular: true },
+    { country_name: "United Arab Emirates", country_code: "AE", dial_code: "+971", flag: "🇦🇪", rate: 42.00, roaming: 300.00, popular: true },
+    { country_name: "Niger", country_code: "NE", dial_code: "+227", flag: "🇳🇪", rate: 45.00, roaming: 260.00, popular: true },
+    { country_name: "Cameroon", country_code: "CM", dial_code: "+237", flag: "🇨🇲", rate: 40.00, roaming: 250.00, popular: true },
+    { country_name: "South Africa", country_code: "ZA", dial_code: "+27", flag: "🇿🇦", rate: 28.00, roaming: 200.00, popular: true },
+    { country_name: "Kenya", country_code: "KE", dial_code: "+254", flag: "🇰🇪", rate: 32.00, roaming: 240.00, popular: true },
+    { country_name: "India", country_code: "IN", dial_code: "+91", flag: "🇮🇳", rate: 15.00, roaming: 150.00, popular: true },
+    { country_name: "China", country_code: "CN", dial_code: "+86", flag: "🇨🇳", rate: 20.00, roaming: 170.00, popular: true },
+    { country_name: "Germany", country_code: "DE", dial_code: "+49", flag: "🇩🇪", rate: 25.00, roaming: 190.00, popular: false },
+    { country_name: "France", country_code: "FR", dial_code: "+33", flag: "🇫🇷", rate: 25.00, roaming: 190.00, popular: false },
+    { country_name: "Malaysia", country_code: "MY", dial_code: "+60", flag: "🇲🇾", rate: 22.00, roaming: 180.00, popular: false }
 ];
 
 const MIME_TYPES = {

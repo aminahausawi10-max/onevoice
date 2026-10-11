@@ -76,54 +76,12 @@ function getLocalStore() {
                 "is_verified" => true
             ],
             "wallet" => [
-                "balance" => 18000.00,
+                "balance" => 0.00,
                 "currency" => "NGN"
             ],
-            "wallet_ledger" => [
-                [
-                    "id" => 1,
-                    "user_id" => 1,
-                    "transaction_type" => "bank_deposit",
-                    "gross_amount" => 20000.00,
-                    "platform_fee" => 2000.00,
-                    "net_credited" => 18000.00,
-                    "balance_before" => 0.00,
-                    "balance_after" => 18000.00,
-                    "channel" => "bank_transfer",
-                    "provider_reference" => "BANK-WEMA-9803123456-01",
-                    "internal_reference" => "OV-DEP-99201",
-                    "narration" => "Bank Transfer via Wema NUBAN - Platform Share: 10% (₦2,000.00)",
-                    "status" => "successful",
-                    "created_at" => date("Y-m-d H:i:s", strtotime("-3 hours"))
-                ]
-            ],
-            "platform_revenue_ledger" => [
-                [
-                    "id" => 1,
-                    "source_type" => "deposit_share",
-                    "source_reference" => "OV-DEP-99201",
-                    "user_id" => 1,
-                    "amount" => 2000.00,
-                    "cumulative_platform_revenue" => 2000.00,
-                    "settlement_status" => "settled",
-                    "settled_at" => date("Y-m-d H:i:s", strtotime("-3 hours")),
-                    "created_at" => date("Y-m-d H:i:s", strtotime("-3 hours"))
-                ]
-            ],
-            "call_logs" => [
-                [
-                    "id" => 1,
-                    "destination_number" => "+2348023456789",
-                    "destination_country" => "Nigeria (MTN)",
-                    "duration_seconds" => 120,
-                    "retail_rate_per_min" => 12.00,
-                    "cost" => 24.00,
-                    "carrier_cost" => 17.00,
-                    "platform_margin" => 7.00,
-                    "status" => "completed",
-                    "created_at" => date("Y-m-d H:i:s", strtotime("-1 hour"))
-                ]
-            ],
+            "wallet_ledger" => [],
+            "platform_revenue_ledger" => [],
+            "call_logs" => [],
             "contacts" => [
                 ["id" => 1, "name" => "Aminu Kano", "phone" => "+2348023456789", "country" => "Nigeria"],
                 ["id" => 2, "name" => "Chinedu Okeke", "phone" => "+2348109876543", "country" => "Nigeria"],

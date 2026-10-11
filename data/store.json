@@ -1,79 +1,51 @@
 {
   "user": {
     "id": 1,
+    "member_id": "OV-784920",
     "name": "Alex Morgan",
     "phone": "+2348031234567",
     "email": "demo@onevoice.app",
-    "language": "ha",
+    "language": "en",
     "virtual_account_number": "9803123456",
     "virtual_bank_name": "Wema Bank (ONE VOICE NUBAN)",
     "virtual_account_name": "ONE VOICE / Alex Morgan",
-    "role": "admin"
+    "role": "admin",
+    "status": "active",
+    "is_verified": true
   },
   "wallet": {
-    "balance": 9024.99,
-    "currency": "USD"
+    "balance": 0.00,
+    "currency": "NGN"
   },
-  "transactions": [
-    {
-      "id": 1,
-      "type": "topup",
-      "amount": 15,
-      "balance_after": 15,
-      "description": "Initial Welcome Calling Credit",
-      "created_at": "10/10/2026, 10:03:53 PM"
-    },
-    {
-      "id": 2,
-      "type": "topup",
-      "amount": 10,
-      "balance_after": 25,
-      "description": "Wallet Top-Up via In-App Payment",
-      "created_at": "10/10/2026, 11:06:17 PM"
-    },
-    {
-      "id": 3,
-      "type": "call_deduction",
-      "amount": -0.012,
-      "balance_after": 24.99,
-      "description": "Call to United States (60s)",
-      "created_at": "10/10/2026, 11:08:14 PM"
-    }
-  ],
-  "call_logs": [
-    {
-      "id": 1,
-      "destination_number": "+44 20 7946 0991",
-      "destination_country": "United Kingdom",
-      "duration_seconds": 142,
-      "cost": 0.0426,
-      "status": "completed",
-      "created_at": "10/10/2026, 10:33:53 PM"
-    },
-    {
-      "id": 2,
-      "destination_number": "+234 803 123 4567",
-      "destination_country": "Nigeria",
-      "duration_seconds": 85,
-      "cost": 0.1062,
-      "status": "completed",
-      "created_at": "10/9/2026, 11:03:53 PM"
-    },
-    {
-      "id": 3,
-      "destination_number": "+14155552671",
-      "destination_country": "United States",
-      "duration_seconds": 60,
-      "cost": 0.012,
-      "status": "completed",
-      "created_at": "10/10/2026, 11:08:14 PM"
-    }
-  ],
+  "settings": {
+    "platform_revenue_share_pct": 10.0,
+    "platform_fixed_fee": 0.0,
+    "nigeria_call_rate_per_min": 12.0,
+    "carrier_wholesale_cost_per_min": 8.5,
+    "currency": "NGN",
+    "virtual_bank_provider": "Wema Bank (ONE VOICE NUBAN)"
+  },
+  "transactions": [],
+  "wallet_ledger": [],
+  "platform_revenue_ledger": [],
+  "call_logs": [],
   "contacts": [
     {
       "id": 1,
       "name": "Aminu Kano",
       "phone": "+2348031234567",
+      "country": "Nigeria"
+    },
+    {
+      "id": 2,
+      "name": "Chinedu Okeke",
+      "phone": "+2348109876543",
+      "country": "Nigeria"
+    },
+    {
+      "id": 3,
+      "name": "Folake Adeleke",
+      "phone": "+2349012345678",
       "country": "Nigeria"
     }
   ],
@@ -95,72 +67,6 @@
       "email": "aminahausawi10@gmail.com",
       "language": "en",
       "is_verified": false
-    }
-  ],
-  "settings": {
-    "platform_revenue_share_pct": 10,
-    "platform_fixed_fee": 0,
-    "nigeria_call_rate_per_min": 12,
-    "carrier_wholesale_cost_per_min": 8.5,
-    "currency": "NGN",
-    "virtual_bank_provider": "Wema Bank (ONE VOICE NUBAN)"
-  },
-  "wallet_ledger": [
-    {
-      "id": 1,
-      "user_id": 1,
-      "transaction_type": "bank_deposit",
-      "gross_amount": 20000,
-      "platform_fee": 2000,
-      "net_credited": 18000,
-      "balance_before": 0,
-      "balance_after": 18000,
-      "channel": "bank_transfer",
-      "provider_reference": "BANK-WEMA-9803123456-01",
-      "internal_reference": "OV-DEP-99201",
-      "narration": "Bank Transfer via Wema NUBAN - Platform Share: 10% (₦2,000.00)",
-      "status": "successful",
-      "created_at": "10/10/2026, 9:34:42 PM"
-    },
-    {
-      "id": 2,
-      "user_id": 1,
-      "transaction_type": "bank_deposit",
-      "gross_amount": 10000,
-      "platform_fee": 1000,
-      "net_credited": 9000,
-      "balance_before": 24.99,
-      "balance_after": 9024.99,
-      "channel": "bank_transfer",
-      "provider_reference": "BANK-TEST-REF-001",
-      "internal_reference": "OV-DEP-SRPKIHH",
-      "narration": "Bank Transfer via bank_transfer - Platform Share: 10% (₦1000.00)",
-      "status": "successful",
-      "created_at": "10/11/2026, 12:34:42 AM"
-    }
-  ],
-  "platform_revenue_ledger": [
-    {
-      "id": 1,
-      "source_type": "deposit_share",
-      "source_reference": "OV-DEP-99201",
-      "user_id": 1,
-      "amount": 2000,
-      "cumulative_platform_revenue": 2000,
-      "settlement_status": "settled",
-      "settled_at": "10/10/2026, 9:34:42 PM",
-      "created_at": "10/10/2026, 9:34:42 PM"
-    },
-    {
-      "id": 2,
-      "source_type": "deposit_share",
-      "source_reference": "OV-DEP-SRPKIHH",
-      "user_id": 1,
-      "amount": 1000,
-      "cumulative_platform_revenue": 3000,
-      "settlement_status": "settled",
-      "settled_at": "10/11/2026, 12:34:42 AM",
-      "created_at": "10/11/2026, 12:34:42 AM"
     }
   ]
 }
