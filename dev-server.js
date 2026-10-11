@@ -967,8 +967,11 @@ const requestHandler = (req, res) => {
     }
 
     // Static File Serving
-    let safePath = pathname === '/' ? '/index.html' : pathname;
-    let filePath = path.join(__dirname, safePath);
+    let safePath = (pathname === '/' || pathname === '') ? '/index.html' : pathname;
+    let filePath = path.join(process.cwd(), safePath);
+    if (!fs.existsSync(filePath)) {
+        filePath = path.join(__dirname, safePath);
+    }
 
     fs.stat(filePath, (err, stats) => {
         if (err || !stats.isFile()) {
