@@ -17,11 +17,16 @@
     "balance": 0.00,
     "currency": "NGN"
   },
+  "wallets": {
+    "1": { "balance": 0.00, "currency": "NGN" },
+    "2": { "balance": 0.00, "currency": "NGN" },
+    "3": { "balance": 0.00, "currency": "NGN" }
+  },
   "settings": {
     "platform_revenue_share_pct": 10.0,
     "platform_fixed_fee": 0.0,
-    "nigeria_call_rate_per_min": 12.0,
-    "carrier_wholesale_cost_per_min": 8.5,
+    "nigeria_call_rate_per_min": 12.00,
+    "carrier_wholesale_cost_per_min": 8.50,
     "currency": "NGN",
     "virtual_bank_provider": "Wema Bank (ONE VOICE NUBAN)"
   },
@@ -56,8 +61,11 @@
       "name": "Fatima Bello",
       "phone": "+2348099887766",
       "email": "fatima.bello@example.com",
+      "virtual_account_number": "9809988776",
+      "virtual_bank_name": "Wema Bank (ONE VOICE NUBAN)",
+      "virtual_account_name": "ONE VOICE / Fatima Bello",
       "language": "en",
-      "is_verified": false
+      "is_verified": true
     },
     {
       "id": 3,
@@ -65,8 +73,11 @@
       "name": "Amina Ahmed Inuwa",
       "phone": "09090809080",
       "email": "aminahausawi10@gmail.com",
+      "virtual_account_number": "9909080908",
+      "virtual_bank_name": "Wema Bank (ONE VOICE NUBAN)",
+      "virtual_account_name": "ONE VOICE / Amina Ahmed Inuwa",
       "language": "en",
-      "is_verified": false
+      "is_verified": true
     }
   ]
 }

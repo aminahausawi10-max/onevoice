@@ -50,6 +50,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeCallCountry = 'Nigeria (All Networks)';
     let activeCallFlag = '🇳🇬';
 
+    // API Fetch Wrapper attaching authenticated user context
+    function apiFetch(url, options = {}) {
+        options = options || {};
+        options.headers = options.headers || {};
+        if (currentUser && currentUser.id) {
+            options.headers['X-User-Id'] = currentUser.id.toString();
+        }
+        return fetch(url, options);
+    }
+
     // ----------------------------------------------------
     // DOM Elements
     // ----------------------------------------------------
@@ -133,6 +143,14 @@ document.addEventListener('DOMContentLoaded', () => {
     const topupModal = document.getElementById('topup-modal');
     const logoutModal = document.getElementById('logout-modal');
     const addContactModal = document.getElementById('add-contact-modal');
+    const transferModal = document.getElementById('transfer-modal');
+    const formPhoneTransfer = document.getElementById('form-phone-transfer');
+    const transferRecipientPhone = document.getElementById('transfer-recipient-phone');
+    const transferLookupBadge = document.getElementById('transfer-lookup-badge');
+    const transferAmountInput = document.getElementById('transfer-amount');
+    const transferModalBalance = document.getElementById('transfer-modal-balance');
+    const transferChipBtns = document.querySelectorAll('.transfer-chip-btn');
+    const btnConfirmTransfer = document.getElementById('btn-confirm-transfer');
 
     // ----------------------------------------------------
     // 1. Single Page Application Routing
@@ -261,14 +279,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dashLangBadge) {
             dashLangBadge.textContent = (user.language === 'ha') ? 'Hausa (ha)' : 'English (en)';
         }
+
+        loadWalletData();
+        loadCallLogs();
     }
 
     function setUnauthenticatedUI() {
         currentUser = null;
+        userWalletBalance = 0.00;
+        updateBalanceUI(0.00);
         if (publicNavLinks) publicNavLinks.style.display = 'flex';
         if (authNavLinks) authNavLinks.style.display = 'none';
         if (publicAuthBtns) publicAuthBtns.style.display = 'flex';
         if (authUserBtns) authUserBtns.style.display = 'none';
+        if (mobileDock) mobileDock.style.display = 'none';
     }
 
     // ----------------------------------------------------
@@ -430,7 +454,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------------------------------
     async function loadWalletData() {
         try {
-            const res = await fetch('api/wallet.php');
+            const res = await apiFetch('api/wallet.php');
             const data = await res.json();
             if (data.success) {
                 userWalletBalance = parseFloat(data.balance);
@@ -459,6 +483,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dashWalletBalance) dashWalletBalance.textContent = formatted;
         if (navBalanceDisplay) navBalanceDisplay.textContent = formatted;
         if (dialerBalancePill) dialerBalancePill.textContent = formatted;
+        if (transferModalBalance) transferModalBalance.textContent = formatted;
         updateCallEstimator();
     }
 
@@ -532,7 +557,7 @@ document.addEventListener('DOMContentLoaded', () => {
             confirmTopupBtn.disabled = true;
 
             try {
-                const res = await fetch('api/wallet.php', {
+                const res = await apiFetch('api/wallet.php', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -559,6 +584,134 @@ document.addEventListener('DOMContentLoaded', () => {
             } finally {
                 confirmTopupBtn.textContent = 'Confirm Bank Transfer & Fund';
                 confirmTopupBtn.disabled = false;
+            }
+        });
+    }
+
+    // ----------------------------------------------------
+    // 5b. Phone Number-to-Phone Number Account Transfers
+    // ----------------------------------------------------
+    let transferDebounceTimer = null;
+    let verifiedRecipient = null;
+
+    window.openTransferModal = () => {
+        if (transferModalBalance) {
+            transferModalBalance.textContent = `₦${userWalletBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+        }
+        if (transferAmountInput && (!transferAmountInput.value || transferAmountInput.value === '0')) {
+            transferAmountInput.value = '1000';
+        }
+        if (transferLookupBadge) transferLookupBadge.style.display = 'none';
+        verifiedRecipient = null;
+        if (transferModal) transferModal.classList.add('active');
+    };
+
+    window.closeTransferModal = () => {
+        if (transferModal) transferModal.classList.remove('active');
+    };
+
+    const triggerTransferBtns = document.querySelectorAll('.trigger-transfer');
+    triggerTransferBtns.forEach(btn => btn.addEventListener('click', window.openTransferModal));
+
+    transferChipBtns.forEach(chip => {
+        chip.addEventListener('click', () => {
+            transferChipBtns.forEach(c => c.classList.remove('active'));
+            chip.classList.add('active');
+            const amt = chip.getAttribute('data-amt');
+            if (transferAmountInput) transferAmountInput.value = amt;
+        });
+    });
+
+    if (transferRecipientPhone) {
+        transferRecipientPhone.addEventListener('input', (e) => {
+            clearTimeout(transferDebounceTimer);
+            const rawPhone = e.target.value.trim();
+            if (rawPhone.length < 7) {
+                if (transferLookupBadge) transferLookupBadge.style.display = 'none';
+                verifiedRecipient = null;
+                return;
+            }
+
+            transferDebounceTimer = setTimeout(async () => {
+                try {
+                    const res = await apiFetch(`api/wallet.php?lookup_phone=${encodeURIComponent(rawPhone)}`);
+                    const data = await res.json();
+                    if (data.success && data.user) {
+                        verifiedRecipient = data.user;
+                        if (transferLookupBadge) {
+                            transferLookupBadge.style.display = 'block';
+                            transferLookupBadge.style.background = '#d1fae5';
+                            transferLookupBadge.style.color = 'var(--clay-mint-dark)';
+                            transferLookupBadge.innerHTML = `✓ Verified Beneficiary: <strong>${data.user.name}</strong> (${data.user.phone})`;
+                        }
+                    } else {
+                        verifiedRecipient = null;
+                        if (transferLookupBadge) {
+                            transferLookupBadge.style.display = 'block';
+                            transferLookupBadge.style.background = '#fee2e2';
+                            transferLookupBadge.style.color = 'var(--clay-coral-dark)';
+                            transferLookupBadge.innerHTML = `⚠️ No registered ONE VOICE user found with this number`;
+                        }
+                    }
+                } catch (err) {}
+            }, 300);
+        });
+    }
+
+    if (formPhoneTransfer) {
+        formPhoneTransfer.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const recipientPhone = transferRecipientPhone ? transferRecipientPhone.value.trim() : '';
+            const amount = parseFloat(transferAmountInput ? transferAmountInput.value : 0);
+
+            if (!recipientPhone) {
+                showToast('Please enter recipient phone number', 'error');
+                return;
+            }
+            if (amount < 50) {
+                showToast('Minimum transfer amount is ₦50.00', 'error');
+                return;
+            }
+            if (amount > userWalletBalance) {
+                showToast(`Insufficient balance (₦${userWalletBalance.toFixed(2)}). Fund your wallet first.`, 'error');
+                return;
+            }
+
+            if (btnConfirmTransfer) {
+                btnConfirmTransfer.textContent = 'Processing Transfer...';
+                btnConfirmTransfer.disabled = true;
+            }
+
+            try {
+                const res = await apiFetch('api/wallet.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'transfer_phone',
+                        recipient_phone: recipientPhone,
+                        amount: amount
+                    })
+                });
+                const data = await res.json();
+
+                if (data.success) {
+                    userWalletBalance = parseFloat(data.new_balance);
+                    updateBalanceUI(userWalletBalance);
+                    showToast(data.message || `Transferred ₦${amount.toLocaleString()} successfully!`, 'success');
+                    closeTransferModal();
+                    formPhoneTransfer.reset();
+                    if (transferLookupBadge) transferLookupBadge.style.display = 'none';
+                    loadWalletData();
+                } else {
+                    showToast(data.message || 'Transfer failed', 'error');
+                }
+            } catch (err) {
+                showToast('Transfer request failed. Check server connection.', 'error');
+            } finally {
+                if (btnConfirmTransfer) {
+                    btnConfirmTransfer.textContent = '💸 Confirm & Send Transfer';
+                    btnConfirmTransfer.disabled = false;
+                }
             }
         });
     }
@@ -965,7 +1118,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function logCallToBackend(number, country, duration, rate) {
         try {
-            const res = await fetch('api/calls.php', {
+            const res = await apiFetch('api/calls.php', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -987,7 +1140,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadCallLogs() {
         try {
-            const res = await fetch('api/calls.php');
+            const res = await apiFetch('api/calls.php');
             const data = await res.json();
             if (data.success && data.calls) {
                 renderCallLogs(data.calls);
@@ -1082,7 +1235,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadContacts() {
         try {
-            const res = await fetch('api/contacts.php');
+            const res = await apiFetch('api/contacts.php');
             const data = await res.json();
             if (data.success && data.contacts) renderContacts(data.contacts);
         } catch (err) {}

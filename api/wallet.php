@@ -12,7 +12,23 @@ $method = $_SERVER['REQUEST_METHOD'];
 
 if ($method === 'GET') {
     $store = getLocalStore();
-    $userId = 1;
+
+    if (isset($_GET['lookup_phone'])) {
+        $cleanTarget = substr(preg_replace('/[^0-9]/', '', $_GET['lookup_phone']), -10);
+        $allUsers = array_merge([$store['user']], $store['users'] ?? []);
+        foreach ($allUsers as $u) {
+            $uClean = substr(preg_replace('/[^0-9]/', '', $u['phone'] ?? ''), -10);
+            if ($uClean && $uClean === $cleanTarget) {
+                echo json_encode(["success" => true, "user" => ["id" => $u['id'], "name" => $u['name'], "phone" => $u['phone'], "member_id" => $u['member_id'] ?? '']]);
+                exit;
+            }
+        }
+        http_response_code(404);
+        echo json_encode(["success" => false, "message" => "Beneficiary phone number not registered on ONE VOICE."]);
+        exit;
+    }
+
+    $userId = $_SESSION['user_id'] ?? ($store['active_user_id'] ?? 1);
 
     $balance = floatval($store['wallet']['balance'] ?? 0);
     $currency = $store['settings']['currency'] ?? 'NGN';
@@ -93,6 +109,95 @@ if ($method === 'GET') {
 if ($method === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
     $action = $input['action'] ?? 'fund_bank_transfer';
+
+    if ($action === 'transfer_phone') {
+        $store = getLocalStore();
+        $senderId = $_SESSION['user_id'] ?? ($store['active_user_id'] ?? 1);
+        $amount = floatval($input['amount'] ?? 0);
+        $targetPhone = trim($input['recipient_phone'] ?? '');
+
+        if ($amount < 50.00) {
+            http_response_code(400);
+            echo json_encode(["success" => false, "message" => "Minimum transfer amount is ₦50.00."]);
+            exit;
+        }
+
+        $allUsers = array_merge([$store['user']], $store['users'] ?? []);
+        $cleanTarget = substr(preg_replace('/[^0-9]/', '', $targetPhone), -10);
+        $recipient = null;
+        foreach ($allUsers as $u) {
+            if (substr(preg_replace('/[^0-9]/', '', $u['phone'] ?? ''), -10) === $cleanTarget) {
+                $recipient = $u;
+                break;
+            }
+        }
+
+        if (!$recipient) {
+            http_response_code(404);
+            echo json_encode(["success" => false, "message" => "Recipient phone number not registered on ONE VOICE."]);
+            exit;
+        }
+
+        if ($recipient['id'] == $senderId) {
+            http_response_code(400);
+            echo json_encode(["success" => false, "message" => "Cannot transfer funds to your own phone number."]);
+            exit;
+        }
+
+        $senderBal = floatval($store['wallet']['balance'] ?? 0);
+        if ($senderBal < $amount) {
+            http_response_code(400);
+            echo json_encode(["success" => false, "message" => "Insufficient wallet credit (₦" . number_format($senderBal, 2) . ") to complete this transfer."]);
+            exit;
+        }
+
+        $newSenderBal = round($senderBal - $amount, 2);
+        $store['wallet']['balance'] = $newSenderBal;
+
+        $ref = 'OV-TRF-' . strtoupper(substr(md5(uniqid()), 0, 8));
+        $store['wallet_ledger'][] = [
+            "id" => count($store['wallet_ledger'] ?? []) + 1,
+            "user_id" => $senderId,
+            "transaction_type" => "transfer_out",
+            "gross_amount" => $amount,
+            "platform_fee" => 0.00,
+            "net_credited" => -$amount,
+            "balance_before" => $senderBal,
+            "balance_after" => $newSenderBal,
+            "channel" => "phone_transfer",
+            "internal_reference" => $ref,
+            "narration" => "Transfer to {$recipient['name']} ({$recipient['phone']})",
+            "status" => "successful",
+            "created_at" => date("Y-m-d H:i:s")
+        ];
+
+        $store['wallet_ledger'][] = [
+            "id" => count($store['wallet_ledger'] ?? []) + 1,
+            "user_id" => $recipient['id'],
+            "transaction_type" => "transfer_in",
+            "gross_amount" => $amount,
+            "platform_fee" => 0.00,
+            "net_credited" => $amount,
+            "balance_before" => 0.00,
+            "balance_after" => $amount,
+            "channel" => "phone_transfer",
+            "internal_reference" => $ref . '-R',
+            "narration" => "Received transfer from ONE VOICE user",
+            "status" => "successful",
+            "created_at" => date("Y-m-d H:i:s")
+        ];
+
+        saveLocalStore($store);
+
+        echo json_encode([
+            "success" => true,
+            "message" => "₦" . number_format($amount, 2) . " transferred successfully to {$recipient['name']}!",
+            "new_balance" => $newSenderBal,
+            "reference" => $ref,
+            "recipient" => ["name" => $recipient['name'], "phone" => $recipient['phone']]
+        ]);
+        exit;
+    }
 
     if ($action === 'fund_bank_transfer' || $action === 'topup') {
         $grossAmount = floatval($input['amount'] ?? 0);
