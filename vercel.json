@@ -1,9 +1,13 @@
 {
   "version": 2,
   "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/api/bridge.js"
-    }
+    { "source": "/api/rates.php", "destination": "/api/rates.js" },
+    { "source": "/api/wallet.php", "destination": "/api/wallet.js" },
+    { "source": "/api/calls.php", "destination": "/api/calls.js" },
+    { "source": "/api/auth.php", "destination": "/api/auth.js" },
+    { "source": "/api/admin.php", "destination": "/api/admin.js" },
+    { "source": "/api/contacts.php", "destination": "/api/contacts.js" },
+    { "source": "/api/settings.php", "destination": "/api/settings.js" },
+    { "source": "/api/(.*)", "destination": "/api/bridge.js" }
   ]
 }

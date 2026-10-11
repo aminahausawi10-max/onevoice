@@ -2,7 +2,6 @@
   "name": "one-voice-web",
   "version": "1.0.0",
   "description": "ONE VOICE - International VoIP Calling & Digital Wallet Web Platform",
-  "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js"

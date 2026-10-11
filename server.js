@@ -200,7 +200,8 @@ const requestHandler = (req, res) => {
         return;
     }
 
-    const parsedUrl = url.parse(req.url, true);
+    const rawUrl = req.headers['x-forwarded-uri'] || req.headers['x-matched-path'] || req.url || '/';
+    const parsedUrl = url.parse(rawUrl, true);
     const pathname = parsedUrl.pathname;
 
     const sendJson = (data, status = 200) => {
