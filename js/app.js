@@ -284,16 +284,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dashPhoneAccount) dashPhoneAccount.textContent = phoneNum;
         if (walletPhoneAccount) walletPhoneAccount.textContent = phoneNum;
 
-        if (walletVirtualNuban) {
-            walletVirtualNuban.textContent = '9090809080';
-        }
-        if (modalVirtualNuban) {
-            modalVirtualNuban.textContent = '9090809080';
-        }
-        const modalUserRemarkPhone = document.getElementById('modal-user-remark-phone');
-        if (modalUserRemarkPhone) {
-            modalUserRemarkPhone.textContent = phoneNum;
-        }
+        if (walletPhoneAccount) walletPhoneAccount.textContent = phoneNum;
+        if (walletAccountName) walletAccountName.textContent = "ONE VOICE / " + user.name;
+        const modalUserPhone = document.getElementById('modal-user-phone-account');
+        const modalUserName = document.getElementById('modal-user-name-account');
+        if (modalUserPhone) modalUserPhone.textContent = phoneNum;
+        if (modalUserName) modalUserName.textContent = "ONE VOICE / " + user.name;
 
         if (dashLangBadge) {
             dashLangBadge.textContent = (user.language === 'ha') ? 'Hausa (ha)' : 'English (en)';
@@ -576,10 +572,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (modalDepositInput && selectedTopupAmount) {
             modalDepositInput.value = selectedTopupAmount;
         }
-        const modalUserRemarkPhone = document.getElementById('modal-user-remark-phone');
-        if (modalUserRemarkPhone && currentUser) {
-            modalUserRemarkPhone.textContent = currentUser.phone;
-        }
+        const modalUserPhone = document.getElementById('modal-user-phone-account');
+        const modalUserName = document.getElementById('modal-user-name-account');
+        if (modalUserPhone && currentUser) modalUserPhone.textContent = currentUser.phone;
+        if (modalUserName && currentUser) modalUserName.textContent = "ONE VOICE / " + currentUser.name;
         updateModalSplitPreview();
         if (topupModal) topupModal.classList.add('active');
     };
@@ -589,11 +585,11 @@ document.addEventListener('DOMContentLoaded', () => {
     triggerTopupBtns.forEach(btn => btn.addEventListener('click', window.openTopupModal));
 
     // Reusable Deposit Execution Function
-    async function completeDeposit(amount, channel = 'opay_transfer', ref = null) {
-        if (!ref) ref = 'BANK-OPAY-' + Date.now();
-        const btnOpay = document.getElementById('btn-confirm-topup');
+    async function completeDeposit(amount, channel = 'phone_account_deposit', ref = null) {
+        if (!ref) ref = 'BANK-MOMO-' + Date.now();
+        const btnConfirm = document.getElementById('btn-confirm-topup');
         const btnPaystack = document.getElementById('btn-paystack-pay');
-        if (btnOpay) { btnOpay.disabled = true; btnOpay.textContent = 'Processing Deposit...'; }
+        if (btnConfirm) { btnConfirm.disabled = true; btnConfirm.textContent = 'Processing & Sending 10% to MoMo...'; }
         if (btnPaystack) { btnPaystack.disabled = true; }
 
         try {
@@ -613,7 +609,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 userWalletBalance = parseFloat(data.new_balance);
                 updateBalanceUI(userWalletBalance);
                 const b = data.deposit_breakdown;
-                showToast(`🎉 Deposit Verified! ₦${b.net_credited_to_user.toFixed(2)} credited to your wallet (10% ₦${b.platform_revenue_share.toFixed(2)} Admin Share to OPay 9090809080)`, 'success');
+                showToast(`🎉 ₦${b.net_credited_to_user.toFixed(2)} credited to your wallet! Admin 10% share (₦${b.platform_revenue_share.toFixed(2)}) sent directly to Admin MoMo (9090809080)`, 'success');
                 closeTopupModal();
                 loadWalletData();
             } else {
@@ -622,7 +618,7 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (err) {
             showToast('Bank gateway connection failed', 'error');
         } finally {
-            if (btnOpay) { btnOpay.disabled = false; btnOpay.textContent = '🏦 I Have Transferred To Admin OPay (Confirm Deposit)'; }
+            if (btnConfirm) { btnConfirm.disabled = false; btnConfirm.textContent = '⚡ Confirm Deposit To My Account & Split Share'; }
             if (btnPaystack) { btnPaystack.disabled = false; }
         }
     }

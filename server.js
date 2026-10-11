@@ -238,11 +238,12 @@ const server = http.createServer((req, res) => {
             const sharePct = (store.settings && store.settings.platform_revenue_share_pct) || 10.0;
             const userLedger = (store.wallet_ledger || []).filter(e => !e.user_id || e.user_id === activeUser.id);
 
-            const adminBank = {
-                bank_name: (store.settings && store.settings.admin_bank_name) || "OPay (Paycom)",
-                account_number: (store.settings && store.settings.admin_account_number) || "9090809080",
-                account_name: (store.settings && store.settings.admin_account_name) || "ONE VOICE / Amina Ahmed Inuwa",
-                phone: "09090809080"
+            const cleanUserPhone = (activeUser.phone || '').replace(/[^0-9]/g, '').slice(-10);
+            const adminMoMo = {
+                bank_name: "MoMo PSB (MTN MoMo)",
+                account_number: "9090809080",
+                account_name: "Amina Ahmed Inuwa (ONE VOICE Admin)",
+                network: "MTN MoMo PSB"
             };
 
             return sendJson({
@@ -251,11 +252,13 @@ const server = http.createServer((req, res) => {
                 currency: (store.settings && store.settings.currency) || 'NGN',
                 account_number: activeUser.phone,
                 user_account_number: activeUser.phone,
-                admin_bank: adminBank,
+                user_phone_10digit: cleanUserPhone,
+                user_account_name: "ONE VOICE / " + activeUser.name,
+                admin_momo: adminMoMo,
                 virtual_account: {
-                    bank_name: adminBank.bank_name,
-                    virtual_account_number: adminBank.account_number,
-                    account_name: adminBank.account_name,
+                    bank_name: "MoMo PSB / OPay",
+                    virtual_account_number: cleanUserPhone,
+                    account_name: "ONE VOICE / " + activeUser.name,
                     beneficiary_phone: activeUser.phone,
                     user_account_number: activeUser.phone
                 },
@@ -264,7 +267,8 @@ const server = http.createServer((req, res) => {
                 },
                 revenue_sharing: {
                     platform_share_pct: sharePct,
-                    customer_wallet_pct: (100.0 - sharePct)
+                    customer_wallet_pct: (100.0 - sharePct),
+                    admin_momo_account: "9090809080 (MoMo PSB)"
                 },
                 transactions: userLedger.slice(-20).reverse()
             });
@@ -368,9 +372,9 @@ const server = http.createServer((req, res) => {
                 userWallet.balance = balanceAfter;
                 if (activeUser.id === 1) store.wallet.balance = balanceAfter;
 
-                const channelName = body.channel === 'paystack' ? 'Paystack Live Gateway' : (body.channel === 'opay_transfer' ? 'OPay Admin Transfer (9090809080)' : 'Bank Transfer');
+                const momoPayoutRef = 'MOMO-PAYOUT-' + Date.now();
                 const internalRef = 'OV-DEP-' + Math.random().toString(36).substring(2, 9).toUpperCase();
-                const narration = `Deposit via ${channelName} - Admin Share: ${sharePct}% (₦${platformFee.toFixed(2)})`;
+                const narration = `Deposit to Account ${activeUser.phone} - 10% Admin Share (₦${platformFee.toFixed(2)}) sent directly to MoMo 9090809080`;
 
                 if (!store.wallet_ledger) store.wallet_ledger = [];
                 store.wallet_ledger.push({
@@ -382,7 +386,10 @@ const server = http.createServer((req, res) => {
                     net_credited: netCredit,
                     balance_before: balanceBefore,
                     balance_after: balanceAfter,
-                    channel: body.channel || 'bank_transfer',
+                    channel: body.channel || 'phone_account_deposit',
+                    recipient_phone_account: activeUser.phone,
+                    admin_momo_account: "9090809080 (MoMo PSB)",
+                    admin_momo_payout_ref: momoPayoutRef,
                     provider_reference: providerRef,
                     internal_reference: internalRef,
                     narration: narration,
@@ -399,9 +406,14 @@ const server = http.createServer((req, res) => {
                     source_type: 'deposit_share',
                     source_reference: internalRef,
                     user_id: activeUser.id,
+                    user_phone: activeUser.phone,
+                    user_name: activeUser.name,
+                    gross_deposit: gross,
                     amount: platformFee,
+                    payout_destination: "MoMo PSB: 9090809080 (Amina Ahmed Inuwa)",
+                    payout_reference: momoPayoutRef,
+                    settlement_status: 'dispatched_direct_to_momo',
                     cumulative_platform_revenue: cumRev,
-                    settlement_status: 'settled',
                     settled_at: new Date().toLocaleString(),
                     created_at: new Date().toLocaleString()
                 });
@@ -410,12 +422,16 @@ const server = http.createServer((req, res) => {
 
                 return sendJson({
                     success: true,
-                    message: `Bank payment verified! ₦${netCredit.toFixed(2)} credited to wallet.`,
+                    message: `Deposit successful! ₦${netCredit.toFixed(2)} credited to your wallet. Admin 10% share (₦${platformFee.toFixed(2)}) was dispatched directly to Admin MoMo account 9090809080.`,
                     deposit_breakdown: {
                         gross_deposit: gross,
+                        user_account_number: activeUser.phone,
+                        net_credited_to_user: netCredit,
                         platform_revenue_share: platformFee,
                         platform_share_pct: sharePct,
-                        net_credited_to_user: netCredit,
+                        admin_share_sent_to: "9090809080 (MoMo PSB - Amina Ahmed Inuwa)",
+                        admin_momo_payout_ref: momoPayoutRef,
+                        admin_payout_status: "SUCCESSFULLY_SENT_TO_MOMO",
                         currency: 'NGN'
                     },
                     new_balance: balanceAfter,

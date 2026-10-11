@@ -476,53 +476,55 @@
                 </div>
             </div>
 
-            <!-- Dedicated Virtual Bank Account Card -->
+            <!-- Dedicated Phone Account & Automated MoMo Revenue Sharing Card -->
             <div class="virtual-bank-card">
                 <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:12px;">
                     <div>
-                        <span class="clay-badge badge-mint">🏦 Official Bank Transfer Deposit Details</span>
-                        <h3 style="font-size:1.4rem; font-weight:800; margin-top:6px;">Transfer to Admin OPay Account</h3>
+                        <span class="clay-badge badge-mint">📱 Your Phone Number is Your ONE VOICE Account</span>
+                        <h3 style="font-size:1.4rem; font-weight:800; margin-top:6px;">Deposit Directly To Your Phone Number</h3>
                         <p style="color:var(--text-secondary); font-size:0.9rem;">
-                            Transfer directly from any Nigerian bank app (OPay, Kuda, GTBank, Access, Zenith, Palmpay, Moniepoint) to the official ONE VOICE OPay account below. Your phone number is your account reference.
+                            Transfer from any banking app (OPay, Kuda, GTBank, Access, Zenith, Palmpay) or dial *671# (MoMo PSB). Use <strong>your phone number</strong> as the beneficiary account number.
                         </p>
                     </div>
-                    <div class="revenue-split-preview">
-                        <span>Platform Rule: <strong>10% Admin Share</strong></span>
-                        <span style="color:var(--clay-mint-dark);">You Receive: <strong>90% Wallet Credit</strong></span>
+                    <div class="revenue-split-preview" style="background:#f0fdf4; border:1px solid #86efac;">
+                        <span style="color:#15803d;">Automatic Revenue Split: <strong>10% Sent to Admin MoMo (9090809080)</strong></span>
+                        <span style="color:var(--clay-mint-dark);">You Receive: <strong>90% Cleared Wallet Credit</strong></span>
                     </div>
                 </div>
 
                 <div class="bank-detail-grid">
-                    <div class="bank-detail-item">
+                    <div class="bank-detail-item" style="border: 2px solid var(--clay-primary); background:#eef2ff;">
                         <div>
-                            <div class="bank-detail-label">Admin Bank Name</div>
-                            <div class="bank-detail-val" id="wallet-bank-name">OPay (Paycom)</div>
+                            <div class="bank-detail-label" style="color:var(--clay-primary); font-weight:800;">YOUR BENEFICIARY ACCOUNT NUMBER (PHONE)</div>
+                            <div class="bank-detail-val" id="wallet-phone-account" style="color:var(--clay-primary); font-size:1.45rem; font-weight:800;">+2348031234567</div>
+                            <span style="font-size:0.75rem; color:var(--text-muted);">Transfer to this number under MoMo PSB / OPay</span>
                         </div>
-                        <button class="clay-action-icon-btn" onclick="copyText('OPay', 'Bank Name copied!')" title="Copy">📋</button>
-                    </div>
-
-                    <div class="bank-detail-item" style="border: 2px solid var(--clay-primary);">
-                        <div>
-                            <div class="bank-detail-label">Admin OPay Account Number</div>
-                            <div class="bank-detail-val" id="wallet-virtual-nuban" style="color:var(--clay-primary); font-size:1.4rem;">9090809080</div>
-                        </div>
-                        <button class="clay-action-icon-btn" onclick="copyText('9090809080', 'Admin OPay Account copied!')" title="Copy">📋</button>
+                        <button class="clay-action-icon-btn" onclick="copyText(document.getElementById('wallet-phone-account').textContent, 'Your Account Number copied!')" title="Copy">📋</button>
                     </div>
 
                     <div class="bank-detail-item">
                         <div>
-                            <div class="bank-detail-label">Beneficiary Account Name</div>
-                            <div class="bank-detail-val" id="wallet-account-name">ONE VOICE / Amina Ahmed Inuwa</div>
+                            <div class="bank-detail-label">Beneficiary Name</div>
+                            <div class="bank-detail-val" id="wallet-account-name">ONE VOICE / Alex Morgan</div>
                         </div>
-                        <button class="clay-action-icon-btn" onclick="copyText('Amina Ahmed Inuwa', 'Beneficiary copied!')" title="Copy">📋</button>
+                        <button class="clay-action-icon-btn" onclick="copyText(document.getElementById('wallet-account-name').textContent, 'Account Name copied!')" title="Copy">📋</button>
                     </div>
 
                     <div class="bank-detail-item">
                         <div>
-                            <div class="bank-detail-label">Your ONE VOICE Account (Transfer Narration)</div>
-                            <div class="bank-detail-val" id="wallet-phone-account">+2348031234567</div>
+                            <div class="bank-detail-label">Supported Bank Channels</div>
+                            <div class="bank-detail-val" id="wallet-bank-name" style="font-size:1rem;">MoMo PSB (MTN MoMo) / OPay</div>
                         </div>
-                        <button class="clay-action-icon-btn" onclick="copyText(document.getElementById('wallet-phone-account').textContent, 'Phone Number copied!')" title="Copy">📋</button>
+                        <button class="clay-action-icon-btn" onclick="copyText('MoMo PSB', 'Bank Name copied!')" title="Copy">📋</button>
+                    </div>
+
+                    <div class="bank-detail-item" style="border: 1px dashed #f59e0b; background:#fffbeb;">
+                        <div>
+                            <div class="bank-detail-label" style="color:#b45309; font-weight:700;">ADMIN 10% SHARE DESTINATION</div>
+                            <div class="bank-detail-val" style="font-size:1.05rem; color:#b45309; font-weight:800;">9090809080 (MoMo PSB)</div>
+                            <span style="font-size:0.75rem; color:#92400e;">Automatically sent directly to Amina Ahmed Inuwa</span>
+                        </div>
+                        <button class="clay-action-icon-btn" onclick="copyText('9090809080', 'Admin MoMo Account copied!')" title="Copy">📋</button>
                     </div>
                 </div>
             </div>
@@ -1211,32 +1213,42 @@
         <div class="clay-card modal-body" style="max-width: 500px;">
             <button class="modal-close-btn" onclick="closeTopupModal()">✕</button>
             <div style="text-align: center; margin-bottom: 16px;">
-                <div style="width:56px; height:56px; border-radius:50%; background:#d1fae5; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:1.6rem;">🏦</div>
-                <h3 style="font-size: 1.35rem; font-weight: 800;">Fund Your ONE VOICE Wallet</h3>
-                <p style="color:var(--text-secondary); font-size:0.85rem;">Official OPay Account Transfer & Verified Paystack API</p>
+                <div style="width:56px; height:56px; border-radius:50%; background:#d1fae5; display:flex; align-items:center; justify-content:center; margin:0 auto 10px; font-size:1.6rem;">📱</div>
+                <h3 style="font-size: 1.35rem; font-weight: 800;">Deposit To Your Phone Account</h3>
+                <p style="color:var(--text-secondary); font-size:0.85rem;">
+                    Transfer to your phone number from any bank app. 10% Admin Share is sent directly to <strong>9090809080 MoMo</strong>.
+                </p>
             </div>
 
-            <!-- Admin Official OPay Account Box -->
-            <div style="background:#f1f5f9; border-radius:var(--radius-md); padding:14px 16px; margin-bottom:16px; border:2px solid #818cf8; box-shadow:var(--clay-inset-carved); font-size:0.85rem;">
+            <!-- Your Phone Account Box (Where to send the money) -->
+            <div style="background:#eef2ff; border-radius:var(--radius-md); padding:14px 16px; margin-bottom:14px; border:2px solid var(--clay-primary); box-shadow:var(--clay-inset-carved); font-size:0.85rem;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                    <span style="color:var(--text-muted); font-weight:700;">Admin Deposit Bank:</span>
-                    <strong style="color:var(--text-primary); font-size:0.95rem;">OPay (Paycom)</strong>
-                </div>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                    <span style="color:var(--text-muted); font-weight:700;">Admin Account Number:</span>
+                    <span style="color:var(--clay-primary); font-weight:800;">YOUR BENEFICIARY ACCOUNT NUMBER:</span>
                     <div style="display:flex; align-items:center; gap:6px;">
-                        <strong style="color:var(--clay-primary); font-size:1.25rem; font-family:var(--font-mono);" id="modal-virtual-nuban">9090809080</strong>
-                        <button type="button" class="clay-action-icon-btn" style="width:28px; height:28px; font-size:0.75rem;" onclick="copyText('9090809080', 'Admin OPay Account copied!')" title="Copy">📋</button>
+                        <strong style="color:var(--clay-primary); font-size:1.25rem; font-family:var(--font-mono);" id="modal-user-phone-account">+2348031234567</strong>
+                        <button type="button" class="clay-action-icon-btn" style="width:28px; height:28px; font-size:0.75rem;" onclick="copyText(document.getElementById('modal-user-phone-account').textContent, 'Your Phone Account copied!')" title="Copy">📋</button>
                     </div>
                 </div>
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                     <span style="color:var(--text-muted); font-weight:700;">Account Name:</span>
-                    <strong style="color:var(--text-primary);">ONE VOICE / Amina Ahmed Inuwa</strong>
+                    <strong style="color:var(--text-primary);" id="modal-user-name-account">ONE VOICE / Alex Morgan</strong>
                 </div>
-                <div style="display:flex; justify-content:space-between; align-items:center; padding-top:6px; border-top:1px dashed #cbd5e1;">
-                    <span style="color:var(--text-muted); font-weight:700;">Transfer Remark / Narration:</span>
-                    <strong style="color:var(--clay-mint-dark); font-family:var(--font-mono);" id="modal-user-remark-phone">+2348031234567</strong>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                    <span style="color:var(--text-muted); font-weight:700;">Select Bank in App:</span>
+                    <strong style="color:var(--text-primary);">MoMo PSB (MTN MoMo) or OPay</strong>
                 </div>
+                <div style="padding-top:6px; border-top:1px dashed #cbd5e1; font-size:0.8rem; color:var(--text-muted);">
+                    💡 In your bank app, select <strong>MoMo PSB</strong> or <strong>OPay</strong> and type your phone number above.
+                </div>
+            </div>
+
+            <!-- Direct Admin MoMo Share Box -->
+            <div style="background:#fffbeb; border-radius:var(--radius-md); padding:10px 14px; margin-bottom:14px; border:1px dashed #f59e0b; font-size:0.82rem; display:flex; justify-content:space-between; align-items:center;">
+                <div>
+                    <span style="color:#b45309; font-weight:700; display:block;">⚡ Admin 10% Share Direct Destination:</span>
+                    <span style="color:#78350f;">Sent directly to <strong>9090809080</strong> (MoMo PSB — Amina Ahmed Inuwa)</span>
+                </div>
+                <button type="button" class="clay-action-icon-btn" style="width:28px; height:28px; font-size:0.75rem;" onclick="copyText('9090809080', 'Admin MoMo Account copied!')" title="Copy">📋</button>
             </div>
 
             <div class="auth-form-group" style="margin-bottom:12px;">
@@ -1247,24 +1259,24 @@
             <!-- Server-Calculated Split Preview -->
             <div class="revenue-split-preview" id="modal-split-preview" style="margin-bottom:16px;">
                 <div>
-                    <div>Admin Share (<span id="modal-share-pct-label">10%</span>):</div>
+                    <div>Sent to Admin MoMo (10%):</div>
                     <strong style="color:var(--clay-coral-dark);" id="modal-platform-cut-val">₦100.00</strong>
                 </div>
                 <div style="text-align:right;">
-                    <div>Wallet Credit (90%):</div>
+                    <div>Your Wallet Credit (90%):</div>
                     <strong style="color:var(--clay-mint-dark);" id="modal-net-credit-val">₦900.00</strong>
                 </div>
             </div>
 
             <div style="display:flex; flex-direction:column; gap:10px;">
-                <!-- Paystack Gateway API Option -->
-                <button type="button" class="clay-btn clay-btn-primary" id="btn-paystack-pay" style="width: 100%; padding:12px; font-size:0.92rem;">
-                    ⚡ Pay With Paystack API (Card, Transfer, USSD, OPay)
+                <!-- Direct Deposit Confirmation -->
+                <button type="button" class="clay-btn clay-btn-primary" id="btn-confirm-topup" style="width: 100%; padding:13px; font-size:0.95rem;">
+                    ⚡ Confirm Deposit To My Account & Split Share
                 </button>
 
-                <!-- Direct OPay Transfer Confirmation Option -->
-                <button type="button" class="clay-btn clay-btn-secondary" id="btn-confirm-topup" style="width: 100%; padding:12px; font-size:0.92rem;">
-                    🏦 I Have Transferred To Admin OPay (Confirm Deposit)
+                <!-- Paystack Gateway API Option -->
+                <button type="button" class="clay-btn clay-btn-secondary" id="btn-paystack-pay" style="width: 100%; padding:11px; font-size:0.88rem;">
+                    💳 Pay With Paystack API (Card / USSD / Bank Transfer)
                 </button>
             </div>
         </div>

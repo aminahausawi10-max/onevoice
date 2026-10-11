@@ -37,10 +37,10 @@
     "nigeria_call_rate_per_min": 12,
     "carrier_wholesale_cost_per_min": 8.5,
     "currency": "NGN",
-    "virtual_bank_provider": "OPay (Paycom)",
-    "admin_bank_name": "OPay (Paycom)",
+    "virtual_bank_provider": "MoMo PSB / OPay (Phone Number Banking)",
+    "admin_bank_name": "MoMo PSB (MTN MoMo)",
     "admin_account_number": "9090809080",
-    "admin_account_name": "ONE VOICE / Amina Ahmed Inuwa",
+    "admin_account_name": "Amina Ahmed Inuwa (ONE VOICE Admin)",
     "paystack_public_key": "pk_test_a8e259b3294c7b884d5df688172082b2024b176f"
   },
   "transactions": [],
