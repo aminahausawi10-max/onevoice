@@ -158,14 +158,6 @@ try {
     if (fs.existsSync(jsAppPath)) {
         staticAssets['/js/app.js'] = fs.readFileSync(jsAppPath, 'utf8');
     }
-    const jsDtmfPath = path.join(__dirname, 'js', 'dtmf.js');
-    if (fs.existsSync(jsDtmfPath)) {
-        staticAssets['/js/dtmf.js'] = fs.readFileSync(jsDtmfPath, 'utf8');
-    }
-    const jsTransPath = path.join(__dirname, 'js', 'translations.js');
-    if (fs.existsSync(jsTransPath)) {
-        staticAssets['/js/translations.js'] = fs.readFileSync(jsTransPath, 'utf8');
-    }
 } catch (e) {
     console.error('Error preloading static assets:', e);
 }

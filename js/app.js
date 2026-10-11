@@ -24,6 +24,282 @@ window.copyText = (text, message = 'Copied to clipboard!') => {
     }
 };
 
+// ----------------------------------------------------
+// SoundEngine - Telephony DTMF & Audio Synthesizer
+// ----------------------------------------------------
+class SoundEngine {
+    constructor() {
+        this.ctx = null;
+        this.ringTimer = null;
+        this.isRinging = false;
+        this.dtmfFrequencies = {
+            '1': [697, 1209], '2': [697, 1336], '3': [697, 1477],
+            '4': [770, 1209], '5': [770, 1336], '6': [770, 1477],
+            '7': [852, 1209], '8': [852, 1336], '9': [852, 1477],
+            '*': [941, 1209], '0': [941, 1336], '#': [941, 1477]
+        };
+    }
+
+    init() {
+        if (!this.ctx) {
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            if (AudioContext) this.ctx = new AudioContext();
+        }
+        if (this.ctx && this.ctx.state === 'suspended') {
+            this.ctx.resume();
+        }
+    }
+
+    playDtmf(key) {
+        this.init();
+        if (!this.ctx) return;
+        const freqs = this.dtmfFrequencies[key];
+        if (!freqs) return;
+
+        const osc1 = this.ctx.createOscillator();
+        const osc2 = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+
+        osc1.type = 'sine';
+        osc1.frequency.setValueAtTime(freqs[0], this.ctx.currentTime);
+        osc2.type = 'sine';
+        osc2.frequency.setValueAtTime(freqs[1], this.ctx.currentTime);
+
+        gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.18);
+
+        osc1.connect(gain);
+        osc2.connect(gain);
+        gain.connect(this.ctx.destination);
+
+        osc1.start();
+        osc2.start();
+        osc1.stop(this.ctx.currentTime + 0.18);
+        osc2.stop(this.ctx.currentTime + 0.18);
+    }
+
+    startRingback() {
+        this.init();
+        if (!this.ctx || this.isRinging) return;
+        this.isRinging = true;
+
+        const playRingCycle = () => {
+            if (!this.isRinging || !this.ctx) return;
+
+            const osc1 = this.ctx.createOscillator();
+            const osc2 = this.ctx.createOscillator();
+            const gain = this.ctx.createGain();
+
+            osc1.type = 'sine';
+            osc1.frequency.setValueAtTime(440, this.ctx.currentTime);
+            osc2.type = 'sine';
+            osc2.frequency.setValueAtTime(480, this.ctx.currentTime);
+
+            gain.gain.setValueAtTime(0.12, this.ctx.currentTime);
+            gain.gain.setValueAtTime(0.12, this.ctx.currentTime + 1.2);
+            gain.gain.exponentialRampToValueAtTime(0.0001, this.ctx.currentTime + 1.3);
+
+            osc1.connect(gain);
+            osc2.connect(gain);
+            gain.connect(this.ctx.destination);
+
+            osc1.start();
+            osc2.start();
+            osc1.stop(this.ctx.currentTime + 1.3);
+            osc2.stop(this.ctx.currentTime + 1.3);
+
+            if (this.isRinging) {
+                this.ringTimer = setTimeout(playRingCycle, 3000);
+            }
+        };
+
+        playRingCycle();
+    }
+
+    stopRingback() {
+        this.isRinging = false;
+        if (this.ringTimer) clearTimeout(this.ringTimer);
+    }
+
+    playConnectBeep() {
+        this.init();
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+        osc.frequency.exponentialRampToValueAtTime(1200, this.ctx.currentTime + 0.15);
+        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.2);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.2);
+    }
+
+    playEndCallTone() {
+        this.init();
+        if (!this.ctx) return;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(450, this.ctx.currentTime);
+        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+        gain.gain.setValueAtTime(0.2, this.ctx.currentTime + 0.2);
+        gain.gain.exponentialRampToValueAtTime(0.001, this.ctx.currentTime + 0.3);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start();
+        osc.stop(this.ctx.currentTime + 0.3);
+    }
+}
+window.soundEngine = new SoundEngine();
+
+// ----------------------------------------------------
+// Localization Manager (EN / HA)
+// ----------------------------------------------------
+const i18n = {
+    en: {
+        appName: "ONE VOICE",
+        welcomeTitle: "Global Calling Without Borders. Pure Crystal Voice.",
+        welcomeDesc: "Call real mobile phones and landlines in 190+ countries with HD audio clarity. Transparent per-second billing from your secure digital wallet.",
+        createAccount: "Create Account",
+        login: "Login",
+        signIn: "Sign In",
+        register: "Register",
+        logout: "Logout",
+        dashboard: "Dashboard",
+        memberId: "Member ID",
+        navHome: "Home",
+        navDialer: "Make Call",
+        navContacts: "Contacts",
+        navWallet: "My Wallet",
+        navRates: "Call Rates",
+        navSettings: "Settings",
+        makeCall: "Make Call",
+        rechargeWallet: "Fund Wallet",
+        dialNow: "Dial Now",
+        exploreRates: "Explore Call Rates",
+        fullName: "Full Name",
+        phoneNumber: "Phone Number",
+        emailAddress: "Email Address",
+        password: "Password",
+        confirmPassword: "Confirm Password",
+        termsAgreement: "I accept the Terms and Conditions and Privacy Policy",
+        alreadyAccount: "Already have an account? Login",
+        welcomeBack: "Welcome back",
+        activeCallingCredit: "Available Calling Credit",
+        recentCalls: "Recent Call Logs",
+        walletTransactions: "Wallet Transactions",
+        topUpNow: "Instant Top-Up",
+        settingsTitle: "Account Settings & Security",
+        editProfile: "Edit Profile",
+        changePhone: "Change Phone Number",
+        changePassword: "Change Password",
+        languagePreference: "Language Preference",
+        contactsTitle: "Saved Contacts",
+        addContact: "Add New Contact",
+        contactName: "Contact Name",
+        contactPhone: "Phone Number",
+        saveContact: "Save Contact",
+        logoutConfirmTitle: "Confirm Logout",
+        logoutConfirmMsg: "Are you sure you want to end your secure session?",
+        cancel: "Cancel",
+        confirmLogout: "Yes, Logout"
+    },
+    ha: {
+        appName: "ONE VOICE",
+        welcomeTitle: "Kiran Ƙasashen Waje Ba Tare Da Shamaki Ba. Muryar Zinare.",
+        welcomeDesc: "Kira layukan wayar salula da na gida a ƙasashe sama da 190 da tsaftatacciyar muryar HD. Caji na gaskiya a kowace daƙiƙa daga walat ɗinka mai aminci.",
+        createAccount: "Buɗe Sabon Asusu",
+        login: "Shiga Asusu",
+        signIn: "Shiga",
+        register: "Yi Rajista",
+        logout: "Fita Daga Asusu",
+        dashboard: "Dandalin Asusu",
+        memberId: "Lambar Zama Mamba",
+        navHome: "Babban Dandali",
+        navDialer: "Yi Kira",
+        navContacts: "Lambobi",
+        navWallet: "Walat",
+        navRates: "Farashi",
+        navSettings: "Saituna",
+        makeCall: "Yi Kira",
+        rechargeWallet: "Sanya Kuɗi a Walat",
+        dialNow: "Kira Yanzu",
+        exploreRates: "Duba Farashin Kira",
+        fullName: "Cikakken Suna",
+        phoneNumber: "Lambar Waya",
+        emailAddress: "Adireshin Imel",
+        password: "Kalmar Sirri",
+        confirmPassword: "Tabbatar da Kalmar Sirri",
+        termsAgreement: "Na yarda da Ka'idojin Amfani da Dokar Tsare Sirri",
+        alreadyAccount: "Kana da asusu tuni? Shiga nan",
+        welcomeBack: "Barka da dawowa",
+        activeCallingCredit: "Ragowar Kuɗin Kira a Walat",
+        recentCalls: "Tarihin Kiran Kwanan Nan",
+        walletTransactions: "Ma'amalolin Walat",
+        topUpNow: "Sanya Kuɗi Nan Take",
+        settingsTitle: "Saitunan Asusu da Tsaro",
+        editProfile: "Gyara Bayanai",
+        changePhone: "Sauya Lambar Waya",
+        changePassword: "Sauya Kalmar Sirri",
+        languagePreference: "Zaɓin Harshe",
+        contactsTitle: "Lambobin Sadarwa da Aka Ajiye",
+        addContact: "Ƙara Sabuwar Lamba",
+        contactName: "Sunan Mai Lamba",
+        contactPhone: "Lambar Waya",
+        saveContact: "Ajiye Lamba",
+        logoutConfirmTitle: "Tabbatar da Fita",
+        logoutConfirmMsg: "Shin da gaske kana son rufe wannan zama na asusunka?",
+        cancel: "Soke",
+        confirmLogout: "Eh, Fita Yanzu"
+    }
+};
+
+class LocalizationManager {
+    constructor() {
+        this.currentLang = localStorage.getItem('onevoice_lang') || 'en';
+    }
+
+    setLanguage(lang) {
+        if (!i18n[lang]) return;
+        this.currentLang = lang;
+        localStorage.setItem('onevoice_lang', lang);
+        this.applyTranslations();
+    }
+
+    t(key) {
+        return i18n[this.currentLang]?.[key] || i18n['en']?.[key] || key;
+    }
+
+    applyTranslations() {
+        document.querySelectorAll('[data-i18n]').forEach(el => {
+            const key = el.getAttribute('data-i18n');
+            const translation = this.t(key);
+            if (translation) {
+                if (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA') {
+                    el.placeholder = translation;
+                } else {
+                    el.textContent = translation;
+                }
+            }
+        });
+
+        const langSelectors = document.querySelectorAll('.lang-select-btn');
+        langSelectors.forEach(btn => {
+            if (btn.getAttribute('data-lang') === this.currentLang) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+
+        window.dispatchEvent(new CustomEvent('languageChanged', { detail: { lang: this.currentLang } }));
+    }
+}
+window.locManager = new LocalizationManager();
+
 document.addEventListener('DOMContentLoaded', () => {
     // ----------------------------------------------------
     // State Management
