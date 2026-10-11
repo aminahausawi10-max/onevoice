@@ -88,5 +88,6 @@
       "language": "en",
       "is_verified": true
     }
-  ]
+  ],
+  "active_user_id": null
 }

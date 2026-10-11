@@ -494,7 +494,13 @@ const server = http.createServer((req, res) => {
                 },
                 ledger: (store.wallet_ledger || []).slice().reverse(),
                 revenue_records: (store.platform_revenue_ledger || []).slice().reverse(),
-                users: [store.user].concat(store.users || []),
+                users: getAllUsers(store).map(u => {
+                    const w = getUserWallet(u.id, store);
+                    return {
+                        ...u,
+                        balance: parseFloat(w.balance || 0)
+                    };
+                }),
                 call_summary: {
                     total_calls: (store.call_logs || []).length,
                     recent_calls: (store.call_logs || []).slice(-10).reverse()

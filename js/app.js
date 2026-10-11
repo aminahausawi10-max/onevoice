@@ -212,6 +212,21 @@ document.addEventListener('DOMContentLoaded', () => {
         navigateToPage(hash);
     });
 
+    window.navigateToPage = navigateToPage;
+
+    // Explicit listeners for Login and Create Account buttons (navbar & hero)
+    const navBtnLogin = document.getElementById('nav-btn-login');
+    if (navBtnLogin) navBtnLogin.addEventListener('click', () => navigateToPage('login'));
+
+    const navBtnRegister = document.getElementById('nav-btn-register');
+    if (navBtnRegister) navBtnRegister.addEventListener('click', () => navigateToPage('register'));
+
+    const heroBtnLogin = document.getElementById('hero-btn-login');
+    if (heroBtnLogin) heroBtnLogin.addEventListener('click', () => navigateToPage('login'));
+
+    const heroBtnCreateAccount = document.getElementById('hero-btn-create-account');
+    if (heroBtnCreateAccount) heroBtnCreateAccount.addEventListener('click', () => navigateToPage('register'));
+
     if (brandLogo) {
         brandLogo.addEventListener('click', (e) => {
             e.preventDefault();
@@ -775,9 +790,75 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (inputAdminCallRate) inputAdminCallRate.value = c.nigeria_call_rate_per_min;
 
                 renderAdminLedger(data.ledger || []);
+                renderAdminUsers(data.users || []);
             }
         } catch (err) {}
     }
+
+    function renderAdminUsers(users) {
+        const adminUsersBody = document.getElementById('admin-users-body');
+        const adminMembersCount = document.getElementById('admin-members-count');
+        if (adminMembersCount) {
+            adminMembersCount.textContent = `${users.length} Registered Member${users.length === 1 ? '' : 's'}`;
+        }
+        if (!adminUsersBody) return;
+        adminUsersBody.innerHTML = '';
+
+        if (!users || users.length === 0) {
+            adminUsersBody.innerHTML = `<tr><td colspan="8" style="text-align:center;">No registered members found in database</td></tr>`;
+            return;
+        }
+
+        users.forEach(u => {
+            const tr = document.createElement('tr');
+            const bal = parseFloat(u.balance || 0);
+            const initial = (u.name || 'U').charAt(0).toUpperCase();
+            const isAdmin = u.role === 'admin';
+
+            tr.innerHTML = `
+                <td>
+                    <span class="member-id-tag" style="font-size:0.8rem; padding:4px 10px;">${u.member_id || 'OV-' + u.id}</span>
+                </td>
+                <td>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <div class="contact-avatar" style="width:32px; height:32px; font-size:0.85rem; border-radius:50%; background:#e0e7ff; color:var(--clay-primary); display:flex; align-items:center; justify-content:center; font-weight:700;">${initial}</div>
+                        <strong>${u.name}</strong>
+                    </div>
+                </td>
+                <td style="font-family:var(--font-mono); font-weight:700; color:var(--clay-primary);">
+                    ${u.phone}
+                    <button class="clay-action-icon-btn" style="width:26px; height:26px; font-size:0.75rem; margin-left:6px;" onclick="copyText('${u.phone}', 'Phone number copied!')" title="Copy">📋</button>
+                </td>
+                <td style="font-family:var(--font-mono); font-size:0.85rem;">
+                    ${u.virtual_account_number || ('9' + (u.phone || '').replace(/[^0-9]/g, '').slice(-10))}
+                </td>
+                <td style="font-size:0.85rem; color:var(--text-secondary);">${u.email}</td>
+                <td>
+                    <span class="clay-badge ${isAdmin ? 'badge-primary' : 'badge-mint'}" style="font-size:0.75rem;">
+                        ${isAdmin ? '👑 Admin' : '👤 Member'}
+                    </span>
+                </td>
+                <td style="font-family:var(--font-mono); font-weight:800; color:var(--clay-mint-dark);">
+                    ₦${bal.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                </td>
+                <td>
+                    <button class="clay-btn clay-btn-primary" style="padding:4px 10px; font-size:0.75rem;" onclick="quickTransferTo('${u.phone}')">
+                        💸 Transfer
+                    </button>
+                </td>
+            `;
+            adminUsersBody.appendChild(tr);
+        });
+    }
+
+    window.quickTransferTo = (phone) => {
+        const transferPhoneInput = document.getElementById('transfer-recipient-phone');
+        if (transferPhoneInput) {
+            transferPhoneInput.value = phone;
+            transferPhoneInput.dispatchEvent(new Event('input'));
+        }
+        window.openTransferModal();
+    };
 
     function renderAdminLedger(ledger) {
         if (!adminLedgerBody) return;

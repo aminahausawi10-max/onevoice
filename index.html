@@ -81,10 +81,10 @@
 
                 <!-- Auth Buttons for Public Mode -->
                 <div id="public-auth-btns" style="display: flex; gap: 8px;">
-                    <button class="clay-btn clay-btn-white" style="padding: 9px 18px; font-size: 0.88rem;" id="nav-btn-login" data-i18n="login">
+                    <button class="clay-btn clay-btn-white nav-page-btn" data-page="login" style="padding: 9px 18px; font-size: 0.88rem;" id="nav-btn-login" data-i18n="login">
                         Login
                     </button>
-                    <button class="clay-btn clay-btn-primary" style="padding: 9px 18px; font-size: 0.88rem;" id="nav-btn-register" data-i18n="createAccount">
+                    <button class="clay-btn clay-btn-primary nav-page-btn" data-page="register" style="padding: 9px 18px; font-size: 0.88rem;" id="nav-btn-register" data-i18n="createAccount">
                         Create Account
                     </button>
                 </div>
@@ -123,10 +123,10 @@
                     </p>
 
                     <div class="hero-actions">
-                        <button class="clay-btn clay-btn-primary" id="hero-btn-create-account" data-i18n="createAccount">
+                        <button class="clay-btn clay-btn-primary nav-page-btn" data-page="register" id="hero-btn-create-account" data-i18n="createAccount">
                             Create Account
                         </button>
-                        <button class="clay-btn clay-btn-white" id="hero-btn-login" data-i18n="login">
+                        <button class="clay-btn clay-btn-white nav-page-btn" data-page="login" id="hero-btn-login" data-i18n="login">
                             Login
                         </button>
                         <button class="clay-btn clay-btn-secondary nav-page-btn" data-page="dialer" data-i18n="makeCall">
@@ -671,6 +671,37 @@
                         </button>
                     </div>
                 </form>
+            </div>
+
+            <!-- Registered Platform Members Directory -->
+            <div class="clay-card table-container" style="margin-bottom:32px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:16px; margin-bottom:20px;">
+                    <div>
+                        <h3 style="font-size:1.3rem; font-weight:800;">👥 Registered Platform Members Directory</h3>
+                        <p style="color:var(--text-secondary); font-size:0.88rem;">All verified accounts with phone account numbers, virtual NUBANs, and wallet balances.</p>
+                    </div>
+                    <span class="clay-badge badge-mint" id="admin-members-count">3 Registered Members</span>
+                </div>
+
+                <div style="overflow-x: auto;">
+                    <table class="clay-table">
+                        <thead>
+                            <tr>
+                                <th>Member ID</th>
+                                <th>Name & Profile</th>
+                                <th>Phone (Account No.)</th>
+                                <th>Virtual Bank NUBAN</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Wallet Balance</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="admin-users-body">
+                            <!-- Populated dynamically via api/admin.php -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
 
             <!-- Global Transaction Audit & Reconciliation Ledger -->

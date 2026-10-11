@@ -30,7 +30,11 @@ if ($method === 'GET') {
 
     $ledgerEntries = $store['wallet_ledger'] ?? [];
     $callLogs = $store['call_logs'] ?? [];
-    $users = array_merge([$store['user']], $store['users'] ?? []);
+    $users = array_map(function($u) use ($store) {
+        $bal = floatval($store['wallets'][$u['id']]['balance'] ?? ($u['id'] === 1 ? ($store['wallet']['balance'] ?? 0) : 0));
+        $u['balance'] = $bal;
+        return $u;
+    }, array_merge([$store['user']], $store['users'] ?? []));
 
     // Aggregate statistics
     foreach ($ledgerEntries as $entry) {
