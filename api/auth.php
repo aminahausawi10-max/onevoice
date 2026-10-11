@@ -228,27 +228,24 @@ if ($method === 'POST') {
             sendResponse(["success" => false, "message" => "Invalid email/phone or password."], 401);
         }
 
-        // Generate 6-digit OTP
-        $otpCode = '742918'; // Standard predictable test code, with actual random generation
-        $otpCode = $generateOtp();
-        $expiresAt = time() + 300; // 5 minutes
-
-        $_SESSION['pending_otp'] = [
-            "user_id" => $matchedUser['id'],
-            "identifier" => $identifier,
-            "code" => $otpCode,
-            "expires_at" => $expiresAt,
-            "attempts" => 0,
-            "user" => $matchedUser
-        ];
+        // Direct login without OTP requirement
+        $_SESSION['user_id'] = $matchedUser['id'];
+        $_SESSION['user_token'] = bin2hex(random_bytes(24));
 
         sendResponse([
             "success" => true,
-            "otp_sent" => true,
-            "identifier" => $identifier,
-            "expires_in_seconds" => 300,
-            "debug_hint" => "Demo OTP: {$otpCode}",
-            "message" => "A 6-digit verification code has been dispatched to {$identifier}."
+            "authenticated" => true,
+            "message" => "Welcome back, " . $matchedUser['name'] . "!",
+            "token" => $_SESSION['user_token'],
+            "user" => [
+                "id" => $matchedUser['id'],
+                "member_id" => $matchedUser['member_id'] ?? 'OV-784920',
+                "name" => $matchedUser['name'],
+                "phone" => $matchedUser['phone'],
+                "email" => $matchedUser['email'],
+                "language" => $matchedUser['language'] ?? 'en',
+                "is_verified" => true
+            ]
         ]);
     }
 

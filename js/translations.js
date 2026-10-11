@@ -52,7 +52,7 @@ const i18n = {
         loginTitle: "Sign in to ONE VOICE",
         loginSubtitle: "Enter your registered email address or phone number",
         identifierPlaceholder: "Email Address or Phone Number",
-        sendOtp: "Send OTP & Login",
+        sendOtp: "Sign In",
         forgotPassword: "Forgot Password?",
         newToPlatform: "New to ONE VOICE? Create Account",
         
@@ -156,7 +156,7 @@ const i18n = {
         loginTitle: "Shiga Asusunka na ONE VOICE",
         loginSubtitle: "Shigar da adireshin imel ko lambar wayar da ka yi rajista da ita",
         identifierPlaceholder: "Adireshin Imel ko Lambar Waya",
-        sendOtp: "Aiko da OTP & Shiga",
+        sendOtp: "Shiga Ciki",
         forgotPassword: "Ka manta kalmar sirri?",
         newToPlatform: "Sabon shiga ne a ONE VOICE? Buɗe Asusu",
         

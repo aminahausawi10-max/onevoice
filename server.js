@@ -868,15 +868,16 @@ const server = http.createServer((req, res) => {
                         return sendJson({ success: false, message: 'No registered ONE VOICE account found matching this identifier.' }, 404);
                     }
 
-                    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-                    otpSessions.set(id, { code: otp, user: matched, expires: Date.now() + 300000, attempts: 0 });
+                    // Direct login without OTP requirement
+                    store.active_user_id = matched.id;
+                    saveStore(store);
+
                     return sendJson({
                         success: true,
-                        otp_sent: true,
-                        identifier: id,
-                        expires_in_seconds: 300,
-                        debug_hint: `Demo OTP: ${otp}`,
-                        message: `A 6-digit verification code has been dispatched to ${matched.phone}.`
+                        authenticated: true,
+                        message: `Welcome back, ${matched.name}!`,
+                        user: matched,
+                        token: 'ov_sess_' + matched.id
                     });
                 }
 

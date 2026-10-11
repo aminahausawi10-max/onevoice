@@ -385,7 +385,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
             const btn = document.getElementById('btn-submit-login');
             btn.disabled = true;
-            btn.textContent = 'Verifying...';
+            btn.textContent = 'Signing in...';
 
             try {
                 const res = await fetch('api/auth.php', {
@@ -395,16 +395,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 const data = await res.json();
 
-                if (data.success && data.otp_sent) {
+                if (data.success && data.user) {
+                    currentUser = data.user;
+                    setAuthenticatedUI(currentUser);
+                    showToast(data.message || `Welcome back, ${data.user.name}!`, 'success');
+                    navigateToPage('home');
+                } else if (data.success && data.otp_sent) {
                     pendingLoginIdentifier = id;
                     const otpTarget = document.getElementById('otp-target-display');
                     if (otpTarget) otpTarget.textContent = id;
 
                     showToast(data.message, 'success');
-                    if (data.debug_hint) {
-                        setTimeout(() => showToast(`🔑 ${data.debug_hint}`, 'info'), 1000);
-                    }
-
                     navigateToPage('otp');
                     startOtpTimer(data.expires_in_seconds || 300);
                 } else {
@@ -414,7 +415,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Login server error', 'error');
             } finally {
                 btn.disabled = false;
-                btn.textContent = 'Send OTP & Login';
+                btn.textContent = 'Sign In';
             }
         });
     }
