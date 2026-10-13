@@ -1205,14 +1205,31 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnWelcomeInstall) btnWelcomeInstall.addEventListener('click', promptPwaInstall);
     if (btnInstallBanner) btnInstallBanner.addEventListener('click', promptPwaInstall);
     const btnGateInstall = document.getElementById('btn-gate-install-action');
+    const gatePostInstallOptions = document.getElementById('gate-post-install-options');
+
+    function revealPostInstallOptions() {
+        if (gatePostInstallOptions) {
+            gatePostInstallOptions.style.display = 'block';
+        }
+        if (btnGateInstall) {
+            btnGateInstall.innerHTML = '✓ App Installed';
+            btnGateInstall.style.background = '#059669';
+        }
+    }
+
     if (btnGateInstall) {
         btnGateInstall.addEventListener('click', async () => {
             await promptPwaInstall();
-            setTimeout(() => {
-                navigateToPage('register');
-            }, 600);
+            // Show the circled options (Continue to Register & Sign In) right after user installs!
+            revealPostInstallOptions();
         });
     }
+
+    // If opened as installed PWA (standalone)
+    if (isStandalone) {
+        revealPostInstallOptions();
+    }
+
     const btnGateRegister = document.getElementById('btn-gate-register-action');
     if (btnGateRegister) {
         btnGateRegister.addEventListener('click', () => {
@@ -1226,10 +1243,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (btnCloseIosModal) btnCloseIosModal.addEventListener('click', () => {
         if (iosModal) iosModal.classList.remove('active');
+        revealPostInstallOptions();
     });
     if (btnDoneIosModal) btnDoneIosModal.addEventListener('click', () => {
         if (iosModal) iosModal.classList.remove('active');
-        navigateToPage('register');
+        revealPostInstallOptions();
     });
 
     window.addEventListener('appinstalled', () => {
@@ -1238,7 +1256,7 @@ document.addEventListener('DOMContentLoaded', () => {
         localStorage.setItem('gate_dismissed', 'true');
         showNotification('ONE VOICE App installed successfully!', 'success');
         deferredPrompt = null;
-        navigateToPage('register');
+        revealPostInstallOptions();
     });
 
     // Boot & Initial Session Check
