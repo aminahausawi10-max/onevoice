@@ -190,6 +190,21 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
 
+        // Update Popover menu active state
+        document.querySelectorAll('.popover-menu-item').forEach(item => {
+            if (item.getAttribute('data-page') === pageName) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+
+        // Highlight header settings button when active
+        const btnHeaderSettings = document.getElementById('header-btn-settings');
+        if (btnHeaderSettings) {
+            btnHeaderSettings.style.background = (pageName === 'settings') ? 'rgba(255, 255, 255, 0.25)' : 'transparent';
+        }
+
         // Close drawer if open
         closeDrawer();
     }

@@ -36,9 +36,11 @@
                 </div>
                 <div class="brand-sub-title">International Calls</div>
             </div>
-            <div class="header-mins-badge" id="header-mins-display">
-                <span id="header-user-mins">120 Minutes</span>
-            </div>
+            <button class="header-icon-btn nav-page-btn" data-page="settings" id="header-btn-settings" title="Settings" aria-label="Settings">
+                <svg viewBox="0 0 24 24" width="26" height="26" fill="#ffffff">
+                    <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                </svg>
+            </button>
         </header>
 
         <!-- Floating Popover Menu (Directly matching user design reference) -->
@@ -770,12 +772,20 @@
 
         <!-- ====================================================
              BOTTOM NAVIGATION DOCK (Shown when authenticated)
-             ==================================================== -->
-        <!-- ====================================================
-             BOTTOM NAVIGATION DOCK (Image 1 Style)
-             Contact | Recent Call | Dial (Floating Pill) | Bundles | Settings
+             HOME | CONTACT | DIAL | BUNDLE
              ==================================================== -->
         <nav class="mobile-bottom-nav" id="mobile-bottom-nav" style="display: none;">
+            <!-- 1. HOME -->
+            <button class="bottom-nav-item nav-page-btn" data-page="home">
+                <span class="bottom-nav-icon">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                    </svg>
+                </span>
+                <span>Home</span>
+            </button>
+
+            <!-- 2. CONTACT -->
             <button class="bottom-nav-item nav-page-btn" data-page="contacts">
                 <span class="bottom-nav-icon">
                     <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
@@ -785,16 +795,7 @@
                 <span>Contact</span>
             </button>
 
-            <button class="bottom-nav-item nav-page-btn" data-page="calls">
-                <span class="bottom-nav-icon">
-                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                        <circle cx="12" cy="12" r="10"></circle>
-                        <polyline points="12 6 12 12 14 14"></polyline>
-                    </svg>
-                </span>
-                <span>Recent Call</span>
-            </button>
-
+            <!-- 3. DIAL (Center Floating Green Bubble) -->
             <button class="bottom-nav-item bottom-nav-dial-center nav-page-btn active" data-page="dialer">
                 <span class="bottom-nav-dial-bubble">
                     <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
@@ -812,22 +813,14 @@
                 <span>Dial</span>
             </button>
 
+            <!-- 4. BUNDLE -->
             <button class="bottom-nav-item nav-page-btn" data-page="wallet">
                 <span class="bottom-nav-icon">
                     <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
                         <path d="M4 10h12v2H4zm0-4h12v2H4zm0 8h8v2H4zm10 0v-1.5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5V14h1c.55 0 1 .45 1 1v6c0 .55-.45 1-1 1h-6c-.55 0-1-.45-1-1v-6c0-.55.45-1 1-1h1zm2 0h2v-1.5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5V14z"/>
                     </svg>
                 </span>
-                <span>Bundles</span>
-            </button>
-
-            <button class="bottom-nav-item nav-page-btn" data-page="settings">
-                <span class="bottom-nav-icon">
-                    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
-                        <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
-                    </svg>
-                </span>
-                <span>Settings</span>
+                <span>Bundle</span>
             </button>
         </nav>
 
