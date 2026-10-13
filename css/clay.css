@@ -90,19 +90,28 @@ html, body {
 }
 
 .header-icon-btn {
-    background: none;
+    width: 38px;
+    height: 38px;
+    border-radius: 50%;
+    background: #ffffff;
     border: none;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #ffffff;
-    padding: 4px;
-    border-radius: 8px;
-    transition: background 0.15s ease;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.16);
+    transition: transform 0.15s ease, background 0.15s ease;
+    flex-shrink: 0;
+    padding: 0;
 }
 .header-icon-btn:hover {
-    background: rgba(255, 255, 255, 0.15);
+    background: #f1f5f9;
+}
+.header-icon-btn:active {
+    transform: scale(0.92);
+}
+.header-icon-btn svg {
+    fill: #006b38;
 }
 
 .header-center-brand {
@@ -298,25 +307,6 @@ html, body {
     stroke: var(--primary-blue);
     stroke-width: 2.2;
     stroke-linecap: round;
-}
-
-.header-icon-btn {
-    width: 38px;
-    height: 38px;
-    border-radius: 50%;
-    background: #f8fafc;
-    border: 1px solid var(--border-light);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1.15rem;
-    cursor: pointer;
-    color: var(--text-primary);
-    transition: all 0.2s ease;
-}
-
-.header-icon-btn:hover {
-    background: #f1f5f9;
 }
 
 /* ==========================================================

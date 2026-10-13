@@ -202,7 +202,7 @@ document.addEventListener('DOMContentLoaded', () => {
         // Highlight header settings button when active
         const btnHeaderSettings = document.getElementById('header-btn-settings');
         if (btnHeaderSettings) {
-            btnHeaderSettings.style.background = (pageName === 'settings') ? 'rgba(255, 255, 255, 0.25)' : 'transparent';
+            btnHeaderSettings.style.background = (pageName === 'settings') ? '#e8f5e9' : '#ffffff';
         }
 
         // Close drawer if open
