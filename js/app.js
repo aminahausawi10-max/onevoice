@@ -88,18 +88,49 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeCallDuration = 0;
     let callTimerInterval = null;
     let availableRates = [
-        { country_name: "Nigeria", country_code: "NG", dial_code: "+234", flag: "🇳🇬", rate: 12.00 },
-        { country_name: "United States", country_code: "US", dial_code: "+1", flag: "🇺🇸", rate: 18.00 },
-        { country_name: "United Kingdom", country_code: "GB", dial_code: "+44", flag: "🇬🇧", rate: 22.00 },
-        { country_name: "Canada", country_code: "CA", dial_code: "+1", flag: "🇨🇦", rate: 18.00 },
-        { country_name: "Ghana", country_code: "GH", dial_code: "+233", flag: "🇬🇭", rate: 35.00 },
-        { country_name: "Saudi Arabia", country_code: "SA", dial_code: "+966", flag: "🇸🇦", rate: 40.00 },
-        { country_name: "United Arab Emirates", country_code: "AE", dial_code: "+971", flag: "🇦🇪", rate: 42.00 },
-        { country_name: "South Africa", country_code: "ZA", dial_code: "+27", flag: "🇿🇦", rate: 28.00 },
-        { country_name: "India", country_code: "IN", dial_code: "+91", flag: "🇮🇳", rate: 15.00 },
-        { country_name: "China", country_code: "CN", dial_code: "+86", flag: "🇨🇳", rate: 20.00 },
-        { country_name: "France", country_code: "FR", dial_code: "+33", flag: "🇫🇷", rate: 25.00 },
-        { country_name: "Germany", country_code: "DE", dial_code: "+49", flag: "🇩🇪", rate: 25.00 }
+        { country_name: "Nigeria", country_code: "NG", dial_code: "+234", flag: "🇳🇬", rate: 12.00, roaming: 45.00 },
+        { country_name: "United States", country_code: "US", dial_code: "+1", flag: "🇺🇸", rate: 18.00, roaming: 180.00 },
+        { country_name: "United Kingdom", country_code: "GB", dial_code: "+44", flag: "🇬🇧", rate: 22.00, roaming: 220.00 },
+        { country_name: "Canada", country_code: "CA", dial_code: "+1", flag: "🇨🇦", rate: 18.00, roaming: 180.00 },
+        { country_name: "Ghana", country_code: "GH", dial_code: "+233", flag: "🇬🇭", rate: 35.00, roaming: 250.00 },
+        { country_name: "Saudi Arabia", country_code: "SA", dial_code: "+966", flag: "🇸🇦", rate: 40.00, roaming: 280.00 },
+        { country_name: "United Arab Emirates", country_code: "AE", dial_code: "+971", flag: "🇦🇪", rate: 42.00, roaming: 300.00 },
+        { country_name: "Niger", country_code: "NE", dial_code: "+227", flag: "🇳🇪", rate: 45.00, roaming: 260.00 },
+        { country_name: "Cameroon", country_code: "CM", dial_code: "+237", flag: "🇨🇲", rate: 40.00, roaming: 250.00 },
+        { country_name: "South Africa", country_code: "ZA", dial_code: "+27", flag: "🇿🇦", rate: 28.00, roaming: 200.00 },
+        { country_name: "Kenya", country_code: "KE", dial_code: "+254", flag: "🇰🇪", rate: 32.00, roaming: 240.00 },
+        { country_name: "Egypt", country_code: "EG", dial_code: "+20", flag: "🇪🇬", rate: 38.00, roaming: 260.00 },
+        { country_name: "Benin", country_code: "BJ", dial_code: "+229", flag: "🇧🇯", rate: 42.00, roaming: 260.00 },
+        { country_name: "Togo", country_code: "TG", dial_code: "+228", flag: "🇹🇬", rate: 44.00, roaming: 270.00 },
+        { country_name: "Ivory Coast", country_code: "CI", dial_code: "+225", flag: "🇨🇮", rate: 46.00, roaming: 280.00 },
+        { country_name: "Senegal", country_code: "SN", dial_code: "+221", flag: "🇸🇳", rate: 48.00, roaming: 290.00 },
+        { country_name: "Uganda", country_code: "UG", dial_code: "+256", flag: "🇺🇬", rate: 34.00, roaming: 230.00 },
+        { country_name: "Tanzania", country_code: "TZ", dial_code: "+255", flag: "🇹🇿", rate: 36.00, roaming: 240.00 },
+        { country_name: "Rwanda", country_code: "RW", dial_code: "+250", flag: "🇷🇼", rate: 35.00, roaming: 240.00 },
+        { country_name: "Ethiopia", country_code: "ET", dial_code: "+251", flag: "🇪🇹", rate: 45.00, roaming: 280.00 },
+        { country_name: "Sudan", country_code: "SD", dial_code: "+249", flag: "🇸🇩", rate: 48.00, roaming: 290.00 },
+        { country_name: "Morocco", country_code: "MA", dial_code: "+212", flag: "🇲🇦", rate: 40.00, roaming: 260.00 },
+        { country_name: "Algeria", country_code: "DZ", dial_code: "+213", flag: "🇩🇿", rate: 42.00, roaming: 270.00 },
+        { country_name: "India", country_code: "IN", dial_code: "+91", flag: "🇮🇳", rate: 15.00, roaming: 150.00 },
+        { country_name: "Pakistan", country_code: "PK", dial_code: "+92", flag: "🇵🇰", rate: 20.00, roaming: 170.00 },
+        { country_name: "Bangladesh", country_code: "BD", dial_code: "+880", flag: "🇧🇩", rate: 22.00, roaming: 180.00 },
+        { country_name: "China", country_code: "CN", dial_code: "+86", flag: "🇨🇳", rate: 20.00, roaming: 170.00 },
+        { country_name: "Malaysia", country_code: "MY", dial_code: "+60", flag: "🇲🇾", rate: 22.00, roaming: 180.00 },
+        { country_name: "Indonesia", country_code: "ID", dial_code: "+62", flag: "🇮🇩", rate: 24.00, roaming: 180.00 },
+        { country_name: "Philippines", country_code: "PH", dial_code: "+63", flag: "🇵🇭", rate: 30.00, roaming: 210.00 },
+        { country_name: "Turkey", country_code: "TR", dial_code: "+90", flag: "🇹🇷", rate: 32.00, roaming: 220.00 },
+        { country_name: "Qatar", country_code: "QA", dial_code: "+974", flag: "🇶🇦", rate: 40.00, roaming: 270.00 },
+        { country_name: "Kuwait", country_code: "KW", dial_code: "+965", flag: "🇰🇼", rate: 38.00, roaming: 260.00 },
+        { country_name: "Oman", country_code: "OM", dial_code: "+968", flag: "🇴🇲", rate: 42.00, roaming: 280.00 },
+        { country_name: "Germany", country_code: "DE", dial_code: "+49", flag: "🇩🇪", rate: 25.00, roaming: 190.00 },
+        { country_name: "France", country_code: "FR", dial_code: "+33", flag: "🇫🇷", rate: 25.00, roaming: 190.00 },
+        { country_name: "Italy", country_code: "IT", dial_code: "+39", flag: "🇮🇹", rate: 26.00, roaming: 195.00 },
+        { country_name: "Spain", country_code: "ES", dial_code: "+34", flag: "🇪🇸", rate: 26.00, roaming: 195.00 },
+        { country_name: "Netherlands", country_code: "NL", dial_code: "+31", flag: "🇳🇱", rate: 25.00, roaming: 190.00 },
+        { country_name: "Switzerland", country_code: "CH", dial_code: "+41", flag: "🇨🇭", rate: 28.00, roaming: 200.00 },
+        { country_name: "Australia", country_code: "AU", dial_code: "+61", flag: "🇦🇺", rate: 24.00, roaming: 185.00 },
+        { country_name: "Brazil", country_code: "BR", dial_code: "+55", flag: "🇧🇷", rate: 30.00, roaming: 210.00 },
+        { country_name: "Ireland", country_code: "IE", dial_code: "+353", flag: "🇮🇪", rate: 24.00, roaming: 180.00 }
     ];
     let selectedCountry = availableRates[0];
 
@@ -175,11 +206,36 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // ----------------------------------------------------
-    // Side Navigation Drawer
+    // Floating Popover Menu (Matching Reference Image)
     // ----------------------------------------------------
     const btnOpenDrawer = document.getElementById('btn-open-drawer');
+    const popoverBackdrop = document.getElementById('popover-menu-backdrop');
+    const floatingMenu = document.getElementById('floating-popover-menu');
     const drawerBackdrop = document.getElementById('drawer-backdrop');
     const sideDrawerPanel = document.getElementById('side-drawer-panel');
+
+    function toggleFloatingMenu() {
+        if (floatingMenu && popoverBackdrop) {
+            const isActive = floatingMenu.classList.contains('active');
+            if (isActive) {
+                closeFloatingMenu();
+            } else {
+                openFloatingMenu();
+            }
+        } else if (sideDrawerPanel) {
+            openDrawer();
+        }
+    }
+
+    function openFloatingMenu() {
+        if (popoverBackdrop) popoverBackdrop.classList.add('active');
+        if (floatingMenu) floatingMenu.classList.add('active');
+    }
+
+    function closeFloatingMenu() {
+        if (popoverBackdrop) popoverBackdrop.classList.remove('active');
+        if (floatingMenu) floatingMenu.classList.remove('active');
+    }
 
     function openDrawer() {
         if (drawerBackdrop) drawerBackdrop.classList.add('active');
@@ -191,8 +247,90 @@ document.addEventListener('DOMContentLoaded', () => {
         if (sideDrawerPanel) sideDrawerPanel.classList.remove('active');
     }
 
-    if (btnOpenDrawer) btnOpenDrawer.addEventListener('click', openDrawer);
+    if (btnOpenDrawer) {
+        btnOpenDrawer.addEventListener('click', (e) => {
+            e.stopPropagation();
+            toggleFloatingMenu();
+        });
+    }
+    if (popoverBackdrop) popoverBackdrop.addEventListener('click', closeFloatingMenu);
     if (drawerBackdrop) drawerBackdrop.addEventListener('click', closeDrawer);
+
+    // Popover menu items handling
+    document.querySelectorAll('.popover-menu-item').forEach(item => {
+        item.addEventListener('click', () => {
+            document.querySelectorAll('.popover-menu-item').forEach(i => i.classList.remove('active'));
+            item.classList.add('active');
+            closeFloatingMenu();
+            if (item.classList.contains('trigger-topup') || item.id === 'pop-menu-topup') {
+                const modal = document.getElementById('modal-topup');
+                if (modal) modal.classList.add('active');
+            }
+        });
+    });
+
+    // ----------------------------------------------------
+    // Avatar / Profile Picture Helpers
+    // ----------------------------------------------------
+    function updateUserAvatarUI(avatarUrl) {
+        if (!avatarUrl) return;
+        const setImg = document.getElementById('settings-avatar-img');
+        const dashImg = document.getElementById('dash-avatar-img');
+        const inCallImg = document.getElementById('in-call-avatar-img');
+        if (setImg) setImg.src = avatarUrl;
+        if (dashImg) dashImg.src = avatarUrl;
+        if (inCallImg) inCallImg.src = avatarUrl;
+    }
+
+    // Avatar Upload Listener
+    const inputAvatarFile = document.getElementById('input-avatar-file');
+    if (inputAvatarFile) {
+        inputAvatarFile.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (!file.type.startsWith('image/')) {
+                showToast('Please select a valid image file (PNG, JPG, etc.)', 'error');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const rawUrl = event.target.result;
+                const img = new Image();
+                img.onload = async () => {
+                    const canvas = document.createElement('canvas');
+                    const maxDim = 256;
+                    let w = img.width;
+                    let h = img.height;
+                    if (w > h) {
+                        if (w > maxDim) { h = Math.round((h * maxDim) / w); w = maxDim; }
+                    } else {
+                        if (h > maxDim) { w = Math.round((w * maxDim) / h); h = maxDim; }
+                    }
+                    canvas.width = w;
+                    canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    const optimizedDataUrl = canvas.toDataURL('image/jpeg', 0.88);
+
+                    updateUserAvatarUI(optimizedDataUrl);
+                    localStorage.setItem('ov_user_avatar', optimizedDataUrl);
+                    if (currentUser) {
+                        currentUser.avatar = optimizedDataUrl;
+                        try {
+                            await apiFetch('api/settings.php', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ action: 'update_profile', avatar: optimizedDataUrl })
+                            });
+                        } catch (err) {}
+                    }
+                    showToast('Profile photo updated successfully!', 'success');
+                };
+                img.src = rawUrl;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
 
     // ----------------------------------------------------
     // Authentication State & UI Updating (Direct without OTP)
@@ -241,15 +379,21 @@ document.addEventListener('DOMContentLoaded', () => {
         if (setInputPhone) setInputPhone.value = user.phone || '09090809080';
         if (setInputEmail) setInputEmail.value = user.email || 'user@onevoice.app';
 
+        // Load avatar if present
+        const savedAvatar = user.avatar || localStorage.getItem('ov_user_avatar');
+        if (savedAvatar) {
+            updateUserAvatarUI(savedAvatar);
+        }
+
         loadWalletData();
     }
 
     function setUnauthenticatedUI() {
         currentUser = null;
-        navigateToPage('welcome');
+        navigateToPage('install-gate');
     }
 
-    // Registration Form (Direct to success, NO OTP)
+    // Registration Form (Direct to success, opens website immediately)
     const formRegister = document.getElementById('form-register');
     if (formRegister) {
         formRegister.addEventListener('submit', async (e) => {
@@ -283,14 +427,28 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 const data = await res.json();
                 if (data.success) {
-                    showToast('Account created successfully!', 'success');
-                    navigateToPage('reg-success');
+                    if (data.user) {
+                        setAuthenticatedUI(data.user);
+                    }
+                    showToast(`Welcome, ${name}! Your account is ready.`, 'success');
+                    navigateToPage('home');
                 } else {
                     showToast(data.message || 'Registration failed', 'error');
                 }
             } catch (err) {
                 // Resilient local simulation if offline
-                navigateToPage('reg-success');
+                const fallbackUser = {
+                    id: Date.now(),
+                    name: name,
+                    phone: phone,
+                    email: email,
+                    member_id: 'OV-' + Math.floor(100000 + Math.random() * 900000),
+                    virtual_account_number: phone.replace(/[^0-9]/g, '').slice(-10),
+                    role: 'user'
+                };
+                setAuthenticatedUI(fallbackUser);
+                showToast(`Welcome, ${name}! Your account is ready.`, 'success');
+                navigateToPage('home');
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'Create Account';
@@ -355,59 +513,92 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnSettingsLogout) btnSettingsLogout.addEventListener('click', handleLogout);
 
     // ----------------------------------------------------
-    // Settings: Profile (Name, Phone, Email) & Password Editing
+    // Settings: Image 4 Modal Triggers & Form Handlers
     // ----------------------------------------------------
-    const formSettingsProfile = document.getElementById('form-settings-profile');
-    if (formSettingsProfile) {
-        formSettingsProfile.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const btn = document.getElementById('btn-submit-profile');
-            const name = document.getElementById('settings-input-name').value.trim();
-            const phone = document.getElementById('settings-input-phone').value.trim();
-            const email = document.getElementById('settings-input-email').value.trim();
-
-            if (!name || !phone || !email) {
-                showToast('Please fill out Name, Phone, and Email.', 'error');
-                return;
+    document.querySelectorAll('.trigger-settings-modal').forEach(row => {
+        row.addEventListener('click', () => {
+            const modalId = row.getAttribute('data-modal');
+            if (modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) modal.classList.add('active');
             }
+        });
+    });
 
-            btn.disabled = true;
-            btn.textContent = 'Saving...';
+    document.querySelectorAll('.close-settings-modal').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const modal = btn.closest('.app-modal-overlay');
+            if (modal) modal.classList.remove('active');
+        });
+    });
 
+    // Form: Edit Name
+    const formEditName = document.getElementById('form-edit-name');
+    if (formEditName) {
+        formEditName.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('settings-input-name').value.trim();
+            if (!name) return;
             try {
                 const res = await apiFetch('api/settings.php', {
                     method: 'POST',
-                    body: JSON.stringify({
-                        action: 'update_profile',
-                        name: name,
-                        phone: phone,
-                        email: email
-                    })
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'update_profile', name })
                 });
                 const data = await res.json();
                 if (data.success && data.user) {
                     setAuthenticatedUI(data.user);
-                    showToast('Profile updated successfully!', 'success');
-                } else {
-                    if (currentUser) {
-                        currentUser.name = name;
-                        currentUser.phone = phone;
-                        currentUser.email = email;
-                        setAuthenticatedUI(currentUser);
-                    }
-                    showToast('Profile updated successfully!', 'success');
+                } else if (currentUser) {
+                    currentUser.name = name;
+                    setAuthenticatedUI(currentUser);
                 }
+                showToast('Name updated successfully!', 'success');
+                const modal = document.getElementById('modal-edit-name');
+                if (modal) modal.classList.remove('active');
             } catch (err) {
                 if (currentUser) {
                     currentUser.name = name;
-                    currentUser.phone = phone;
+                    setAuthenticatedUI(currentUser);
+                }
+                showToast('Name updated successfully!', 'success');
+                const modal = document.getElementById('modal-edit-name');
+                if (modal) modal.classList.remove('active');
+            }
+        });
+    }
+
+    // Form: Edit Email
+    const formEditEmail = document.getElementById('form-edit-email');
+    if (formEditEmail) {
+        formEditEmail.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('settings-input-email').value.trim();
+            if (!email) return;
+            try {
+                const res = await apiFetch('api/settings.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'update_profile', email })
+                });
+                const data = await res.json();
+                if (data.success && data.user) {
+                    setAuthenticatedUI(data.user);
+                } else if (currentUser) {
                     currentUser.email = email;
                     setAuthenticatedUI(currentUser);
                 }
-                showToast('Profile updated successfully!', 'success');
-            } finally {
-                btn.disabled = false;
-                btn.textContent = '💾 Save Profile Changes';
+                showToast('Email updated successfully!', 'success');
+                const modal = document.getElementById('modal-edit-email');
+                if (modal) modal.classList.remove('active');
+            } catch (err) {
+                if (currentUser) {
+                    currentUser.email = email;
+                    setAuthenticatedUI(currentUser);
+                }
+                showToast('Email updated successfully!', 'success');
+                const modal = document.getElementById('modal-edit-email');
+                if (modal) modal.classList.remove('active');
             }
         });
     }
@@ -449,18 +640,45 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.success) {
                     showToast('Password updated successfully!', 'success');
                     formSettingsPassword.reset();
+                    const modal = document.getElementById('modal-edit-password');
+                    if (modal) modal.classList.remove('active');
                 } else {
                     showToast(data.message || 'Failed to update password.', 'error');
                 }
             } catch (err) {
                 showToast('Password updated successfully!', 'success');
                 formSettingsPassword.reset();
+                const modal = document.getElementById('modal-edit-password');
+                if (modal) modal.classList.remove('active');
             } finally {
                 btn.disabled = false;
                 btn.textContent = '🔒 Update Password';
             }
         });
     }
+
+    // Language switchers (English / Hausa)
+    document.querySelectorAll('.welcome-lang-btn').forEach(btn => {
+        btn.addEventListener('click', async () => {
+            const lang = btn.getAttribute('data-lang');
+            if (!lang) return;
+            document.querySelectorAll('.welcome-lang-btn').forEach(b => {
+                b.classList.toggle('active', b.getAttribute('data-lang') === lang);
+            });
+            if (currentUser) {
+                currentUser.language = lang;
+                try {
+                    await apiFetch('api/settings.php', {
+                        method: 'POST',
+                        body: JSON.stringify({ action: 'update_profile', language: lang })
+                    });
+                } catch (e) {}
+            }
+            showToast(`Language set to ${lang === 'ha' ? 'Hausa' : 'English'}`, 'info');
+            const modal = document.getElementById('modal-language');
+            if (modal) modal.classList.remove('active');
+        });
+    });
 
     // ----------------------------------------------------
     // Wallet & Direct Top-Up (Simulation Mode - No Gateway)
@@ -494,7 +712,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         const mins = Math.floor(balance / 12.0);
         const minsEl = document.getElementById('dialer-mins-left');
+        const headerMinsEl = document.getElementById('header-user-mins');
         if (minsEl) minsEl.textContent = `${mins} mins`;
+        if (headerMinsEl) headerMinsEl.textContent = `${mins || 120} Minutes`;
     }
 
     function renderWalletTransactions(txs) {
@@ -954,6 +1174,21 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnHeaderInstall) btnHeaderInstall.addEventListener('click', promptPwaInstall);
     if (btnWelcomeInstall) btnWelcomeInstall.addEventListener('click', promptPwaInstall);
     if (btnInstallBanner) btnInstallBanner.addEventListener('click', promptPwaInstall);
+    const btnGateInstall = document.getElementById('btn-gate-install-action');
+    if (btnGateInstall) {
+        btnGateInstall.addEventListener('click', async () => {
+            await promptPwaInstall();
+            setTimeout(() => {
+                navigateToPage('register');
+            }, 600);
+        });
+    }
+    const btnGateRegister = document.getElementById('btn-gate-register-action');
+    if (btnGateRegister) {
+        btnGateRegister.addEventListener('click', () => {
+            navigateToPage('register');
+        });
+    }
     if (drawerInstallApp) drawerInstallApp.addEventListener('click', () => {
         closeDrawer();
         promptPwaInstall();
@@ -969,8 +1204,10 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('appinstalled', () => {
         console.log('[PWA] Installed successfully');
         hideInstallTriggers();
+        localStorage.setItem('gate_dismissed', 'true');
         showNotification('ONE VOICE App installed successfully!', 'success');
         deferredPrompt = null;
+        navigateToPage('register');
     });
 
     // Boot & Initial Session Check

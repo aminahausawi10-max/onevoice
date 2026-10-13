@@ -138,11 +138,38 @@ const defaultRates = [
     { country_name: "Cameroon", country_code: "CM", dial_code: "+237", flag: "🇨🇲", rate: 40.00, roaming: 250.00, popular: true },
     { country_name: "South Africa", country_code: "ZA", dial_code: "+27", flag: "🇿🇦", rate: 28.00, roaming: 200.00, popular: true },
     { country_name: "Kenya", country_code: "KE", dial_code: "+254", flag: "🇰🇪", rate: 32.00, roaming: 240.00, popular: true },
+    { country_name: "Egypt", country_code: "EG", dial_code: "+20", flag: "🇪🇬", rate: 38.00, roaming: 260.00, popular: true },
+    { country_name: "Benin", country_code: "BJ", dial_code: "+229", flag: "🇧🇯", rate: 42.00, roaming: 260.00, popular: true },
+    { country_name: "Togo", country_code: "TG", dial_code: "+228", flag: "🇹🇬", rate: 44.00, roaming: 270.00, popular: false },
+    { country_name: "Ivory Coast", country_code: "CI", dial_code: "+225", flag: "🇨🇮", rate: 46.00, roaming: 280.00, popular: false },
+    { country_name: "Senegal", country_code: "SN", dial_code: "+221", flag: "🇸🇳", rate: 48.00, roaming: 290.00, popular: false },
+    { country_name: "Uganda", country_code: "UG", dial_code: "+256", flag: "🇺🇬", rate: 34.00, roaming: 230.00, popular: false },
+    { country_name: "Tanzania", country_code: "TZ", dial_code: "+255", flag: "🇹🇿", rate: 36.00, roaming: 240.00, popular: false },
+    { country_name: "Rwanda", country_code: "RW", dial_code: "+250", flag: "🇷🇼", rate: 35.00, roaming: 240.00, popular: false },
+    { country_name: "Ethiopia", country_code: "ET", dial_code: "+251", flag: "🇪🇹", rate: 45.00, roaming: 280.00, popular: false },
+    { country_name: "Sudan", country_code: "SD", dial_code: "+249", flag: "🇸🇩", rate: 48.00, roaming: 290.00, popular: false },
+    { country_name: "Morocco", country_code: "MA", dial_code: "+212", flag: "🇲🇦", rate: 40.00, roaming: 260.00, popular: false },
+    { country_name: "Algeria", country_code: "DZ", dial_code: "+213", flag: "🇩🇿", rate: 42.00, roaming: 270.00, popular: false },
     { country_name: "India", country_code: "IN", dial_code: "+91", flag: "🇮🇳", rate: 15.00, roaming: 150.00, popular: true },
+    { country_name: "Pakistan", country_code: "PK", dial_code: "+92", flag: "🇵🇰", rate: 20.00, roaming: 170.00, popular: false },
+    { country_name: "Bangladesh", country_code: "BD", dial_code: "+880", flag: "🇧🇩", rate: 22.00, roaming: 180.00, popular: false },
     { country_name: "China", country_code: "CN", dial_code: "+86", flag: "🇨🇳", rate: 20.00, roaming: 170.00, popular: true },
+    { country_name: "Malaysia", country_code: "MY", dial_code: "+60", flag: "🇲🇾", rate: 22.00, roaming: 180.00, popular: true },
+    { country_name: "Indonesia", country_code: "ID", dial_code: "+62", flag: "🇮🇩", rate: 24.00, roaming: 180.00, popular: false },
+    { country_name: "Philippines", country_code: "PH", dial_code: "+63", flag: "🇵🇭", rate: 30.00, roaming: 210.00, popular: false },
+    { country_name: "Turkey", country_code: "TR", dial_code: "+90", flag: "🇹🇷", rate: 32.00, roaming: 220.00, popular: false },
+    { country_name: "Qatar", country_code: "QA", dial_code: "+974", flag: "🇶🇦", rate: 40.00, roaming: 270.00, popular: true },
+    { country_name: "Kuwait", country_code: "KW", dial_code: "+965", flag: "🇰🇼", rate: 38.00, roaming: 260.00, popular: false },
+    { country_name: "Oman", country_code: "OM", dial_code: "+968", flag: "🇴🇲", rate: 42.00, roaming: 280.00, popular: false },
     { country_name: "Germany", country_code: "DE", dial_code: "+49", flag: "🇩🇪", rate: 25.00, roaming: 190.00, popular: false },
     { country_name: "France", country_code: "FR", dial_code: "+33", flag: "🇫🇷", rate: 25.00, roaming: 190.00, popular: false },
-    { country_name: "Malaysia", country_code: "MY", dial_code: "+60", flag: "🇲🇾", rate: 22.00, roaming: 180.00, popular: false }
+    { country_name: "Italy", country_code: "IT", dial_code: "+39", flag: "🇮🇹", rate: 26.00, roaming: 195.00, popular: false },
+    { country_name: "Spain", country_code: "ES", dial_code: "+34", flag: "🇪🇸", rate: 26.00, roaming: 195.00, popular: false },
+    { country_name: "Netherlands", country_code: "NL", dial_code: "+31", flag: "🇳🇱", rate: 25.00, roaming: 190.00, popular: false },
+    { country_name: "Switzerland", country_code: "CH", dial_code: "+41", flag: "🇨🇭", rate: 28.00, roaming: 200.00, popular: false },
+    { country_name: "Australia", country_code: "AU", dial_code: "+61", flag: "🇦🇺", rate: 24.00, roaming: 185.00, popular: false },
+    { country_name: "Brazil", country_code: "BR", dial_code: "+55", flag: "🇧🇷", rate: 30.00, roaming: 210.00, popular: false },
+    { country_name: "Ireland", country_code: "IE", dial_code: "+353", flag: "🇮🇪", rate: 24.00, roaming: 180.00, popular: false }
 ];
 
 const MIME_TYPES = {
@@ -211,6 +238,14 @@ function getAllUsers(store) {
 function normalizePhone(p) {
     if (!p) return '';
     return p.toString().replace(/[^0-9]/g, '').slice(-10);
+}
+
+function publicUser(u) {
+    if (!u) return null;
+    const clone = Object.assign({}, u);
+    delete clone.password;
+    delete clone.password_hash;
+    return clone;
 }
 
 function getActiveUser(req, store) {
@@ -904,6 +939,7 @@ const requestHandler = (req, res) => {
                     if (body.name) activeUser.name = body.name.trim();
                     if (body.email) activeUser.email = body.email.trim();
                     if (body.language) activeUser.language = body.language;
+                    if (body.avatar) activeUser.avatar = body.avatar;
 
                     // If phone is supplied and changed
                     if (body.phone) {
@@ -942,17 +978,19 @@ const requestHandler = (req, res) => {
                         store.user.name = activeUser.name;
                         store.user.email = activeUser.email;
                         store.user.language = activeUser.language;
+                        if (activeUser.avatar) store.user.avatar = activeUser.avatar;
                     } else if (store.users) {
                         const target = store.users.find(u => u.id === activeUser.id);
                         if (target) {
                             target.name = activeUser.name;
                             target.email = activeUser.email;
                             target.language = activeUser.language;
+                            if (activeUser.avatar) target.avatar = activeUser.avatar;
                         }
                     }
 
                     saveStore(store);
-                    return sendJson({ success: true, message: 'Profile updated successfully!', user: activeUser });
+                    return sendJson({ success: true, message: 'Profile updated successfully!', user: publicUser(activeUser) });
                 }
 
                 if (action === 'change_password') {
@@ -1008,8 +1046,11 @@ const requestHandler = (req, res) => {
                     }
 
                     const memberId = 'OV-' + Math.floor(100000 + Math.random() * 900000);
-                    const virtualNuban = '9' + normP;
+                    const virtualNuban = normP; // 10-digit phone number without leading 0
                     const nextId = Math.max(...users.map(u => u.id), 1) + 1;
+                    const regPassword = (body.password || '').toString();
+                    if (regPassword.length < 6) return sendJson({ success: false, message: 'Password must be at least 6 characters.' }, 400);
+                    const banks = ['OPay', 'Kuda Bank', 'Wema Bank', 'Moniepoint', 'PalmPay'];
 
                     const newUser = {
                         id: nextId,
@@ -1017,8 +1058,10 @@ const requestHandler = (req, res) => {
                         name: name,
                         phone: phone.startsWith('+') ? phone : ('+234' + normP.slice(-10)),
                         email: email,
-                        virtual_bank_name: "Wema Bank (ONE VOICE NUBAN)",
+                        password: regPassword,
+                        virtual_bank_name: banks[Math.floor(Math.random() * banks.length)],
                         virtual_account_number: virtualNuban,
+                        account_number: virtualNuban,
                         virtual_account_name: "ONE VOICE / " + name,
                         language: 'en',
                         role: 'user',
@@ -1039,7 +1082,7 @@ const requestHandler = (req, res) => {
                         member_id: memberId,
                         phone: newUser.phone,
                         virtual_account_number: virtualNuban,
-                        user: newUser,
+                        user: publicUser(newUser),
                         token: 'ov_sess_' + nextId
                     });
                 }
@@ -1048,10 +1091,14 @@ const requestHandler = (req, res) => {
                     const id = (body.identifier || '').toLowerCase().trim();
                     const users = getAllUsers(store);
                     const normId = normalizePhone(id);
-                    const matched = users.find(u => u.email.toLowerCase() === id || (normId && normalizePhone(u.phone) === normId) || u.member_id.toLowerCase() === id);
+                    const matched = users.find(u => (u.email || '').toLowerCase() === id || (normId && normalizePhone(u.phone) === normId) || (u.member_id || '').toLowerCase() === id);
 
                     if (!matched) {
-                        return sendJson({ success: false, message: 'No registered ONE VOICE account found matching this identifier.' }, 404);
+                        return sendJson({ success: false, message: 'No ONE VOICE account found with this phone number or email.' }, 404);
+                    }
+
+                    if (matched.password && matched.password !== (body.password || '').toString()) {
+                        return sendJson({ success: false, message: 'Incorrect password.' }, 401);
                     }
 
                     // Direct login without OTP requirement
@@ -1062,7 +1109,7 @@ const requestHandler = (req, res) => {
                         success: true,
                         authenticated: true,
                         message: `Welcome back, ${matched.name}!`,
-                        user: matched,
+                        user: publicUser(matched),
                         token: 'ov_sess_' + matched.id
                     });
                 }

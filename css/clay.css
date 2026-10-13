@@ -76,31 +76,166 @@ html, body {
    ========================================================== */
 .app-top-header {
     width: 100%;
-    padding: 14px 18px;
+    padding: 10px 16px;
+    min-height: 64px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: #ffffff;
+    background: #006b38;
+    color: #ffffff;
     position: sticky;
     top: 0;
-    z-index: 100;
-    border-bottom: 1px solid var(--border-subtle);
+    z-index: 1000;
+    box-shadow: 0 4px 16px rgba(0, 107, 56, 0.22);
 }
 
-.brand-logo-wrap {
+.header-icon-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
     display: flex;
-    flex-direction: row;
     align-items: center;
-    gap: 8px;
-    text-decoration: none;
+    justify-content: center;
+    color: #ffffff;
+    padding: 4px;
+    border-radius: 8px;
+    transition: background 0.15s ease;
+}
+.header-icon-btn:hover {
+    background: rgba(255, 255, 255, 0.15);
 }
 
-.header-logo-icon {
-    width: 32px;
-    height: 32px;
-    object-fit: contain;
+.header-center-brand {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+.header-center-brand .brand-title-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    line-height: 1.1;
+}
+
+.header-center-brand .brand-one {
+    color: #ffffff;
+    font-weight: 900;
+    font-size: 1.45rem;
+    letter-spacing: -0.5px;
+}
+
+.header-center-brand .brand-voice {
+    color: #76c827;
+    font-weight: 900;
+    font-size: 1.45rem;
+    letter-spacing: -0.5px;
+}
+
+.header-center-brand .brand-sub-title {
+    color: #ffffff;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.2px;
+    opacity: 0.95;
+    margin-top: 1px;
+}
+
+.header-mins-badge {
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+    white-space: nowrap;
+    padding: 4px 6px;
     border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+/* Floating Popover Menu matching reference image */
+.popover-menu-backdrop {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.35);
+    z-index: 1040;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    backdrop-filter: blur(2px);
+    -webkit-backdrop-filter: blur(2px);
+}
+
+.popover-menu-backdrop.active {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.floating-popover-menu {
+    position: absolute;
+    top: 60px;
+    left: 12px;
+    width: 205px;
+    background: #ffffff;
+    border-radius: 20px;
+    padding: 8px 6px;
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.22), 0 6px 14px rgba(0, 0, 0, 0.1);
+    z-index: 1050;
+    opacity: 0;
+    pointer-events: none;
+    transform: translateY(-8px) scale(0.96);
+    transform-origin: top left;
+    transition: opacity 0.2s cubic-bezier(0.16, 1, 0.3, 1), transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.floating-popover-menu.active {
+    opacity: 1;
+    pointer-events: auto;
+    transform: translateY(0) scale(1);
+}
+
+.popover-menu-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 9px 12px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    color: #111827;
+    font-weight: 700;
+    font-size: 0.92rem;
+    margin-bottom: 3px;
+    user-select: none;
+}
+
+.popover-menu-item:last-child {
+    margin-bottom: 0;
+}
+
+.popover-menu-item:hover {
+    background: #f1f5f9;
+}
+
+.popover-menu-item.active {
+    background: #e8f5e9;
+    color: #007a3d;
+}
+
+.popover-menu-item .popover-item-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.popover-menu-item .popover-item-text {
+    flex: 1;
 }
 
 .header-right-actions {
@@ -823,42 +958,84 @@ html, body {
     margin-bottom: 12px;
 }
 
-.dialer-display-box {
+/* Image 2 Style Rounded Dialer Display with Green Cursor and Tag Backspace */
+.dialer-display-card-modern {
     width: 100%;
-    min-height: 54px;
-    background: #ffffff;
-    border-bottom: 2px solid var(--border-light);
+    min-height: 58px;
+    background: #f8fafc;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 14px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    position: relative;
-    padding: 6px 40px 6px 14px;
-    margin-bottom: 16px;
+    justify-content: space-between;
+    padding: 8px 14px;
+    margin-bottom: 20px;
+    box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.03);
+}
+
+.dialer-display-text-wrapper {
+    display: flex;
+    align-items: center;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+}
+
+.dialer-display-text-wrapper::-webkit-scrollbar {
+    display: none;
 }
 
 .dialer-display-number {
-    font-size: 1.7rem;
+    font-size: 1.65rem;
     font-weight: 800;
-    color: var(--text-primary);
-    letter-spacing: 1px;
+    color: #0f172a;
+    letter-spacing: 0.5px;
+    line-height: 1.2;
 }
 
-.dialer-display-clear {
-    position: absolute;
-    right: 10px;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 28px;
-    height: 28px;
-    border-radius: 50%;
-    background: #f1f5f9;
+.dialer-cursor-blink {
+    display: inline-block;
+    width: 2.5px;
+    height: 1.6rem;
+    background: #10b981;
+    margin-left: 2px;
+    border-radius: 2px;
+    animation: cursorBlink 1s infinite ease-in-out;
+}
+
+@keyframes cursorBlink {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0; }
+}
+
+/* Tag-style delete button circled in Red in Image 2 */
+.btn-dialer-tag-backspace {
+    background: #94a3b8;
+    color: #ffffff;
     border: none;
-    color: var(--text-secondary);
-    font-size: 0.9rem;
+    border-radius: 6px;
+    padding: 6px 9px 5px;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
+    transition: background 0.15s ease, transform 0.1s ease;
+    box-shadow: 0 2px 6px rgba(100, 116, 139, 0.25);
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+
+.btn-dialer-tag-backspace:hover {
+    background: #64748b;
+}
+
+.btn-dialer-tag-backspace:active {
+    background: #475569;
+    transform: scale(0.92);
+}
+
+.tag-backspace-svg {
+    display: block;
 }
 
 /* 3x4 Dialpad Grid */
@@ -1269,7 +1446,7 @@ html, body {
 }
 
 /* ==========================================================
-   Bottom Navigation Dock (Screens 6 & 7)
+   Bottom Navigation Dock (Screens 6 & 7 - Image 1 Style)
    ========================================================== */
 .mobile-bottom-nav {
     position: fixed;
@@ -1282,34 +1459,75 @@ html, body {
     border-top: 1px solid var(--border-light);
     display: flex;
     justify-content: space-around;
-    align-items: center;
-    padding: 8px 12px 12px;
+    align-items: flex-end;
+    padding: 6px 6px 10px;
     z-index: 90;
-    box-shadow: 0 -4px 16px rgba(0, 0, 0, 0.04);
+    box-shadow: 0 -4px 18px rgba(0, 0, 0, 0.06);
 }
 
 .bottom-nav-item {
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 2px;
+    justify-content: center;
+    gap: 4px;
     background: none;
     border: none;
-    color: var(--text-muted);
+    color: #1e293b;
     font-size: 0.72rem;
     font-weight: 700;
     cursor: pointer;
     text-decoration: none;
-    padding: 4px 8px;
-    transition: color 0.15s ease;
+    padding: 4px 6px;
+    flex: 1;
+    transition: all 0.15s ease;
 }
 
 .bottom-nav-icon {
-    font-size: 1.25rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #10b981;
 }
 
 .bottom-nav-item.active {
-    color: var(--primary-blue);
+    color: #059669;
+}
+
+.bottom-nav-item.active .bottom-nav-icon {
+    color: #059669;
+}
+
+/* Center Dial Button: Circular Floating Green Bubble */
+.bottom-nav-dial-center {
+    position: relative;
+    top: -14px;
+}
+
+.bottom-nav-dial-bubble {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: #10b981;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.bottom-nav-dial-center:active .bottom-nav-dial-bubble {
+    transform: scale(0.92);
+}
+
+.bottom-nav-dial-center.active .bottom-nav-dial-bubble {
+    background: #059669;
+}
+
+.bottom-nav-dial-center span:last-child {
+    color: #059669;
+    font-weight: 800;
 }
 
 /* Toast System */
@@ -1457,5 +1675,192 @@ html, body {
     font-size: 0.78rem;
     color: var(--text-secondary);
     margin-top: 2px;
+}
+
+/* ==========================================================
+   Image 4 Settings Design: Green Top Navbar & iOS-style Rows
+   ========================================================== */
+.settings-top-navbar-green {
+    background: #059669;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    margin: -16px -16px 16px;
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+}
+
+.settings-back-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+}
+
+.settings-navbar-title {
+    font-size: 1.15rem;
+    font-weight: 800;
+    color: #ffffff;
+    letter-spacing: -0.2px;
+}
+
+.settings-menu-list-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.settings-grouped-card {
+    background: #ffffff;
+    border-radius: 16px;
+    border: 1px solid #f1f5f9;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.03);
+    overflow: hidden;
+}
+
+.settings-list-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 16px;
+    cursor: pointer;
+    border-bottom: 1px solid #f8fafc;
+    transition: background 0.15s ease;
+}
+
+.settings-list-row:last-child {
+    border-bottom: none;
+}
+
+.settings-list-row:active {
+    background: #f8fafc;
+}
+
+.settings-row-left {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+}
+
+.settings-row-icon-box {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.bg-green-box {
+    background: #10b981;
+}
+
+.bg-blue-box {
+    background: #2563eb;
+}
+
+.bg-orange-box {
+    background: #f97316;
+}
+
+.bg-white-green-icon {
+    background: #f0fdf4;
+}
+
+.settings-row-texts {
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-row-title {
+    font-size: 0.95rem;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.25;
+}
+
+.settings-row-sub {
+    font-size: 0.76rem;
+    color: #64748b;
+    font-weight: 500;
+    margin-top: 2px;
+}
+
+.settings-row-arrow {
+    font-size: 1.35rem;
+    color: #cbd5e1;
+    font-weight: 600;
+    margin-left: 8px;
+}
+
+/* ==========================================================
+   Avatar Upload & Circular Frame Styling
+   ========================================================== */
+.settings-avatar-wrap {
+    position: relative;
+    width: 96px;
+    height: 96px;
+    margin: 0 auto 12px;
+}
+
+.settings-avatar-img {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 3px solid #ffffff;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.12);
+    background: #f1f5f9;
+}
+
+.settings-avatar-edit-badge {
+    position: absolute;
+    bottom: 2px;
+    right: 2px;
+    width: 32px;
+    height: 32px;
+    background: #007a3d;
+    color: #ffffff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.25);
+    border: 2px solid #ffffff;
+    font-size: 0.95rem;
+    transition: transform 0.15s ease, background 0.15s ease;
+}
+
+.settings-avatar-edit-badge:hover {
+    transform: scale(1.1);
+    background: #059669;
+}
+
+.dash-user-avatar-badge {
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    overflow: hidden;
+    border: 2px solid #ffffff;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    flex-shrink: 0;
+    background: #ecfdf5;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    position: relative;
+}
+
+.dash-avatar-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 

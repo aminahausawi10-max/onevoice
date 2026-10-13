@@ -85,11 +85,13 @@ if ($method === 'POST') {
         $email = trim($input['email'] ?? '');
         $lang = in_array($input['language'] ?? '', ['en', 'ha']) ? $input['language'] : 'en';
         $phone = trim($input['phone'] ?? '');
+        $avatar = $input['avatar'] ?? null;
 
         $store = getLocalStore();
         if ($name) $store['user']['name'] = $name;
         if ($email) $store['user']['email'] = $email;
         $store['user']['language'] = $lang;
+        if ($avatar) $store['user']['avatar'] = $avatar;
 
         if ($phone) {
             $norm = preg_replace('/[^0-9]/', '', substr($phone, -10));
@@ -120,9 +122,9 @@ if ($method === 'POST') {
         $newPass = $input['new_password'] ?? '';
         $confirm = $input['confirm_password'] ?? '';
 
-        if (strlen($newPass) < 8) {
+        if (strlen($newPass) < 6) {
             http_response_code(400);
-            echo json_encode(["success" => false, "message" => "New password must be at least 8 characters long."]);
+            echo json_encode(["success" => false, "message" => "New password must be at least 6 characters long."]);
             exit;
         }
 
@@ -131,6 +133,10 @@ if ($method === 'POST') {
             echo json_encode(["success" => false, "message" => "Passwords do not match."]);
             exit;
         }
+
+        $store = getLocalStore();
+        $store['user']['password'] = $newPass;
+        saveLocalStore($store);
 
         $newHash = password_hash($newPass, PASSWORD_BCRYPT);
         if ($pdo) {

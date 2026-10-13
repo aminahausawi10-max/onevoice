@@ -22,26 +22,132 @@
     <!-- Main Mobile Application Shell -->
     <div class="app-shell" id="app-shell">
 
-        <!-- Top Header Bar (Shown when authenticated or on inner pages) -->
+        <!-- Top Header Bar (Matching Reference Image) -->
         <header class="app-top-header" id="app-top-header" style="display: none;">
-            <button class="header-icon-btn" id="btn-open-drawer" title="Menu">☰</button>
-            <div class="brand-logo-wrap nav-page-btn" data-page="home" style="cursor: pointer;">
-                <img src="assets/icon-192.png" alt="ONE VOICE" class="header-logo-icon">
-                <div class="brand-logo-text">
+            <button class="header-icon-btn" id="btn-open-drawer" title="Menu" aria-label="Open Menu">
+                <svg viewBox="0 0 24 24" width="28" height="28" fill="#ffffff">
+                    <path d="M3 6h18v2.4H3V6zm0 5.3h18v2.4H3v-2.4zm0 5.3h18V19H3v-2.4z"/>
+                </svg>
+            </button>
+            <div class="header-center-brand nav-page-btn" data-page="home" title="ONE VOICE Home">
+                <div class="brand-title-row">
                     <span class="brand-one">ONE</span>
                     <span class="brand-voice">VOICE</span>
                 </div>
+                <div class="brand-sub-title">International Calls</div>
             </div>
-            <div class="header-right-actions">
-                <button class="header-install-btn" id="btn-pwa-install" title="Install App" style="display: none;">📲 Install</button>
-                <button class="header-icon-btn nav-page-btn" data-page="settings" title="Settings">⚙️</button>
+            <div class="header-mins-badge" id="header-mins-display">
+                <span id="header-user-mins">120 Minutes</span>
             </div>
         </header>
+
+        <!-- Floating Popover Menu (Directly matching user design reference) -->
+        <div class="popover-menu-backdrop" id="popover-menu-backdrop"></div>
+        <div class="floating-popover-menu" id="floating-popover-menu">
+            <!-- 1. Home -->
+            <div class="popover-menu-item active nav-page-btn" data-page="home" id="pop-menu-home">
+                <span class="popover-item-icon">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="#007a3d">
+                        <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                    </svg>
+                </span>
+                <span class="popover-item-text">Home</span>
+            </div>
+
+            <!-- 2. Units -->
+            <div class="popover-menu-item nav-page-btn" data-page="rates" id="pop-menu-units">
+                <span class="popover-item-icon">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="#007a3d">
+                        <path d="M12 2C6.48 2 2 4.02 2 6.5s4.48 4.5 10 4.5 10-2.02 10-4.5S17.52 2 12 2zm0 7C7.58 9 4 7.43 4 6.5S7.58 4 12 4s8 1.43 8 2.5S16.42 9 12 9zm-8 2.37c1.39 1.15 4.41 2.13 8 2.13s6.61-.98 8-2.13v2.88c0 2.48-4.48 4.5-10 4.5s-10-2.02-10-4.5v-2.88zm0 5.25c1.39 1.15 4.41 2.13 8 2.13 1.09 0 2.13-.09 3.09-.27-.4-.82-.64-1.74-.68-2.73-3.23.01-6.93-.84-8.41-1.75v2.62zm15 1.38v-2h-2v-2h2v-2h2v2h2v2h-2v2h-2z"/>
+                    </svg>
+                </span>
+                <span class="popover-item-text">Units</span>
+            </div>
+
+            <!-- 3. Top Up -->
+            <div class="popover-menu-item trigger-topup" id="pop-menu-topup">
+                <span class="popover-item-icon">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="#007a3d">
+                        <path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                    </svg>
+                </span>
+                <span class="popover-item-text">Top Up</span>
+            </div>
+
+            <!-- 4. Help -->
+            <div class="popover-menu-item nav-page-btn" data-page="help" id="pop-menu-help">
+                <span class="popover-item-icon">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="#007a3d">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 16h-2v-2h2v2zm1.07-7.75l-.9.92C12.45 11.9 12 12.5 12 14h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.67z"/>
+                    </svg>
+                </span>
+                <span class="popover-item-text">Help</span>
+            </div>
+
+            <!-- 5. Contact Office -->
+            <div class="popover-menu-item nav-page-btn" data-page="support" id="pop-menu-office">
+                <span class="popover-item-icon">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="#007a3d">
+                        <path d="M12 1c-4.97 0-9 4.03-9 9v7c0 2.21 1.79 4 4 4h1v-8H5v-3c0-3.87 3.13-7 7-7s7 3.13 7 7v3h-3v8h1c2.21 0 4-1.79 4-4V10c0-4.97-4.03-9-9-9z"/>
+                    </svg>
+                </span>
+                <span class="popover-item-text">Contact Office</span>
+            </div>
+
+            <!-- 6. Airtime -->
+            <div class="popover-menu-item nav-page-btn" data-page="wallet" id="pop-menu-airtime">
+                <span class="popover-item-icon">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="#007a3d">
+                        <path d="M4 3h16c1.1 0 2 .9 2 2v14c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V5c0-1.1.9-2 2-2zm8 4l-5 5h3v5h4v-5h3l-5-5z"/>
+                    </svg>
+                </span>
+                <span class="popover-item-text">Airtime</span>
+            </div>
+
+            <!-- 7. Settings -->
+            <div class="popover-menu-item nav-page-btn" data-page="settings" id="pop-menu-settings">
+                <span class="popover-item-icon">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="#007a3d">
+                        <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                    </svg>
+                </span>
+                <span class="popover-item-text">Settings</span>
+            </div>
+        </div>
+
+        <!-- ====================================================
+             SCREEN 0: INSTALL APP FIRST SCREEN (#page-install-gate)
+             ==================================================== -->
+        <section class="app-page active" id="page-install-gate">
+            <div class="welcome-screen-wrap" style="justify-content:center; gap:20px; padding:30px 16px;">
+                <div class="welcome-logo-badge-container">
+                    <img src="assets/logo.png" alt="ONE VOICE - Connect the World" class="welcome-official-logo">
+                </div>
+
+                <div class="welcome-hero-header" style="margin-top:0;">
+                    <div class="welcome-tagline" style="font-size:1.45rem;">ONE VOICE</div>
+                    <div style="font-size:1.05rem; font-weight:700; color:var(--primary-green-dark); margin-top:4px;">International Calls</div>
+                    <div class="welcome-subtagline" style="margin-top:6px;">Install the app on your phone to get started, sign in, and make crystal-clear calls anywhere, anytime.</div>
+                </div>
+
+                <div class="welcome-actions-wrap" style="margin-top:10px; width:100%; max-width:320px;">
+                    <button class="btn-green-pill" id="btn-gate-install-action" style="font-size:1.05rem; padding:16px;">
+                        📲 Install ONE VOICE App
+                    </button>
+                    <button class="btn-outline-pill nav-page-btn" data-page="register" id="btn-gate-register-action" style="font-weight:700;">
+                        Continue to Register →
+                    </button>
+                    <div style="font-size:0.85rem; color:var(--text-secondary); margin-top:8px; text-align:center;">
+                        Already registered? <span class="nav-page-btn" data-page="login" style="color:var(--primary-green); font-weight:700; cursor:pointer;">Sign In</span>
+                    </div>
+                </div>
+            </div>
+        </section>
 
         <!-- ====================================================
              SCREEN 1: WELCOME SCREEN (#page-welcome)
              ==================================================== -->
-        <section class="app-page active" id="page-welcome">
+        <section class="app-page" id="page-welcome">
             <div class="welcome-screen-wrap">
                 <!-- Official ONE VOICE Logo Badge Hero -->
                 <div class="welcome-logo-badge-container">
@@ -54,9 +160,9 @@
                 </div>
 
                 <div class="welcome-actions-wrap">
-                    <button class="btn-green-pill nav-page-btn" data-page="register">Create Account</button>
-                    <button class="btn-outline-pill nav-page-btn" data-page="login">Login</button>
-                    <button class="btn-outline-pill btn-pwa-install-trigger" id="btn-pwa-welcome" style="display: none; border-color: var(--primary-green); color: var(--primary-green-dark); font-weight: 700;">📲 Install App</button>
+                    <button class="btn-green-pill nav-page-btn" data-page="login">Sign In</button>
+                    <button class="btn-outline-pill nav-page-btn" data-page="register">Create Account</button>
+                    <button class="btn-outline-pill btn-pwa-install-trigger" id="btn-pwa-welcome" style="border-color: var(--primary-green); color: var(--primary-green-dark); font-weight: 700;">📲 Install App</button>
 
                     <div class="welcome-lang-selector">
                         <button class="welcome-lang-btn active" data-lang="en">🌐 English ⌵</button>
@@ -194,7 +300,9 @@
         <section class="app-page" id="page-home">
             <!-- User Profile Bar -->
             <div class="dashboard-user-bar">
-                <div class="user-avatar-circle" id="dash-avatar-circle">👤</div>
+                <div class="dash-user-avatar-badge nav-page-btn" data-page="settings" title="Change Profile Photo" id="dash-avatar-circle">
+                    <img id="dash-avatar-img" class="dash-avatar-img" src="assets/icon-192.png" alt="Profile">
+                </div>
                 <div>
                     <div class="user-greeting-name">Hello, <span id="dash-user-name">Amina Ahmed</span></div>
                     <div class="user-member-id" id="dash-member-id">Member ID: OV-880993</div>
@@ -213,12 +321,12 @@
                 <button class="btn-sm-install" id="btn-install-banner">Install</button>
             </div>
 
-            <!-- Green Wallet Balance Banner -->
+            <!-- Green Bundles Balance Banner -->
             <div class="wallet-balance-banner">
                 <div class="wallet-banner-left">
                     <div class="wallet-currency-icon">₦</div>
                     <div>
-                        <div class="wallet-balance-label">Wallet Balance</div>
+                        <div class="wallet-balance-label">Bundles Balance</div>
                         <div class="wallet-balance-value" id="dash-wallet-balance">₦ 9,000.00</div>
                     </div>
                 </div>
@@ -260,10 +368,10 @@
                     <div class="dash-tile-title">Call History</div>
                 </div>
 
-                <!-- 5. My Wallet -->
+                <!-- 5. Bundles -->
                 <div class="dash-action-tile nav-page-btn" data-page="wallet">
                     <div class="dash-tile-icon-box icon-wallet">💳</div>
-                    <div class="dash-tile-title">My Wallet</div>
+                    <div class="dash-tile-title">Bundles</div>
                 </div>
 
                 <!-- 6. Settings -->
@@ -310,10 +418,17 @@
                 <span>⌵</span>
             </button>
 
-            <!-- Number Display Box -->
-            <div class="dialer-display-box">
-                <div class="dialer-display-number" id="dial-number">+234</div>
-                <button class="dialer-display-clear" id="btn-dial-clear">✕</button>
+            <!-- Number Display Box with Green Blinking Cursor & Tag-style Backspace -->
+            <div class="dialer-display-card-modern">
+                <div class="dialer-display-text-wrapper">
+                    <span class="dialer-display-number" id="dial-number">+2347033445566</span>
+                    <span class="dialer-cursor-blink"></span>
+                </div>
+                <button class="btn-dialer-tag-backspace" id="btn-dial-clear" title="Delete">
+                    <svg class="tag-backspace-svg" viewBox="0 0 24 24" width="22" height="22">
+                        <path d="M22 3H7c-.69 0-1.32.35-1.72.92L0 12l5.28 8.08c.4.57 1.03.92 1.72.92h15c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-3 12.59L17.59 17 14 13.41 10.41 17 9 15.59 12.59 12 9 8.41 10.41 7 14 10.59 17.59 7 19 8.41 15.41 12 19 15.59z" fill="currentColor"/>
+                    </svg>
+                </button>
             </div>
 
             <!-- 3x4 Dialpad Grid -->
@@ -345,8 +460,8 @@
              ==================================================== -->
         <section class="app-page" id="page-wallet">
             <div style="margin-bottom:16px;">
-                <h2 style="font-size:1.35rem; font-weight:800;">My Wallet</h2>
-                <p style="font-size:0.85rem; color:var(--text-secondary);">Manage balance, recharge credits & transfers</p>
+                <h2 style="font-size:1.35rem; font-weight:800;">Bundles & Airtime</h2>
+                <p style="font-size:0.85rem; color:var(--text-secondary);">Manage balance, recharge calling units & bundles</p>
             </div>
 
             <!-- Balance Card -->
@@ -354,7 +469,7 @@
                 <div class="wallet-banner-left">
                     <div class="wallet-currency-icon">₦</div>
                     <div>
-                        <div class="wallet-balance-label">Available Balance</div>
+                        <div class="wallet-balance-label">Available Bundles Balance</div>
                         <div class="wallet-balance-value" id="wallet-page-balance">₦ 9,000.00</div>
                     </div>
                 </div>
@@ -421,107 +536,207 @@
         <!-- ====================================================
              PAGE: SETTINGS (#page-settings)
              ==================================================== -->
+        <!-- ====================================================
+             PAGE: SETTINGS (Image 4 Native Mobile Menu Design)
+             ==================================================== -->
         <section class="app-page" id="page-settings">
-            <div class="auth-header-bar" style="margin-bottom:14px;">
-                <button class="header-icon-btn nav-page-btn" data-page="home" style="border:none; background:none;">←</button>
-                <div class="auth-header-title">Account Settings</div>
-                <div style="width:38px;"></div>
+            <!-- Green Title Bar Header matching image -->
+            <div class="settings-top-navbar-green">
+                <button class="settings-back-btn nav-page-btn" data-page="home" title="Back">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="#ffffff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+                <div class="settings-navbar-title">Settings</div>
+                <div style="width:24px;"></div>
             </div>
 
-            <!-- Profile Summary Card -->
-            <div class="settings-profile-badge">
-                <div class="settings-avatar-circle" id="settings-avatar-icon">👤</div>
-                <div class="settings-badge-info">
-                    <div class="settings-badge-name" id="settings-display-name">Alex Morgan</div>
-                    <div class="settings-badge-phone" id="settings-display-phone">+234 803 123 4567</div>
-                    <div class="settings-badge-id" id="settings-display-id">ID: OV-784920</div>
+            <!-- Profile Avatar Card with Photo Upload -->
+            <div style="text-align: center; padding: 18px 16px 12px; background: #ffffff; margin-bottom: 12px; border-radius: var(--radius-lg); border: 1px solid var(--border-light);">
+                <div class="settings-avatar-wrap">
+                    <img id="settings-avatar-img" class="settings-avatar-img" src="assets/icon-192.png" alt="Profile Photo">
+                    <label for="input-avatar-file" class="settings-avatar-edit-badge" title="Change Photo" aria-label="Upload Photo">
+                        📷
+                    </label>
+                    <input type="file" id="input-avatar-file" accept="image/*" style="display:none;">
                 </div>
+                <div style="font-size: 1.15rem; font-weight: 800; color: #0f172a;" id="settings-display-name">Amina Ahmed</div>
+                <div style="font-size: 0.82rem; color: #059669; font-weight: 600;" id="settings-display-phone">+234 803 123 4567</div>
+                <div style="font-size: 0.75rem; color: #64748b; margin-top: 2px;" id="settings-display-id">Member ID: OV-880993</div>
             </div>
 
-            <!-- Section 1: Edit Profile (Name, Phone Number, Email) -->
-            <div class="settings-card">
-                <div class="settings-card-header">
-                    <span class="settings-card-icon">👤</span>
-                    <div>
-                        <div class="settings-card-title">Edit Profile Information</div>
-                        <div class="settings-card-sub">Change your Name, Phone Number, and Email</div>
+            <div class="settings-menu-list-wrapper">
+                <!-- Group 1: Profile Top Cards -->
+                <div class="settings-grouped-card">
+                    <!-- 0. Change Photo -->
+                    <div class="settings-list-row" onclick="document.getElementById('input-avatar-file').click();" style="cursor: pointer;">
+                        <div class="settings-row-left">
+                            <div class="settings-row-icon-box" style="background:#8b5cf6;">
+                                <svg viewBox="0 0 24 24" width="22" height="22" fill="#ffffff">
+                                    <path d="M4 4h3l2-2h6l2 2h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2zm8 3a5 5 0 1 0 0 10 5 5 0 0 0 0-10zm0 2a3 3 0 1 1 0 6 3 3 0 0 1 0-6z"/>
+                                </svg>
+                            </div>
+                            <div class="settings-row-texts">
+                                <div class="settings-row-title">Profile Photo</div>
+                                <div class="settings-row-sub">Upload or change picture</div>
+                            </div>
+                        </div>
+                        <div class="settings-row-arrow">›</div>
+                    </div>
+
+                    <!-- 1. Edit Name -->
+                    <div class="settings-list-row trigger-settings-modal" data-modal="modal-edit-name">
+                        <div class="settings-row-left">
+                            <div class="settings-row-icon-box bg-green-box">
+                                <svg viewBox="0 0 24 24" width="22" height="22" fill="#ffffff">
+                                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                                </svg>
+                            </div>
+                            <div class="settings-row-texts">
+                                <div class="settings-row-title">Edit Name</div>
+                                <div class="settings-row-sub">Change your display name</div>
+                            </div>
+                        </div>
+                        <div class="settings-row-arrow">›</div>
+                    </div>
+
+                    <!-- 2. Change Email -->
+                    <div class="settings-list-row trigger-settings-modal" data-modal="modal-edit-email">
+                        <div class="settings-row-left">
+                            <div class="settings-row-icon-box bg-blue-box">
+                                <svg viewBox="0 0 24 24" width="22" height="22" fill="#ffffff">
+                                    <path d="M20 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+                                </svg>
+                            </div>
+                            <div class="settings-row-texts">
+                                <div class="settings-row-title">Change Email</div>
+                                <div class="settings-row-sub">Update your email address</div>
+                            </div>
+                        </div>
+                        <div class="settings-row-arrow">›</div>
+                    </div>
+
+                    <!-- 3. Change Password -->
+                    <div class="settings-list-row trigger-settings-modal" data-modal="modal-edit-password">
+                        <div class="settings-row-left">
+                            <div class="settings-row-icon-box bg-orange-box">
+                                <svg viewBox="0 0 24 24" width="22" height="22" fill="#ffffff">
+                                    <path d="M18 8h-1V6c0-2.76-2.24-5-5-5S7 3.24 7 6v2H6c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h12c1.1 0 2-.9 2-2V10c0-1.1-.9-2-2-2zm-6 9c-1.1 0-2-.9-2-2s.9-2 2-2 2 .9 2 2-.9 2-2 2zm3.1-9H8.9V6c0-1.71 1.39-3.1 3.1-3.1 1.71 0 3.1 1.39 3.1 3.1v2z"/>
+                                </svg>
+                            </div>
+                            <div class="settings-row-texts">
+                                <div class="settings-row-title">Change Password</div>
+                                <div class="settings-row-sub">Set a new password</div>
+                            </div>
+                        </div>
+                        <div class="settings-row-arrow">›</div>
                     </div>
                 </div>
 
-                <form id="form-settings-profile" style="margin-top: 14px;">
-                    <div class="form-input-group">
-                        <span class="form-input-icon">👤</span>
-                        <input type="text" id="settings-input-name" class="app-input" placeholder="Full Name" required>
+                <!-- Group 2: System & Preferences -->
+                <div class="settings-grouped-card">
+                    <!-- 4. Call Settings -->
+                    <div class="settings-list-row trigger-settings-modal" data-modal="modal-call-settings">
+                        <div class="settings-row-left">
+                            <div class="settings-row-icon-box bg-white-green-icon">
+                                <svg viewBox="0 0 24 24" width="22" height="22" fill="#059669">
+                                    <path d="M20.01 15.38c-1.23 0-2.42-.2-3.53-.56a.977.977 0 0 0-1.01.24l-1.57 1.97c-2.83-1.35-5.48-3.9-6.89-6.83l1.95-1.66c.27-.28.35-.67.24-1.02-.37-1.11-.56-2.3-.56-3.53 0-.54-.45-.99-.99-.99H4.19C3.65 3 3 3.24 3 3.99 3 13.28 10.73 21 20.01 21c.71 0 .99-.63.99-1.18v-3.45c0-.54-.45-.99-.99-.99z"/>
+                                </svg>
+                            </div>
+                            <div class="settings-row-texts">
+                                <div class="settings-row-title">Call Settings</div>
+                                <div class="settings-row-sub">Audio, speaker and call preferences</div>
+                            </div>
+                        </div>
+                        <div class="settings-row-arrow">›</div>
                     </div>
 
-                    <div class="form-input-group">
-                        <span class="form-input-icon">📱</span>
-                        <input type="tel" id="settings-input-phone" class="app-input" placeholder="Phone Number (e.g. 09090809080)" required>
-                    </div>
-                    <div style="font-size:0.75rem; color:var(--text-secondary); margin:-6px 0 12px 6px;">
-                        💡 Changing your phone number also updates your 10-digit account number automatically.
+                    <!-- 5. Notifications -->
+                    <div class="settings-list-row trigger-settings-modal" data-modal="modal-notifications">
+                        <div class="settings-row-left">
+                            <div class="settings-row-icon-box bg-white-green-icon">
+                                <svg viewBox="0 0 24 24" width="22" height="22" fill="#059669">
+                                    <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.89 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
+                                </svg>
+                            </div>
+                            <div class="settings-row-texts">
+                                <div class="settings-row-title">Notifications</div>
+                                <div class="settings-row-sub">Manage notifications</div>
+                            </div>
+                        </div>
+                        <div class="settings-row-arrow">›</div>
                     </div>
 
-                    <div class="form-input-group">
-                        <span class="form-input-icon">✉️</span>
-                        <input type="email" id="settings-input-email" class="app-input" placeholder="Email Address" required>
+                    <!-- 6. Privacy & Security -->
+                    <div class="settings-list-row trigger-settings-modal" data-modal="modal-privacy">
+                        <div class="settings-row-left">
+                            <div class="settings-row-icon-box bg-white-green-icon">
+                                <svg viewBox="0 0 24 24" width="22" height="22" fill="#059669">
+                                    <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+                                </svg>
+                            </div>
+                            <div class="settings-row-texts">
+                                <div class="settings-row-title">Privacy & Security</div>
+                                <div class="settings-row-sub">Manage your privacy and security</div>
+                            </div>
+                        </div>
+                        <div class="settings-row-arrow">›</div>
                     </div>
 
-                    <button type="submit" class="btn-green-pill" id="btn-submit-profile">💾 Save Profile Info</button>
-                </form>
+                    <!-- 7. Language -->
+                    <div class="settings-list-row trigger-settings-modal" data-modal="modal-language">
+                        <div class="settings-row-left">
+                            <div class="settings-row-icon-box bg-white-green-icon">
+                                <svg viewBox="0 0 24 24" width="22" height="22" fill="#059669">
+                                    <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2 0 .68.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56-1.84-.63-3.37-1.9-4.33-3.56zm2.95-8H5.08c.96-1.66 2.49-2.93 4.33-3.56C8.81 5.55 8.35 6.75 8.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 14H9.66c-.09-.66-.16-1.32-.16-2 0-.68.07-1.35.16-2h4.68c.09.65.16 1.32.16 2 0 .68-.07 1.34-.16 2zm.25 5.56c.6-1.11 1.06-2.31 1.38-3.56h2.95c-.96 1.65-2.49 2.93-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2 0-.68-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z"/>
+                                </svg>
+                            </div>
+                            <div class="settings-row-texts">
+                                <div class="settings-row-title">Language</div>
+                                <div class="settings-row-sub">English / Hausa</div>
+                            </div>
+                        </div>
+                        <div class="settings-row-arrow">›</div>
+                    </div>
+
+                    <!-- 8. About App -->
+                    <div class="settings-list-row trigger-settings-modal" data-modal="modal-about-app">
+                        <div class="settings-row-left">
+                            <div class="settings-row-icon-box bg-white-green-icon">
+                                <svg viewBox="0 0 24 24" width="22" height="22" fill="#059669">
+                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+                                </svg>
+                            </div>
+                            <div class="settings-row-texts">
+                                <div class="settings-row-title">About App</div>
+                                <div class="settings-row-sub">App version and information</div>
+                            </div>
+                        </div>
+                        <div class="settings-row-arrow">›</div>
+                    </div>
+
+                    <!-- 9. Help & Support -->
+                    <div class="settings-list-row nav-page-btn" data-page="support">
+                        <div class="settings-row-left">
+                            <div class="settings-row-icon-box bg-white-green-icon">
+                                <svg viewBox="0 0 24 24" width="22" height="22" fill="#059669">
+                                    <path d="M12 1c-4.97 0-9 4.03-9 9v7c0 2.21 1.79 4 4 4h1v-8H5v-3c0-3.87 3.13-7 7-7s7 3.13 7 7v3h-3v8h1c2.21 0 4-1.79 4-4V10c0-4.97-4.03-9-9-9z"/>
+                                </svg>
+                            </div>
+                            <div class="settings-row-texts">
+                                <div class="settings-row-title">Help & Support</div>
+                                <div class="settings-row-sub">Get help or contact support</div>
+                            </div>
+                        </div>
+                        <div class="settings-row-arrow">›</div>
+                    </div>
+                </div>
+
+                <!-- Logout Button -->
+                <button class="btn-outline-pill" id="btn-settings-logout" style="border-color:#ef4444; color:#ef4444; margin:16px 0 28px; font-weight:700;">
+                    🚪 Logout of Account
+                </button>
             </div>
-
-            <!-- Section 2: Edit Password -->
-            <div class="settings-card">
-                <div class="settings-card-header">
-                    <span class="settings-card-icon">🔒</span>
-                    <div>
-                        <div class="settings-card-title">Change Password</div>
-                        <div class="settings-card-sub">Update your account login password</div>
-                    </div>
-                </div>
-
-                <form id="form-settings-password" style="margin-top: 14px;">
-                    <div class="form-input-group">
-                        <span class="form-input-icon">🔑</span>
-                        <input type="password" id="settings-current-password" class="app-input" placeholder="Current Password">
-                        <button type="button" class="form-input-eye" onclick="togglePassVisibility('settings-current-password')">👁️</button>
-                    </div>
-
-                    <div class="form-input-group">
-                        <span class="form-input-icon">🔒</span>
-                        <input type="password" id="settings-new-password" class="app-input" placeholder="New Password (min. 6 characters)" required>
-                        <button type="button" class="form-input-eye" onclick="togglePassVisibility('settings-new-password')">👁️</button>
-                    </div>
-
-                    <div class="form-input-group">
-                        <span class="form-input-icon">🛡️</span>
-                        <input type="password" id="settings-confirm-password" class="app-input" placeholder="Confirm New Password" required>
-                        <button type="button" class="form-input-eye" onclick="togglePassVisibility('settings-confirm-password')">👁️</button>
-                    </div>
-
-                    <button type="submit" class="btn-blue-pill" id="btn-submit-password">🔒 Update Password</button>
-                </form>
-            </div>
-
-            <!-- Section 3: Language Preference -->
-            <div class="settings-card">
-                <div class="settings-card-header">
-                    <span class="settings-card-icon">🌐</span>
-                    <div>
-                        <div class="settings-card-title">Language Preference</div>
-                        <div class="settings-card-sub">Choose interface language</div>
-                    </div>
-                </div>
-                <div style="display:flex; gap:10px; margin-top:12px;">
-                    <button class="btn-outline-pill welcome-lang-btn active" data-lang="en" style="flex:1; padding:10px;">🇬🇧 English</button>
-                    <button class="btn-outline-pill welcome-lang-btn" data-lang="ha" style="flex:1; padding:10px;">🇳🇬 Hausa</button>
-                </div>
-            </div>
-
-            <button class="btn-outline-pill" id="btn-settings-logout" style="border-color:#ef4444; color:#ef4444; margin:16px 0 24px;">
-                🚪 Logout of Account
-            </button>
         </section>
 
         <!-- ====================================================
@@ -556,26 +771,63 @@
         <!-- ====================================================
              BOTTOM NAVIGATION DOCK (Shown when authenticated)
              ==================================================== -->
+        <!-- ====================================================
+             BOTTOM NAVIGATION DOCK (Image 1 Style)
+             Contact | Recent Call | Dial (Floating Pill) | Bundles | Settings
+             ==================================================== -->
         <nav class="mobile-bottom-nav" id="mobile-bottom-nav" style="display: none;">
-            <button class="bottom-nav-item nav-page-btn" data-page="home">
-                <span class="bottom-nav-icon">🏠</span>
-                <span>Home</span>
-            </button>
             <button class="bottom-nav-item nav-page-btn" data-page="contacts">
-                <span class="bottom-nav-icon">👥</span>
-                <span>Contacts</span>
+                <span class="bottom-nav-icon">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                        <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                    </svg>
+                </span>
+                <span>Contact</span>
             </button>
-            <button class="bottom-nav-item nav-page-btn active" data-page="dialer">
-                <span class="bottom-nav-icon">📞</span>
+
+            <button class="bottom-nav-item nav-page-btn" data-page="calls">
+                <span class="bottom-nav-icon">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <polyline points="12 6 12 12 14 14"></polyline>
+                    </svg>
+                </span>
+                <span>Recent Call</span>
+            </button>
+
+            <button class="bottom-nav-item bottom-nav-dial-center nav-page-btn active" data-page="dialer">
+                <span class="bottom-nav-dial-bubble">
+                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                        <circle cx="5" cy="5" r="2"></circle>
+                        <circle cx="12" cy="5" r="2"></circle>
+                        <circle cx="19" cy="5" r="2"></circle>
+                        <circle cx="5" cy="12" r="2"></circle>
+                        <circle cx="12" cy="12" r="2"></circle>
+                        <circle cx="19" cy="12" r="2"></circle>
+                        <circle cx="5" cy="19" r="2"></circle>
+                        <circle cx="12" cy="19" r="2"></circle>
+                        <circle cx="19" cy="19" r="2"></circle>
+                    </svg>
+                </span>
                 <span>Dial</span>
             </button>
-            <button class="bottom-nav-item nav-page-btn" data-page="calls">
-                <span class="bottom-nav-icon">🕒</span>
-                <span>Recent</span>
-            </button>
+
             <button class="bottom-nav-item nav-page-btn" data-page="wallet">
-                <span class="bottom-nav-icon">💳</span>
-                <span>Wallet</span>
+                <span class="bottom-nav-icon">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                        <path d="M4 10h12v2H4zm0-4h12v2H4zm0 8h8v2H4zm10 0v-1.5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5V14h1c.55 0 1 .45 1 1v6c0 .55-.45 1-1 1h-6c-.55 0-1-.45-1-1v-6c0-.55.45-1 1-1h1zm2 0h2v-1.5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5V14z"/>
+                    </svg>
+                </span>
+                <span>Bundles</span>
+            </button>
+
+            <button class="bottom-nav-item nav-page-btn" data-page="settings">
+                <span class="bottom-nav-icon">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                        <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                    </svg>
+                </span>
+                <span>Settings</span>
             </button>
         </nav>
 
@@ -619,18 +871,78 @@
                 <div class="drawer-user-id" id="drawer-user-id">Member ID: OV-880993</div>
             </div>
 
-            <div class="drawer-menu-list">
-                <div class="drawer-menu-item drawer-install-item" id="drawer-install-app" style="display: none;">📲 Install App (PWA)</div>
-                <div class="drawer-menu-item nav-page-btn" data-page="home">🏠 Home</div>
-                <div class="drawer-menu-item nav-page-btn" data-page="dialer">📞 Make Call</div>
-                <div class="drawer-menu-item nav-page-btn" data-page="contacts">👥 Contacts</div>
-                <div class="drawer-menu-item nav-page-btn" data-page="rates">📑 Call Rates</div>
-                <div class="drawer-menu-item nav-page-btn" data-page="calls">🕒 Call History</div>
-                <div class="drawer-menu-item nav-page-btn" data-page="wallet">💳 My Wallet</div>
-                <div class="drawer-menu-item nav-page-btn" data-page="settings">⚙️ Settings</div>
-                <div class="drawer-menu-item nav-page-btn" data-page="support">🎧 Support</div>
-                <div class="drawer-menu-item nav-page-btn" data-page="help">❓ Help</div>
-                <div class="drawer-menu-item logout-item" id="btn-drawer-logout">🚪 Logout</div>
+            <div class="drawer-menu-list drawer-menu-list-clean">
+                <div class="drawer-menu-item drawer-install-item" id="drawer-install-app" style="display: none;">
+                    <span class="drawer-item-icon">📲</span>
+                    <span>Install App (PWA)</span>
+                </div>
+                <!-- 1. Home -->
+                <div class="drawer-menu-item nav-page-btn" data-page="home">
+                    <span class="drawer-item-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="#10b981">
+                            <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+                        </svg>
+                    </span>
+                    <span>Home</span>
+                </div>
+                <!-- 2. Units -->
+                <div class="drawer-menu-item nav-page-btn" data-page="rates">
+                    <span class="drawer-item-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="#10b981">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/>
+                        </svg>
+                    </span>
+                    <span>Units</span>
+                </div>
+                <!-- 3. Top Up -->
+                <div class="drawer-menu-item nav-page-btn" data-page="wallet">
+                    <span class="drawer-item-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="#10b981">
+                            <path d="M21 18v1c0 1.1-.9 2-2 2H5c-1.11 0-2-.9-2-2V5c0-1.1.89-2 2-2h14c1.1 0 2 .9 2 2v1h-9c-1.11 0-2 .9-2 2v8c0 1.1.89 2 2 2h9zm-9-2h10V8H12v8zm4-2.5c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/>
+                        </svg>
+                    </span>
+                    <span>Top Up</span>
+                </div>
+                <!-- 4. Help -->
+                <div class="drawer-menu-item nav-page-btn" data-page="help">
+                    <span class="drawer-item-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="#10b981">
+                            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 16h-2v-2h2v2zm1.07-7.75l-.9.92C12.45 11.9 12 12.5 12 14h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H7c0-2.76 2.24-5 5-5s5 2.24 5 5c0 1.04-.42 1.99-1.07 2.67z"/>
+                        </svg>
+                    </span>
+                    <span>Help</span>
+                </div>
+                <!-- 5. Contact Office -->
+                <div class="drawer-menu-item nav-page-btn" data-page="support">
+                    <span class="drawer-item-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="#10b981">
+                            <path d="M12 1c-4.97 0-9 4.03-9 9v7c0 2.21 1.79 4 4 4h1v-8H5v-3c0-3.87 3.13-7 7-7s7 3.13 7 7v3h-3v8h1c2.21 0 4-1.79 4-4V10c0-4.97-4.03-9-9-9z"/>
+                        </svg>
+                    </span>
+                    <span>Contact Office</span>
+                </div>
+                <!-- 6. Airtime -->
+                <div class="drawer-menu-item nav-page-btn" data-page="wallet">
+                    <span class="drawer-item-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="#10b981">
+                            <path d="M4 4h16v16H4V4zm8 3l-5 5h3v5h4v-5h3l-5-5z"/>
+                        </svg>
+                    </span>
+                    <span>Airtime</span>
+                </div>
+                <!-- 7. Settings -->
+                <div class="drawer-menu-item nav-page-btn" data-page="settings">
+                    <span class="drawer-item-icon">
+                        <svg viewBox="0 0 24 24" width="22" height="22" fill="#10b981">
+                            <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                        </svg>
+                    </span>
+                    <span>Settings</span>
+                </div>
+                <div class="drawer-menu-item logout-item" id="btn-drawer-logout" style="margin-top:10px; border-top:1px solid #f1f5f9; padding-top:12px;">
+                    <span class="drawer-item-icon">🚪</span>
+                    <span>Logout</span>
+                </div>
             </div>
         </div>
 
@@ -713,6 +1025,192 @@
                     <button type="submit" class="btn-green-pill" id="btn-confirm-transfer">💸 Send Transfer</button>
                 </form>
             </div>
+        </div>
+
+        <!-- ====================================================
+             SETTINGS MODAL: EDIT NAME
+             ==================================================== -->
+        <div class="app-modal-overlay" id="modal-edit-name">
+            <div class="app-modal-card">
+                <div class="modal-header-row">
+                    <div class="modal-title">Edit Name</div>
+                    <button class="modal-close-x close-settings-modal">✕</button>
+                </div>
+                <form id="form-edit-name">
+                    <div class="form-input-group">
+                        <span class="form-input-icon">👤</span>
+                        <input type="text" id="settings-input-name" class="app-input" placeholder="Enter display name" required>
+                    </div>
+                    <button type="submit" class="btn-green-pill" style="margin-top:10px;">Save Name</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ====================================================
+             SETTINGS MODAL: CHANGE EMAIL
+             ==================================================== -->
+        <div class="app-modal-overlay" id="modal-edit-email">
+            <div class="app-modal-card">
+                <div class="modal-header-row">
+                    <div class="modal-title">Change Email</div>
+                    <button class="modal-close-x close-settings-modal">✕</button>
+                </div>
+                <form id="form-edit-email">
+                    <div class="form-input-group">
+                        <span class="form-input-icon">✉️</span>
+                        <input type="email" id="settings-input-email" class="app-input" placeholder="Enter new email address" required>
+                    </div>
+                    <button type="submit" class="btn-green-pill" style="margin-top:10px;">Save Email</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ====================================================
+             SETTINGS MODAL: CHANGE PASSWORD
+             ==================================================== -->
+        <div class="app-modal-overlay" id="modal-edit-password">
+            <div class="app-modal-card">
+                <div class="modal-header-row">
+                    <div class="modal-title">Change Password</div>
+                    <button class="modal-close-x close-settings-modal">✕</button>
+                </div>
+                <form id="form-settings-password">
+                    <div class="form-input-group">
+                        <span class="form-input-icon">🔑</span>
+                        <input type="password" id="settings-current-password" class="app-input" placeholder="Current password">
+                        <button type="button" class="form-input-eye" onclick="togglePassVisibility('settings-current-password')">👁️</button>
+                    </div>
+                    <div class="form-input-group">
+                        <span class="form-input-icon">🔒</span>
+                        <input type="password" id="settings-new-password" class="app-input" placeholder="New password (min. 6 chars)" minlength="6" required>
+                        <button type="button" class="form-input-eye" onclick="togglePassVisibility('settings-new-password')">👁️</button>
+                    </div>
+                    <div class="form-input-group">
+                        <span class="form-input-icon">🛡️</span>
+                        <input type="password" id="settings-confirm-password" class="app-input" placeholder="Confirm new password" minlength="6" required>
+                        <button type="button" class="form-input-eye" onclick="togglePassVisibility('settings-confirm-password')">👁️</button>
+                    </div>
+                    <button type="submit" class="btn-green-pill" id="btn-submit-password" style="margin-top:10px;">Update Password</button>
+                </form>
+            </div>
+        </div>
+
+        <!-- ====================================================
+             SETTINGS MODAL: CALL SETTINGS
+             ==================================================== -->
+        <div class="app-modal-overlay" id="modal-call-settings">
+            <div class="app-modal-card">
+                <div class="modal-header-row">
+                    <div class="modal-title">Call Settings</div>
+                    <button class="modal-close-x close-settings-modal">✕</button>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:14px; font-size:0.9rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-weight:700;">HD Voice Codec (Opus)</div>
+                            <div style="font-size:0.75rem; color:var(--text-secondary);">Crystal clear international audio</div>
+                        </div>
+                        <input type="checkbox" checked style="accent-color:var(--primary-green); width:20px; height:20px;">
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-weight:700;">DTMF Keypad Tones</div>
+                            <div style="font-size:0.75rem; color:var(--text-secondary);">Play audio tones when dialing</div>
+                        </div>
+                        <input type="checkbox" checked style="accent-color:var(--primary-green); width:20px; height:20px;">
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-weight:700;">Low Bandwidth Mode</div>
+                            <div style="font-size:0.75rem; color:var(--text-secondary);">Optimized for weak 3G/2G signals</div>
+                        </div>
+                        <input type="checkbox" style="accent-color:var(--primary-green); width:20px; height:20px;">
+                    </div>
+                </div>
+                <button class="btn-green-pill close-settings-modal" style="margin-top:16px;">Done</button>
+            </div>
+        </div>
+
+        <!-- ====================================================
+             SETTINGS MODAL: NOTIFICATIONS
+             ==================================================== -->
+        <div class="app-modal-overlay" id="modal-notifications">
+            <div class="app-modal-card">
+                <div class="modal-header-row">
+                    <div class="modal-title">Notifications</div>
+                    <button class="modal-close-x close-settings-modal">✕</button>
+                </div>
+                <div style="display:flex; flex-direction:column; gap:14px; font-size:0.9rem;">
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-weight:700;">Incoming Call Alerts</div>
+                            <div style="font-size:0.75rem; color:var(--text-secondary);">Notify for incoming calls</div>
+                        </div>
+                        <input type="checkbox" checked style="accent-color:var(--primary-green); width:20px; height:20px;">
+                    </div>
+                    <div style="display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-weight:700;">Recharge & Balance SMS</div>
+                            <div style="font-size:0.75rem; color:var(--text-secondary);">Updates on wallet credit</div>
+                        </div>
+                        <input type="checkbox" checked style="accent-color:var(--primary-green); width:20px; height:20px;">
+                    </div>
+                </div>
+                <button class="btn-green-pill close-settings-modal" style="margin-top:16px;">Done</button>
+            </div>
+        </div>
+
+        <!-- ====================================================
+             SETTINGS MODAL: PRIVACY & SECURITY
+             ==================================================== -->
+        <div class="app-modal-overlay" id="modal-privacy">
+            <div class="app-modal-card">
+                <div class="modal-header-row">
+                    <div class="modal-title">Privacy & Security</div>
+                    <button class="modal-close-x close-settings-modal">✕</button>
+                </div>
+                <div style="font-size:0.88rem; line-height:1.6; color:var(--text-secondary);">
+                    <p>🔒 <strong>End-to-End Signaling:</strong> All voice session requests are encrypted via TLS 1.3 protocol.</p>
+                    <p style="margin-top:8px;">🛡️ <strong>Zero Data Brokering:</strong> ONE VOICE never sells or distributes your phone records or contacts to third parties.</p>
+                </div>
+                <button class="btn-green-pill close-settings-modal" style="margin-top:16px;">Got It</button>
+            </div>
+        </div>
+
+        <!-- ====================================================
+             SETTINGS MODAL: LANGUAGE
+             ==================================================== -->
+        <div class="app-modal-overlay" id="modal-language">
+            <div class="app-modal-card">
+                <div class="modal-header-row">
+                    <div class="modal-title">Language</div>
+                    <button class="modal-close-x close-settings-modal">✕</button>
+                </div>
+                <div style="display:flex; gap:10px; margin-top:8px;">
+                    <button class="btn-outline-pill welcome-lang-btn active" data-lang="en" style="flex:1; padding:12px;">🇬🇧 English</button>
+                    <button class="btn-outline-pill welcome-lang-btn" data-lang="ha" style="flex:1; padding:12px;">🇳🇬 Hausa</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ====================================================
+             SETTINGS MODAL: ABOUT APP
+             ==================================================== -->
+        <div class="app-modal-overlay" id="modal-about-app">
+            <div class="app-modal-card" style="text-align:center;">
+                <div class="modal-header-row">
+                    <div class="modal-title">About App</div>
+                    <button class="modal-close-x close-settings-modal">✕</button>
+                </div>
+                <img src="assets/icon-192.png" alt="ONE VOICE" style="width:70px; height:70px; border-radius:18px; margin:8px auto; box-shadow:0 6px 18px rgba(0,0,0,0.1);">
+                <div style="font-size:1.15rem; font-weight:800; color:var(--text-primary); margin-top:6px;">ONE VOICE</div>
+                <div style="font-size:0.82rem; color:var(--primary-green-dark); font-weight:700;">International Calls • PWA Version 2.4.0</div>
+                <div style="font-size:0.82rem; color:var(--text-secondary); margin-top:8px; line-height:1.5;">
+                    Next-generation crystal clear global calling platform. Connect the world anywhere, anytime.
+                </div>
+                <button class="btn-green-pill close-settings-modal" style="margin-top:18px;">Close</button>
+            </div>
+        </div>
         <!-- iOS PWA Install Guide Modal -->
         <div class="app-modal-overlay" id="ios-pwa-modal">
             <div class="app-modal-card">
