@@ -171,7 +171,7 @@ document.addEventListener('DOMContentLoaded', () => {
             window.scrollTo(0, 0);
         }
 
-        const isPublicAuthPage = ['welcome', 'register', 'login', 'reg-success', 'forgot'].includes(pageName);
+        const isPublicAuthPage = ['welcome', 'register', 'login', 'reg-success', 'forgot', 'install-gate'].includes(pageName);
 
         // Header and Bottom Nav Visibility
         if (appTopHeader) {
@@ -359,6 +359,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setAuthenticatedUI(user) {
         currentUser = user;
+        if (user) {
+            try {
+                localStorage.setItem('ov_current_user', JSON.stringify(user));
+            } catch (e) {}
+        }
         const name = user.name || 'Amina Ahmed';
         const memberId = user.member_id || 'OV-880993';
         const accountNum = formatPhoneToAccountNumber(user.phone || '9090809080');
@@ -405,6 +410,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function setUnauthenticatedUI() {
         currentUser = null;
+        try {
+            localStorage.removeItem('ov_current_user');
+        } catch (e) {}
         navigateToPage('install-gate');
     }
 
@@ -442,9 +450,16 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
                 const data = await res.json();
                 if (data.success) {
-                    if (data.user) {
-                        setAuthenticatedUI(data.user);
-                    }
+                    const newUser = data.user || {
+                        id: data.member_id || Date.now(),
+                        name: name,
+                        phone: phone,
+                        email: email,
+                        member_id: data.member_id || ('OV-' + Math.floor(100000 + Math.random() * 900000)),
+                        virtual_account_number: phone.replace(/[^0-9]/g, '').slice(-10),
+                        role: 'user'
+                    };
+                    setAuthenticatedUI(newUser);
                     showToast(`Welcome, ${name}! Your account is ready.`, 'success');
                     navigateToPage('home');
                 } else {
@@ -1214,6 +1229,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     if (btnDoneIosModal) btnDoneIosModal.addEventListener('click', () => {
         if (iosModal) iosModal.classList.remove('active');
+        navigateToPage('register');
     });
 
     window.addEventListener('appinstalled', () => {
@@ -1227,8 +1243,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Boot & Initial Session Check
     async function initSession() {
+        const savedUserStr = localStorage.getItem('ov_current_user');
+        let savedUser = null;
+        if (savedUserStr) {
+            try { savedUser = JSON.parse(savedUserStr); } catch (e) {}
+        }
+
+        // For new visitors / unauthenticated users: ALWAYS start on Install Gate!
+        if (!savedUser) {
+            setUnauthenticatedUI();
+            return;
+        }
+
         try {
-            const res = await fetch('api/auth.php');
+            const res = await fetch('api/auth.php', {
+                headers: { 'X-User-Id': savedUser.id ? savedUser.id.toString() : '' }
+            });
             const data = await res.json();
             if (data.success && data.authenticated && data.user) {
                 setAuthenticatedUI(data.user);
@@ -1237,7 +1267,12 @@ document.addEventListener('DOMContentLoaded', () => {
                 setUnauthenticatedUI();
             }
         } catch (e) {
-            setUnauthenticatedUI();
+            if (savedUser) {
+                setAuthenticatedUI(savedUser);
+                navigateToPage('home');
+            } else {
+                setUnauthenticatedUI();
+            }
         }
     }
 

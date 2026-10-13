@@ -27,10 +27,8 @@ function sendResponse($data, $statusCode = 200) {
 // ----------------------------------------------------
 if ($method === 'GET') {
     $token = $_SERVER['HTTP_AUTHORIZATION'] ?? $_SESSION['user_token'] ?? null;
-    
-    // Check if user is logged in
-    $store = getLocalStore();
-    $user = $store['user'] ?? null;
+    $customUserId = $_SERVER['HTTP_X_USER_ID'] ?? null;
+    $user = null;
 
     if ($pdo && isset($_SESSION['user_id'])) {
         try {
@@ -41,6 +39,20 @@ if ($method === 'GET') {
                 $user = $dbUser;
             }
         } catch (Exception $e) {}
+    } else if (isset($_SESSION['user_id']) || $customUserId) {
+        $targetId = $_SESSION['user_id'] ?? $customUserId;
+        $store = getLocalStore();
+        $allUsers = $store['users'] ?? [];
+        if (!empty($store['user']) && (string)$store['user']['id'] === (string)$targetId) {
+            $user = $store['user'];
+        } else {
+            foreach ($allUsers as $u) {
+                if ((string)$u['id'] === (string)$targetId) {
+                    $user = $u;
+                    break;
+                }
+            }
+        }
     }
 
     if ($user) {
@@ -139,11 +151,24 @@ if ($method === 'POST') {
 
                 $pdo->commit();
 
+                $_SESSION['user_id'] = $userId;
+                $_SESSION['user_token'] = bin2hex(random_bytes(24));
+
                 sendResponse([
                     "success" => true,
+                    "authenticated" => true,
                     "message" => "Account created successfully!",
                     "member_id" => $memberId,
-                    "email" => $email
+                    "email" => $email,
+                    "user" => [
+                        "id" => $userId,
+                        "member_id" => $memberId,
+                        "name" => $name,
+                        "phone" => $phone,
+                        "email" => $email,
+                        "language" => 'en',
+                        "is_verified" => true
+                    ]
                 ]);
             } catch (Exception $e) {
                 $pdo->rollBack();
@@ -171,16 +196,29 @@ if ($method === 'POST') {
             "email" => $email,
             "password_hash" => $passwordHash,
             "language" => "en",
-            "is_verified" => false
+            "is_verified" => true
         ];
         $store['users'][] = $newUser;
         saveLocalStore($store);
 
+        $_SESSION['user_id'] = $newUser['id'];
+        $_SESSION['user_token'] = bin2hex(random_bytes(24));
+
         sendResponse([
             "success" => true,
+            "authenticated" => true,
             "message" => "Account created successfully!",
             "member_id" => $memberId,
-            "email" => $email
+            "email" => $email,
+            "user" => [
+                "id" => $newUser['id'],
+                "member_id" => $memberId,
+                "name" => $name,
+                "phone" => $phone,
+                "email" => $email,
+                "language" => "en",
+                "is_verified" => true
+            ]
         ]);
     }
 

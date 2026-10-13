@@ -252,16 +252,13 @@ function getActiveUser(req, store) {
     const h = req.headers['x-user-id'] || req.headers['authorization'];
     if (h) {
         const uid = parseInt(h.toString().replace(/[^0-9]/g, ''));
-        const users = getAllUsers(store);
-        const f = users.find(u => u.id === uid);
-        if (f) return f;
+        if (uid) {
+            const users = getAllUsers(store);
+            const f = users.find(u => u.id === uid);
+            if (f) return f;
+        }
     }
-    if (store.active_user_id) {
-        const users = getAllUsers(store);
-        const f = users.find(u => u.id === store.active_user_id);
-        if (f) return f;
-    }
-    return store.user;
+    return null;
 }
 
 function getUserWallet(userId, store) {
@@ -385,7 +382,7 @@ const requestHandler = (req, res) => {
                 return sendJson({ success: false, message: 'Beneficiary phone number not registered on ONE VOICE.' }, 404);
             }
 
-            const activeUser = getActiveUser(req, store);
+            const activeUser = getActiveUser(req, store) || store.user;
             const userWallet = getUserWallet(activeUser.id, store);
             const sharePct = (store.settings && store.settings.platform_revenue_share_pct) || 10.0;
             const userLedger = (store.wallet_ledger || []).filter(e => !e.user_id || e.user_id === activeUser.id);
@@ -435,7 +432,7 @@ const requestHandler = (req, res) => {
         if (req.method === 'POST') {
             return parseBody((body) => {
                 const action = body.action || 'fund_bank_transfer';
-                const activeUser = getActiveUser(req, store);
+                const activeUser = getActiveUser(req, store) || store.user;
                 const userWallet = getUserWallet(activeUser.id, store);
 
                 if (action === 'transfer_phone') {
@@ -735,13 +732,13 @@ const requestHandler = (req, res) => {
     if (isCalls) {
         const store = getStore();
         if (req.method === 'GET') {
-            const activeUser = getActiveUser(req, store);
+            const activeUser = getActiveUser(req, store) || store.user;
             const userCalls = (store.call_logs || []).filter(c => !c.user_id || c.user_id === activeUser.id);
             return sendJson({ success: true, calls: userCalls.slice(-20).reverse() });
         }
         if (req.method === 'POST') {
             return parseBody((body) => {
-                const activeUser = getActiveUser(req, store);
+                const activeUser = getActiveUser(req, store) || store.user;
                 const userWallet = getUserWallet(activeUser.id, store);
                 const destNumber = body.destination_number || 'Unknown';
                 const destCountry = body.destination_country || 'Nigeria (All Networks)';
@@ -861,7 +858,7 @@ const requestHandler = (req, res) => {
         if (req.method === 'POST') {
             return parseBody((body) => {
                 const action = body.action || 'update_profile';
-                const activeUser = getActiveUser(req, store);
+                const activeUser = getActiveUser(req, store) || store.user;
 
                 if (action === 'request_phone_change') {
                     const newPhone = (body.new_phone || '').trim();
@@ -1078,6 +1075,7 @@ const requestHandler = (req, res) => {
 
                     return sendJson({
                         success: true,
+                        authenticated: true,
                         message: 'Account created successfully!',
                         member_id: memberId,
                         phone: newUser.phone,
