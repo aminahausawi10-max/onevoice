@@ -464,8 +464,8 @@
              ==================================================== -->
         <section class="app-page" id="page-wallet">
             <div style="margin-bottom:16px;">
-                <h2 style="font-size:1.35rem; font-weight:800;">Bundles & Airtime</h2>
-                <p style="font-size:0.85rem; color:var(--text-secondary);">Manage balance, recharge calling units & bundles</p>
+                <h2 style="font-size:1.35rem; font-weight:800;">Airtime and Bundle</h2>
+                <p style="font-size:0.85rem; color:var(--text-secondary);">Manage balance, recharge airtime & buy calling bundles</p>
             </div>
 
             <!-- Balance Card -->
@@ -473,7 +473,7 @@
                 <div class="wallet-banner-left">
                     <div class="wallet-currency-icon">₦</div>
                     <div>
-                        <div class="wallet-balance-label">Available Bundles Balance</div>
+                        <div class="wallet-balance-label">Available Balance</div>
                         <div class="wallet-balance-value" id="wallet-page-balance">₦ 9,000.00</div>
                     </div>
                 </div>
@@ -492,9 +492,17 @@
                 </div>
             </div>
 
-            <div style="display:flex; gap:10px; margin-bottom:20px;">
-                <button class="btn-green-pill trigger-topup" style="flex:1; padding:12px;">⚡ Recharge</button>
-                <button class="btn-outline-pill trigger-transfer" style="flex:1; padding:12px;">💸 Transfer</button>
+            <!-- Action Buttons: Transfer, Buy Bundle, Buy Recharge -->
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:20px;">
+                <button class="btn-outline-pill trigger-transfer" style="padding:14px; display:flex; align-items:center; justify-content:center; gap:6px; font-weight:700;">
+                    💸 Transfer
+                </button>
+                <button class="btn-green-pill trigger-buy-bundle" id="btn-wallet-buy-bundle" style="padding:14px; display:flex; align-items:center; justify-content:center; gap:6px; font-weight:700; background:#006b38;">
+                    📦 Buy Bundle
+                </button>
+                <button class="btn-green-pill trigger-topup" id="btn-wallet-buy-recharge" style="grid-column: 1 / -1; padding:14px; display:flex; align-items:center; justify-content:center; gap:6px; font-weight:700; background:linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    ⚡ Buy Recharge
+                </button>
             </div>
 
             <h3 style="font-size:1.05rem; font-weight:800; margin-bottom:10px;">Recent Transactions</h3>
@@ -815,17 +823,7 @@
                 <span>Dial</span>
             </button>
 
-            <!-- 4. BUNDLE -->
-            <button class="bottom-nav-item nav-page-btn" data-page="wallet">
-                <span class="bottom-nav-icon">
-                    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
-                        <path d="M4 10h12v2H4zm0-4h12v2H4zm0 8h8v2H4zm10 0v-1.5c0-1.38 1.12-2.5 2.5-2.5s2.5 1.12 2.5 2.5V14h1c.55 0 1 .45 1 1v6c0 .55-.45 1-1 1h-6c-.55 0-1-.45-1-1v-6c0-.55.45-1 1-1h1zm2 0h2v-1.5c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5V14z"/>
-                    </svg>
-                </span>
-                <span>Bundle</span>
-            </button>
-
-            <!-- 5. RECENT CALL -->
+            <!-- 4. RECENT CALL -->
             <button class="bottom-nav-item nav-page-btn" data-page="calls">
                 <span class="bottom-nav-icon">
                     <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -834,6 +832,16 @@
                     </svg>
                 </span>
                 <span>Recent Call</span>
+            </button>
+
+            <!-- 5. RECHARGE -->
+            <button class="bottom-nav-item nav-page-btn" data-page="wallet">
+                <span class="bottom-nav-icon">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="currentColor">
+                        <path d="M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34.05-.08.07-.12C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15C12.9 17.55 11 21 11 21z"/>
+                    </svg>
+                </span>
+                <span>Recharge</span>
             </button>
         </nav>
 
@@ -992,6 +1000,69 @@
                 </div>
 
                 <button type="button" class="btn-green-pill" id="btn-confirm-topup">⚡ Complete Top-Up to Wallet</button>
+            </div>
+        </div>
+
+        <!-- Buy Bundle Modal -->
+        <div class="app-modal-overlay" id="modal-buy-bundle">
+            <div class="app-modal-card" style="max-height: 90vh; overflow-y: auto;">
+                <div class="modal-header-row">
+                    <div class="modal-title">Buy Calling Bundle</div>
+                    <button class="modal-close-x" id="btn-close-bundle-modal">✕</button>
+                </div>
+                <p style="font-size:0.85rem; color:var(--text-secondary); margin-bottom:14px;">Select a voice bundle to call any international destination at discounted rates.</p>
+                
+                <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:18px;" id="bundle-options-container">
+                    <label class="bundle-plan-card selected-bundle" style="display:flex; justify-content:space-between; align-items:center; padding:14px; border:2px solid #059669; background:#f0fdf4; border-radius:14px; cursor:pointer;">
+                        <div>
+                            <div style="font-weight:800; font-size:1.02rem; color:#111827;">Starter Voice Bundle</div>
+                            <div style="font-size:0.8rem; color:var(--text-secondary);">50 International Minutes • Valid 30 Days</div>
+                            <div style="font-size:0.75rem; color:#059669; font-weight:700;">₦10.00 / min</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:1.15rem; font-weight:900; color:#006b38;">₦500</div>
+                            <input type="radio" name="bundle_plan" value="500" data-mins="50" data-name="Starter Voice Bundle (50 Mins)" checked style="accent-color:#006b38; width:18px; height:18px;">
+                        </div>
+                    </label>
+
+                    <label class="bundle-plan-card" style="display:flex; justify-content:space-between; align-items:center; padding:14px; border:2px solid #e2e8f0; border-radius:14px; cursor:pointer;">
+                        <div>
+                            <div style="font-weight:800; font-size:1.02rem; color:#111827;">Value Voice Bundle <span style="background:#059669; color:#fff; font-size:0.65rem; font-weight:800; padding:2px 6px; border-radius:6px;">POPULAR</span></div>
+                            <div style="font-size:0.8rem; color:var(--text-secondary);">120 International Minutes • Valid 30 Days</div>
+                            <div style="font-size:0.75rem; color:#059669; font-weight:700;">₦8.33 / min</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:1.15rem; font-weight:900; color:#006b38;">₦1,000</div>
+                            <input type="radio" name="bundle_plan" value="1000" data-mins="120" data-name="Value Voice Bundle (120 Mins)" style="accent-color:#006b38; width:18px; height:18px;">
+                        </div>
+                    </label>
+
+                    <label class="bundle-plan-card" style="display:flex; justify-content:space-between; align-items:center; padding:14px; border:2px solid #e2e8f0; border-radius:14px; cursor:pointer;">
+                        <div>
+                            <div style="font-weight:800; font-size:1.02rem; color:#111827;">Super Talk Bundle</div>
+                            <div style="font-size:0.8rem; color:var(--text-secondary);">300 International Minutes • Valid 60 Days</div>
+                            <div style="font-size:0.75rem; color:#059669; font-weight:700;">₦8.33 / min</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:1.15rem; font-weight:900; color:#006b38;">₦2,500</div>
+                            <input type="radio" name="bundle_plan" value="2500" data-mins="300" data-name="Super Talk Bundle (300 Mins)" style="accent-color:#006b38; width:18px; height:18px;">
+                        </div>
+                    </label>
+
+                    <label class="bundle-plan-card" style="display:flex; justify-content:space-between; align-items:center; padding:14px; border:2px solid #e2e8f0; border-radius:14px; cursor:pointer;">
+                        <div>
+                            <div style="font-weight:800; font-size:1.02rem; color:#111827;">Global Max Bundle</div>
+                            <div style="font-size:0.8rem; color:var(--text-secondary);">700 International Minutes • Valid 90 Days</div>
+                            <div style="font-size:0.75rem; color:#059669; font-weight:700;">₦7.14 / min</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:1.15rem; font-weight:900; color:#006b38;">₦5,000</div>
+                            <input type="radio" name="bundle_plan" value="5000" data-mins="700" data-name="Global Max Bundle (700 Mins)" style="accent-color:#006b38; width:18px; height:18px;">
+                        </div>
+                    </label>
+                </div>
+
+                <button type="button" class="btn-green-pill" id="btn-confirm-buy-bundle" style="padding:15px; font-size:1rem;">Confirm & Activate Bundle</button>
             </div>
         </div>
 

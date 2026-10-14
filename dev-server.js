@@ -510,6 +510,49 @@ const requestHandler = (req, res) => {
                     });
                 }
 
+                if (action === 'buy_bundle') {
+                    const amount = parseFloat(body.amount || 0);
+                    const bundleName = (body.bundle_name || 'Voice Bundle').trim();
+                    const minutes = parseInt(body.minutes || 0, 10);
+                    const currBal = parseFloat(userWallet.balance || 0);
+
+                    if (amount <= 0 || currBal < amount) {
+                        return sendJson({ success: false, message: `Insufficient wallet credit (₦${currBal.toFixed(2)}) to purchase this bundle.` }, 400);
+                    }
+
+                    const newBal = Math.round((currBal - amount) * 100) / 100;
+                    userWallet.balance = newBal;
+                    if (activeUser.id === 1) store.wallet.balance = newBal;
+
+                    const ref = 'OV-BDL-' + Math.random().toString(36).substring(2, 9).toUpperCase();
+                    if (!store.wallet_ledger) store.wallet_ledger = [];
+                    store.wallet_ledger.push({
+                        id: store.wallet_ledger.length + 1,
+                        user_id: activeUser.id,
+                        transaction_type: 'bundle_purchase',
+                        gross_amount: amount,
+                        platform_fee: 0.00,
+                        net_credited: -amount,
+                        balance_before: currBal,
+                        balance_after: newBal,
+                        channel: 'voice_bundle',
+                        internal_reference: ref,
+                        narration: `Purchased ${bundleName} (${minutes} mins)`,
+                        status: 'successful',
+                        created_at: new Date().toLocaleString()
+                    });
+
+                    saveStore(store);
+
+                    return sendJson({
+                        success: true,
+                        message: `${bundleName} activated successfully! ₦${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })} deducted.`,
+                        new_balance: newBal,
+                        reference: ref,
+                        minutes_added: minutes
+                    });
+                }
+
                 // Default: fund_bank_transfer / topup / verify_paystack / confirm_opay_transfer
                 const gross = parseFloat(body.amount || 0);
                 if (gross < 10) return sendJson({ success: false, message: 'Minimum deposit is ₦10.00' }, 400);

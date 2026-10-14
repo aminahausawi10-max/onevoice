@@ -199,6 +199,76 @@ if ($method === 'POST') {
         exit;
     }
 
+    if ($action === 'buy_bundle') {
+        $amount = floatval($input['amount'] ?? 0);
+        $bundleName = trim($input['bundle_name'] ?? 'Voice Bundle');
+        $minutes = intval($input['minutes'] ?? 0);
+        $store = getLocalStore();
+        $userId = $_SESSION['user_id'] ?? ($store['active_user_id'] ?? 1);
+        $userBal = floatval($store['wallet']['balance'] ?? 0.0);
+
+        if ($pdo) {
+            try {
+                $wStmt = $pdo->prepare("SELECT balance FROM wallets WHERE user_id = ?");
+                $wStmt->execute([$userId]);
+                $bRow = $wStmt->fetchColumn();
+                if ($bRow !== false) $userBal = floatval($bRow);
+            } catch (Exception $e) {}
+        }
+
+        if ($amount <= 0 || $userBal < $amount) {
+            http_response_code(400);
+            echo json_encode(["success" => false, "message" => "Insufficient wallet credit (₦" . number_format($userBal, 2) . ") to purchase this bundle."]);
+            exit;
+        }
+
+        $newBal = round($userBal - $amount, 2);
+        $store['wallet']['balance'] = $newBal;
+        $ref = 'OV-BDL-' . strtoupper(substr(md5(uniqid()), 0, 8));
+
+        if ($pdo) {
+            try {
+                $pdo->beginTransaction();
+                $uStmt = $pdo->prepare("UPDATE wallets SET balance = ?, updated_at = NOW() WHERE user_id = ?");
+                $uStmt->execute([$newBal, $userId]);
+
+                $narration = "Purchased " . $bundleName . " (" . $minutes . " mins)";
+                $lStmt = $pdo->prepare("INSERT INTO wallet_ledger (user_id, transaction_type, gross_amount, platform_fee, net_credited, balance_before, balance_after, channel, internal_reference, narration, status) VALUES (?, 'bundle_purchase', ?, 0.00, ?, ?, ?, 'voice_bundle', ?, ?, 'successful')");
+                $lStmt->execute([$userId, $amount, -$amount, $userBal, $newBal, $ref, $narration]);
+                $pdo->commit();
+            } catch (Exception $e) {
+                if ($pdo->inTransaction()) $pdo->rollBack();
+            }
+        }
+
+        $store['wallet_ledger'][] = [
+            "id" => count($store['wallet_ledger'] ?? []) + 1,
+            "user_id" => $userId,
+            "transaction_type" => "bundle_purchase",
+            "gross_amount" => $amount,
+            "platform_fee" => 0.00,
+            "net_credited" => -$amount,
+            "balance_before" => $userBal,
+            "balance_after" => $newBal,
+            "channel" => "voice_bundle",
+            "internal_reference" => $ref,
+            "narration" => "Purchased " . $bundleName . " (" . $minutes . " mins)",
+            "status" => "successful",
+            "created_at" => date("Y-m-d H:i:s")
+        ];
+
+        saveLocalStore($store);
+
+        echo json_encode([
+            "success" => true,
+            "message" => "{$bundleName} activated successfully! ₦" . number_format($amount, 2) . " deducted.",
+            "new_balance" => $newBal,
+            "reference" => $ref,
+            "minutes_added" => $minutes
+        ]);
+        exit;
+    }
+
     if ($action === 'fund_bank_transfer' || $action === 'topup' || $action === 'verify_paystack' || $action === 'confirm_opay_transfer') {
         $grossAmount = floatval($input['amount'] ?? 0);
         $providerRef = trim($input['provider_reference'] ?? ('BANK-OPAY-' . strtoupper(substr(md5(uniqid()), 0, 12))));

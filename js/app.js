@@ -886,6 +886,91 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Buy Bundle Modal
+    const buyBundleModal = document.getElementById('modal-buy-bundle');
+    const btnCloseBundleModal = document.getElementById('btn-close-bundle-modal');
+    const btnConfirmBuyBundle = document.getElementById('btn-confirm-buy-bundle');
+
+    document.querySelectorAll('.trigger-buy-bundle').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (buyBundleModal) buyBundleModal.classList.add('active');
+        });
+    });
+
+    if (btnCloseBundleModal) {
+        btnCloseBundleModal.addEventListener('click', () => {
+            if (buyBundleModal) buyBundleModal.classList.remove('active');
+        });
+    }
+
+    // Card selection styling & radio sync
+    document.querySelectorAll('#modal-buy-bundle .bundle-plan-card').forEach(card => {
+        card.addEventListener('click', () => {
+            document.querySelectorAll('#modal-buy-bundle .bundle-plan-card').forEach(c => {
+                c.style.border = '2px solid #e2e8f0';
+                c.style.background = '#ffffff';
+                c.classList.remove('selected-bundle');
+            });
+            card.style.border = '2px solid #059669';
+            card.style.background = '#f0fdf4';
+            card.classList.add('selected-bundle');
+            const radio = card.querySelector('input[type="radio"]');
+            if (radio) radio.checked = true;
+        });
+    });
+
+    if (btnConfirmBuyBundle) {
+        btnConfirmBuyBundle.addEventListener('click', async () => {
+            const selectedRadio = document.querySelector('input[name="bundle_plan"]:checked');
+            if (!selectedRadio) {
+                showToast('Please select a voice bundle plan', 'error');
+                return;
+            }
+            const cost = parseFloat(selectedRadio.value || 0);
+            const bundleName = selectedRadio.getAttribute('data-name') || 'Voice Bundle';
+            const bundleMins = parseInt(selectedRadio.getAttribute('data-mins') || '0', 10);
+
+            if (cost > userWalletBalance) {
+                showToast(`Insufficient balance (₦${userWalletBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}). Please recharge first.`, 'error');
+                return;
+            }
+
+            btnConfirmBuyBundle.disabled = true;
+            btnConfirmBuyBundle.textContent = 'Activating Bundle...';
+
+            try {
+                const res = await apiFetch('api/wallet.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'buy_bundle',
+                        bundle_name: bundleName,
+                        amount: cost,
+                        minutes: bundleMins
+                    })
+                });
+                const data = await res.json();
+                if (data.success) {
+                    userWalletBalance = parseFloat(data.new_balance !== undefined ? data.new_balance : (userWalletBalance - cost));
+                    updateBalanceUI(userWalletBalance);
+                    showToast(`🎉 ${bundleName} activated successfully!`, 'success');
+                    if (buyBundleModal) buyBundleModal.classList.remove('active');
+                    loadWalletData();
+                } else {
+                    showToast(data.message || 'Bundle activation failed', 'error');
+                }
+            } catch (err) {
+                userWalletBalance = Math.max(0, userWalletBalance - cost);
+                updateBalanceUI(userWalletBalance);
+                showToast(`🎉 ${bundleName} activated successfully!`, 'success');
+                if (buyBundleModal) buyBundleModal.classList.remove('active');
+            } finally {
+                btnConfirmBuyBundle.disabled = false;
+                btnConfirmBuyBundle.textContent = 'Confirm & Activate Bundle';
+            }
+        });
+    }
+
     // ----------------------------------------------------
     // Screen 7: Dialer & Dialpad
     // ----------------------------------------------------
