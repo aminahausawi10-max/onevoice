@@ -3,7 +3,7 @@
  * Enables offline capability, faster caching, and installation on mobile devices
  */
 
-const CACHE_NAME = 'onevoice-cache-v1';
+const CACHE_NAME = 'onevoice-cache-v2';
 const PRECACHE_ASSETS = [
     '/',
     '/index.html',
