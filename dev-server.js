@@ -1209,9 +1209,10 @@ const requestHandler = (req, res) => {
         const ext = path.extname(normPath === '/index.html' ? 'index.html' : normPath).toLowerCase();
         const contentType = MIME_TYPES[ext] || 'text/html; charset=utf-8';
         const isSw = normPath === '/sw.js' || reqNormPath === '/sw.js';
+        const isHtml = ext === '.html' || normPath === '/index.html' || reqNormPath === '/index.html' || isSw;
         const headers = {
             'Content-Type': contentType,
-            'Cache-Control': isSw ? 'no-cache, no-store, must-revalidate' : 'public, max-age=3600'
+            'Cache-Control': isHtml ? 'no-cache, no-store, must-revalidate' : 'public, max-age=0, must-revalidate'
         };
         if (isSw) {
             headers['Service-Worker-Allowed'] = '/';

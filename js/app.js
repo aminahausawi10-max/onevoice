@@ -1227,6 +1227,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.addEventListener('load', () => {
             navigator.serviceWorker.register('/sw.js', { scope: '/' })
                 .then(reg => {
+                    reg.update();
                     console.log('[PWA] ServiceWorker registered with scope:', reg.scope);
                 })
                 .catch(err => {

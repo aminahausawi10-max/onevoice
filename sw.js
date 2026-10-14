@@ -3,18 +3,19 @@
  * Enables offline capability, faster caching, and installation on mobile devices
  */
 
-const CACHE_NAME = 'onevoice-cache-v2';
+const CACHE_NAME = 'onevoice-cache-v3';
 const PRECACHE_ASSETS = [
     '/',
     '/index.html',
     '/css/clay.css',
     '/js/app.js',
     '/manifest.json',
-    '/assets/logo.png',
-    '/assets/icon-192.png',
-    '/assets/icon-512.png',
-    '/assets/apple-touch-icon.png',
-    '/assets/favicon.png'
+    '/site.webmanifest',
+    '/assets/logo.png?v=onedial',
+    '/assets/icon-192.png?v=onedial',
+    '/assets/icon-512.png?v=onedial',
+    '/assets/apple-touch-icon.png?v=onedial',
+    '/assets/favicon.png?v=onedial'
 ];
 
 self.addEventListener('install', (event) => {
