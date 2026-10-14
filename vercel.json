@@ -2,7 +2,7 @@
   "version": 2,
   "functions": {
     "server.js": {
-      "includeFiles": "index.html,css/**,js/**,data/**,assets/**,manifest.json,sw.js"
+      "includeFiles": "index.html,css/**,js/**,data/**,assets/**,manifest.json,site.webmanifest,sw.js"
     }
   }
 }

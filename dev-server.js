@@ -204,6 +204,10 @@ try {
     if (fs.existsSync(manifestPath)) {
         staticAssets['/manifest.json'] = fs.readFileSync(manifestPath, 'utf8');
     }
+    const webmanifestPath = path.join(__dirname, 'site.webmanifest');
+    if (fs.existsSync(webmanifestPath)) {
+        staticAssets['/site.webmanifest'] = fs.readFileSync(webmanifestPath, 'utf8');
+    }
     const swPath = path.join(__dirname, 'sw.js');
     if (fs.existsSync(swPath)) {
         staticAssets['/sw.js'] = fs.readFileSync(swPath, 'utf8');
