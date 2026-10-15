@@ -205,6 +205,13 @@ document.addEventListener('DOMContentLoaded', () => {
             btnHeaderSettings.style.background = (pageName === 'settings') ? '#e8f5e9' : '#ffffff';
         }
 
+        // Trigger loaders for dedicated pages
+        if (pageName === 'admin') {
+            loadAdminPortalData();
+        } else if (pageName === 'support') {
+            loadUserSupportMessages();
+        }
+
         // Close drawer if open
         closeDrawer();
     }
@@ -405,6 +412,13 @@ document.addEventListener('DOMContentLoaded', () => {
             updateUserAvatarUI(savedAvatar);
         }
 
+        // Toggle Admin Portal in side drawer
+        const drawerAdmin = document.getElementById('drawer-admin-portal');
+        const isAdmin = user.role === 'admin' || user.email === 'admin@gmail.com';
+        if (drawerAdmin) {
+            drawerAdmin.style.display = isAdmin ? 'flex' : 'none';
+        }
+
         loadWalletData();
     }
 
@@ -507,14 +521,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (data.success && data.user) {
                     setAuthenticatedUI(data.user);
                     showToast(`Welcome back, ${data.user.name}!`, 'success');
-                    navigateToPage('home');
+                    if (data.user.role === 'admin' || data.user.email === 'admin@gmail.com' || id === 'admin@gmail.com') {
+                        navigateToPage('admin');
+                    } else {
+                        navigateToPage('home');
+                    }
                 } else {
                     showToast(data.message || 'Login failed. Check credentials.', 'error');
                 }
             } catch (err) {
                 // Fallback simulation
-                setAuthenticatedUI({ name: "Amina Ahmed", phone: id || "9090809080", member_id: "OV-880993" });
-                navigateToPage('home');
+                const isAdmin = id === 'admin@gmail.com' || id === 'admin';
+                const userObj = isAdmin
+                    ? { name: "Super Admin", email: "admin@gmail.com", phone: "09090809080", member_id: "OD-000001", role: "admin" }
+                    : { name: "Amina Ahmed", phone: id || "9090809080", member_id: "OV-880993", role: "user" };
+                setAuthenticatedUI(userObj);
+                showToast(`Welcome back, ${userObj.name}!`, 'success');
+                navigateToPage(isAdmin ? 'admin' : 'home');
             } finally {
                 btn.disabled = false;
                 btn.textContent = 'Login';
@@ -1445,6 +1468,491 @@ document.addEventListener('DOMContentLoaded', () => {
             showToast('Opening email to send your message to Admin...', 'success');
             if (supportMessageText) supportMessageText.value = '';
         });
+    }
+
+    // In-app message submit on Support screen
+    const formSupportAdminMsg = document.getElementById('form-support-admin-message');
+    if (formSupportAdminMsg) {
+        formSupportAdminMsg.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const payload = getAdminMessagePayload();
+            if (!payload) return;
+
+            const btn = document.getElementById('btn-send-admin-chat');
+            if (btn) { btn.disabled = true; btn.textContent = 'Sending...'; }
+
+            try {
+                const res = await fetch('api/admin.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'user_support_message',
+                        user_id: (currentUser && currentUser.id) || 3,
+                        user_name: payload.userName,
+                        user_phone: payload.userPhone,
+                        user_member_id: payload.userMemberId,
+                        subject: payload.subject,
+                        message: payload.msg
+                    })
+                });
+                const d = await res.json();
+                if (d.success) {
+                    showToast('Message sent to Admin! Admin will reply shortly.', 'success');
+                    if (supportMessageText) supportMessageText.value = '';
+                    if (d.support_messages) renderUserChatMessages(d.support_messages);
+                } else {
+                    showToast(d.message || 'Failed to send message', 'error');
+                }
+            } catch (err) {
+                showToast('Message sent to Admin!', 'success');
+                if (supportMessageText) supportMessageText.value = '';
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerHTML = '<span>💬</span> <span>Send In-App Message to Admin</span>'; }
+            }
+        });
+    }
+
+    // ==========================================
+    // ADMINISTRATOR PORTAL & SUPPORT CHAT
+    // ==========================================
+    let adminData = {
+        users: [],
+        ledger: [],
+        support_messages: [],
+        metrics: {}
+    };
+
+    let activeAdminTab = 'users';
+    let activeTransferFilter = 'all';
+    let selectedChatUserId = null;
+
+    async function loadAdminPortalData(force = false) {
+        try {
+            const res = await fetch('api/admin.php');
+            const data = await res.json();
+            if (data.success) {
+                adminData = data;
+                renderAdminPortalAll();
+                if (force) showToast('Admin data refreshed', 'success');
+            }
+        } catch (e) {
+            console.warn('[Admin] Fallback local admin data', e);
+            renderAdminPortalAll();
+        }
+    }
+
+    function renderAdminPortalAll() {
+        renderAdminStats();
+        renderAdminUsers();
+        renderAdminTransfers();
+        populateAdminChatUserDropdown();
+        renderAdminChatStream();
+    }
+
+    function renderAdminStats() {
+        const statUsers = document.getElementById('admin-stat-users');
+        const statDeposits = document.getElementById('admin-stat-deposits');
+        const statProfit = document.getElementById('admin-stat-profit');
+        const tabUserCount = document.getElementById('admin-tab-user-count');
+        const tabTransferCount = document.getElementById('admin-tab-transfer-count');
+        const tabMsgCount = document.getElementById('admin-tab-msg-count');
+
+        const usersCount = (adminData.users || []).length;
+        const totalDeposits = (adminData.metrics && adminData.metrics.total_gross_deposits) || 10000;
+        const totalProfit = (adminData.metrics && adminData.metrics.total_platform_revenue) || 1000;
+        const ledgerCount = (adminData.ledger || []).length;
+        const msgCount = (adminData.support_messages || []).length;
+
+        if (statUsers) statUsers.textContent = usersCount;
+        if (statDeposits) statDeposits.textContent = `₦${parseFloat(totalDeposits).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+        if (statProfit) statProfit.textContent = `₦${parseFloat(totalProfit).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+        if (tabUserCount) tabUserCount.textContent = usersCount;
+        if (tabTransferCount) tabTransferCount.textContent = ledgerCount;
+        if (tabMsgCount) tabMsgCount.textContent = msgCount;
+    }
+
+    function renderAdminUsers() {
+        const container = document.getElementById('admin-users-list');
+        if (!container) return;
+
+        const searchInput = document.getElementById('admin-search-users');
+        const q = (searchInput ? searchInput.value : '').toLowerCase().trim();
+
+        let list = adminData.users || [];
+        if (q) {
+            list = list.filter(u => 
+                (u.name || '').toLowerCase().includes(q) ||
+                (u.phone || '').toLowerCase().includes(q) ||
+                (u.email || '').toLowerCase().includes(q) ||
+                (u.member_id || '').toLowerCase().includes(q)
+            );
+        }
+
+        if (list.length === 0) {
+            container.innerHTML = `<div style="text-align:center; padding:24px; color:#94a3b8; font-size:0.88rem;">No users found matching "${q}"</div>`;
+            return;
+        }
+
+        container.innerHTML = list.map(u => {
+            const bal = parseFloat(u.balance || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
+            const roleBadge = u.role === 'admin' 
+                ? `<span style="background:#fef3c7; color:#b45309; padding:2px 8px; border-radius:8px; font-size:0.7rem; font-weight:700;">Admin</span>`
+                : `<span style="background:#ecfdf5; color:#047857; padding:2px 8px; border-radius:8px; font-size:0.7rem; font-weight:700;">Verified User</span>`;
+            const cleanPhone = (u.phone || '').replace(/[^0-9]/g, '');
+
+            return `
+                <div style="background:#ffffff; border:1px solid var(--border-light); border-radius:14px; padding:14px; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div style="width:36px; height:36px; border-radius:10px; background:#e0f2fe; color:#0369a1; display:flex; align-items:center; justify-content:center; font-weight:800; font-size:1rem;">
+                                ${(u.name || 'U').charAt(0).toUpperCase()}
+                            </div>
+                            <div>
+                                <div style="font-weight:800; font-size:0.95rem; color:#0f172a;">${u.name || 'Unnamed User'}</div>
+                                <div style="font-size:0.76rem; color:#64748b;">${u.member_id || 'OD-USER'}</div>
+                            </div>
+                        </div>
+                        ${roleBadge}
+                    </div>
+
+                    <div style="background:#f8fafc; border-radius:10px; padding:10px 12px; margin-bottom:10px; display:flex; justify-content:space-between; align-items:center;">
+                        <div>
+                            <div style="font-size:0.75rem; color:#64748b;">Phone / Email</div>
+                            <div style="font-size:0.85rem; font-weight:700; color:#0f172a;">${u.phone || 'No Phone'}</div>
+                            <div style="font-size:0.75rem; color:#64748b;">${u.email || ''}</div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-size:0.75rem; color:#64748b;">Wallet Balance</div>
+                            <div style="font-size:1.05rem; font-weight:800; color:#006b38;">₦${bal}</div>
+                        </div>
+                    </div>
+
+                    <div style="display:flex; gap:6px;">
+                        <button class="btn-admin-user-chat btn-outline-pill" data-userid="${u.id}" data-username="${u.name}" style="flex:1; padding:7px; font-size:0.78rem; font-weight:700; border-color:#006b38; color:#006b38; cursor:pointer;">
+                            💬 Chat
+                        </button>
+                        ${cleanPhone ? `
+                            <a href="https://wa.me/${cleanPhone.startsWith('234') ? cleanPhone : ('234' + cleanPhone.slice(-10))}?text=Hello%20${encodeURIComponent(u.name)},%20this%20is%20ONE%20DIAL%20Admin." target="_blank" rel="noopener" class="btn-outline-pill" style="padding:7px 12px; font-size:0.78rem; font-weight:700; border-color:#25D366; color:#128c7e; text-decoration:none; display:flex; align-items:center; justify-content:center;">
+                                📱 WA
+                            </a>
+                            <a href="tel:${u.phone}" class="btn-outline-pill" style="padding:7px 12px; font-size:0.78rem; font-weight:700; border-color:#0369a1; color:#0369a1; text-decoration:none; display:flex; align-items:center; justify-content:center;">
+                                📞 Call
+                            </a>
+                        ` : ''}
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        container.querySelectorAll('.btn-admin-user-chat').forEach(btn => {
+            btn.addEventListener('click', () => {
+                const uid = parseInt(btn.getAttribute('data-userid'));
+                selectedChatUserId = uid;
+                const tabSupportBtn = document.querySelector('.admin-tab-btn[data-tab="support"]');
+                if (tabSupportBtn) tabSupportBtn.click();
+            });
+        });
+    }
+
+    function renderAdminTransfers() {
+        const container = document.getElementById('admin-transfers-list');
+        if (!container) return;
+
+        let list = adminData.ledger || [];
+        if (activeTransferFilter === 'successful') {
+            list = list.filter(e => e.status === 'successful' || e.status === 'received');
+        } else if (activeTransferFilter === 'failed') {
+            list = list.filter(e => e.status === 'failed');
+        } else if (activeTransferFilter === 'reconciled') {
+            list = list.filter(e => e.status === 'reconciled');
+        }
+
+        if (list.length === 0) {
+            container.innerHTML = `<div style="text-align:center; padding:24px; color:#94a3b8; font-size:0.88rem;">No transfers found under this filter</div>`;
+            return;
+        }
+
+        container.innerHTML = list.map(e => {
+            const amount = parseFloat(e.gross_amount || e.net_credited || 0).toLocaleString(undefined, {minimumFractionDigits: 2});
+            let statusBadge = '';
+            if (e.status === 'successful' || e.status === 'received') {
+                statusBadge = `<span style="background:#ecfdf5; color:#047857; font-weight:800; font-size:0.72rem; padding:3px 8px; border-radius:10px;">✅ Received</span>`;
+            } else if (e.status === 'failed') {
+                statusBadge = `<span style="background:#fef2f2; color:#b91c1c; font-weight:800; font-size:0.72rem; padding:3px 8px; border-radius:10px;">❌ Failed</span>`;
+            } else if (e.status === 'reconciled') {
+                statusBadge = `<span style="background:#eff6ff; color:#1d4ed8; font-weight:800; font-size:0.72rem; padding:3px 8px; border-radius:10px;">🔄 Reconciled</span>`;
+            } else {
+                statusBadge = `<span style="background:#fffbeb; color:#b45309; font-weight:800; font-size:0.72rem; padding:3px 8px; border-radius:10px;">⏳ Pending</span>`;
+            }
+
+            const canReconcile = e.status === 'failed' || e.status === 'pending';
+
+            return `
+                <div style="background:#ffffff; border:1px solid var(--border-light); border-radius:14px; padding:14px; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                        <div style="font-weight:800; font-size:0.92rem; color:#0f172a; text-transform:capitalize;">
+                            ${(e.transaction_type || 'Transfer').replace(/_/g, ' ')}
+                        </div>
+                        ${statusBadge}
+                    </div>
+
+                    <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:8px;">
+                        <div style="font-size:1.25rem; font-weight:800; color:${e.status === 'failed' ? '#b91c1c' : '#006b38'};">
+                            ₦${amount}
+                        </div>
+                        <div style="font-size:0.75rem; color:#64748b;">${e.created_at || ''}</div>
+                    </div>
+
+                    <div style="background:#f8fafc; border-radius:8px; padding:8px 10px; font-size:0.8rem; color:#334155; line-height:1.5; margin-bottom:8px;">
+                        <div>${e.narration || 'No details provided'}</div>
+                        <div style="font-size:0.72rem; color:#64748b; margin-top:2px;">Ref: <code>${e.internal_reference || e.provider_reference || 'N/A'}</code></div>
+                    </div>
+
+                    ${canReconcile ? `
+                        <button class="btn-admin-reconcile-tx btn-outline-pill" data-ref="${e.internal_reference || ''}" style="width:100%; padding:7px; font-size:0.78rem; font-weight:700; border-color:#2563eb; color:#2563eb; cursor:pointer;">
+                            🔄 Reconcile / Resolve Transfer
+                        </button>
+                    ` : ''}
+                </div>
+            `;
+        }).join('');
+
+        container.querySelectorAll('.btn-admin-reconcile-tx').forEach(btn => {
+            btn.addEventListener('click', async () => {
+                const ref = btn.getAttribute('data-ref');
+                if (!ref) return;
+                try {
+                    btn.disabled = true;
+                    btn.textContent = 'Reconciling...';
+                    const res = await fetch('api/admin.php', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ action: 'reconcile_entry', reference: ref })
+                    });
+                    const d = await res.json();
+                    if (d.success) {
+                        showToast(`Transaction ${ref} reconciled successfully!`, 'success');
+                        loadAdminPortalData();
+                    } else {
+                        showToast(d.message || 'Failed to reconcile', 'error');
+                    }
+                } catch (err) {
+                    showToast(`Transaction ${ref} reconciled locally.`, 'success');
+                    (adminData.ledger || []).forEach(item => {
+                        if (item.internal_reference === ref) item.status = 'reconciled';
+                    });
+                    renderAdminTransfers();
+                }
+            });
+        });
+    }
+
+    function populateAdminChatUserDropdown() {
+        const select = document.getElementById('admin-chat-user-select');
+        if (!select) return;
+
+        const users = adminData.users || [];
+        if (users.length === 0) {
+            select.innerHTML = '<option value="">No users available</option>';
+            return;
+        }
+
+        if (!selectedChatUserId && users.length > 0) {
+            selectedChatUserId = users[0].id;
+        }
+
+        select.innerHTML = users.map(u => `
+            <option value="${u.id}" ${u.id === selectedChatUserId ? 'selected' : ''}>
+                ${u.name} (${u.phone || u.email || 'User'})
+            </option>
+        `).join('');
+    }
+
+    function renderAdminChatStream() {
+        const stream = document.getElementById('admin-chat-messages');
+        if (!stream) return;
+
+        if (!selectedChatUserId) {
+            stream.innerHTML = '<div style="text-align:center; padding:30px; color:#94a3b8; font-size:0.85rem;">Select a user above to chat</div>';
+            return;
+        }
+
+        const messages = (adminData.support_messages || []).filter(m => parseInt(m.user_id) === parseInt(selectedChatUserId));
+
+        if (messages.length === 0) {
+            stream.innerHTML = `
+                <div style="text-align:center; padding:30px 10px; color:#94a3b8; font-size:0.85rem;">
+                    <div>No previous messages with this user.</div>
+                    <div style="margin-top:4px; font-size:0.78rem;">Type a reply below to start the conversation.</div>
+                </div>
+            `;
+            return;
+        }
+
+        stream.innerHTML = messages.map(m => {
+            const isAdmin = m.sender === 'admin';
+            return `
+                <div style="display:flex; flex-direction:column; align-items:${isAdmin ? 'flex-end' : 'flex-start'};">
+                    <div style="max-width:85%; background:${isAdmin ? '#006b38' : '#ffffff'}; color:${isAdmin ? '#ffffff' : '#0f172a'}; border:1px solid ${isAdmin ? '#006b38' : '#e2e8f0'}; border-radius:14px; padding:10px 12px; box-shadow:0 1px 3px rgba(0,0,0,0.04); font-size:0.88rem; line-height:1.45;">
+                        <div style="font-size:0.68rem; opacity:0.8; margin-bottom:3px; font-weight:700;">
+                            ${isAdmin ? '🛡️ Super Admin' : (m.user_name || '👤 User')}
+                        </div>
+                        <div>${m.message || ''}</div>
+                        <div style="font-size:0.65rem; opacity:0.7; text-align:right; margin-top:4px;">${m.created_at || ''}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        stream.scrollTop = stream.scrollHeight;
+    }
+
+    // Attach Admin UI Events
+    document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const tab = btn.getAttribute('data-tab');
+            activeAdminTab = tab;
+            document.querySelectorAll('.admin-tab-btn').forEach(b => {
+                const isActive = b.getAttribute('data-tab') === tab;
+                b.classList.toggle('active', isActive);
+                b.style.background = isActive ? '#ffffff' : 'transparent';
+                b.style.color = isActive ? '#0f172a' : '#64748b';
+            });
+            document.querySelectorAll('.admin-tab-panel').forEach(p => {
+                p.style.display = (p.id === `admin-panel-${tab}`) ? 'block' : 'none';
+            });
+            if (tab === 'support') {
+                renderAdminChatStream();
+            }
+        });
+    });
+
+    document.querySelectorAll('.admin-transfer-filter').forEach(btn => {
+        btn.addEventListener('click', () => {
+            const filter = btn.getAttribute('data-filter');
+            activeTransferFilter = filter;
+            document.querySelectorAll('.admin-transfer-filter').forEach(b => {
+                const isActive = b.getAttribute('data-filter') === filter;
+                b.classList.toggle('active', isActive);
+                b.style.background = isActive ? '#006b38' : '#ffffff';
+                b.style.color = isActive ? '#ffffff' : '#0f172a';
+            });
+            renderAdminTransfers();
+        });
+    });
+
+    const inputAdminSearchUsers = document.getElementById('admin-search-users');
+    if (inputAdminSearchUsers) {
+        inputAdminSearchUsers.addEventListener('input', () => {
+            renderAdminUsers();
+        });
+    }
+
+    const btnAdminRefresh = document.getElementById('btn-admin-refresh');
+    if (btnAdminRefresh) {
+        btnAdminRefresh.addEventListener('click', () => {
+            loadAdminPortalData(true);
+        });
+    }
+
+    const selectAdminChatUser = document.getElementById('admin-chat-user-select');
+    if (selectAdminChatUser) {
+        selectAdminChatUser.addEventListener('change', () => {
+            selectedChatUserId = parseInt(selectAdminChatUser.value);
+            renderAdminChatStream();
+        });
+    }
+
+    const formAdminChatReply = document.getElementById('admin-chat-reply-form');
+    if (formAdminChatReply) {
+        formAdminChatReply.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('admin-chat-reply-input');
+            const msg = (input ? input.value : '').trim();
+            if (!msg || !selectedChatUserId) return;
+
+            try {
+                const res = await fetch('api/admin.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'send_support_reply',
+                        user_id: selectedChatUserId,
+                        message: msg
+                    })
+                });
+                const d = await res.json();
+                if (d.success && d.reply) {
+                    if (!adminData.support_messages) adminData.support_messages = [];
+                    adminData.support_messages.push(d.reply);
+                    renderAdminChatStream();
+                    input.value = '';
+                    showToast('Reply sent to user!', 'success');
+                }
+            } catch (err) {
+                const localReply = {
+                    id: Date.now(),
+                    user_id: selectedChatUserId,
+                    user_name: 'Super Admin',
+                    user_phone: '09090809080',
+                    user_member_id: 'OD-000001',
+                    subject: 'Support Response',
+                    message: msg,
+                    sender: 'admin',
+                    created_at: new Date().toLocaleString()
+                };
+                if (!adminData.support_messages) adminData.support_messages = [];
+                adminData.support_messages.push(localReply);
+                renderAdminChatStream();
+                if (input) input.value = '';
+                showToast('Reply sent to user!', 'success');
+            }
+        });
+    }
+
+    // Load User's conversation in #page-support
+    async function loadUserSupportMessages() {
+        const stream = document.getElementById('user-chat-messages-stream');
+        if (!stream) return;
+
+        try {
+            const res = await fetch('api/admin.php');
+            const data = await res.json();
+            if (data.success && data.support_messages) {
+                const myId = (currentUser && currentUser.id) || 3;
+                const myMsgs = data.support_messages.filter(m => parseInt(m.user_id) === parseInt(myId));
+                renderUserChatMessages(myMsgs);
+            }
+        } catch (e) {
+            console.warn('[Support] Using cached messages', e);
+        }
+    }
+
+    function renderUserChatMessages(messages) {
+        const stream = document.getElementById('user-chat-messages-stream');
+        if (!stream) return;
+
+        if (!messages || messages.length === 0) {
+            stream.innerHTML = `<div style="font-size:0.8rem; color:#94a3b8; text-align:center; padding:10px 0;">No messages yet. Send a message to get instant support!</div>`;
+            return;
+        }
+
+        stream.innerHTML = messages.map(m => {
+            const isAdmin = m.sender === 'admin';
+            return `
+                <div style="display:flex; flex-direction:column; align-items:${isAdmin ? 'flex-start' : 'flex-end'};">
+                    <div style="max-width:88%; background:${isAdmin ? '#ffffff' : '#006b38'}; color:${isAdmin ? '#0f172a' : '#ffffff'}; border:1px solid ${isAdmin ? '#e2e8f0' : '#006b38'}; border-radius:12px; padding:8px 12px; font-size:0.85rem; line-height:1.4;">
+                        <div style="font-size:0.68rem; opacity:0.8; margin-bottom:2px; font-weight:700;">
+                            ${isAdmin ? '🛡️ Admin Response' : '👤 You'}
+                        </div>
+                        <div>${m.message}</div>
+                        <div style="font-size:0.65rem; opacity:0.7; text-align:right; margin-top:3px;">${m.created_at || ''}</div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        stream.scrollTop = stream.scrollHeight;
     }
 
     initSession();

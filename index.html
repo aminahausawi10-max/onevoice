@@ -275,14 +275,19 @@
             </div>
 
             <form id="form-login" style="margin-top: 14px;">
+                <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:10px 12px; font-size:0.8rem; color:#166534; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between;">
+                    <div><strong>Admin Login:</strong> admin@gmail.com / admin123</div>
+                    <span style="background:#166534; color:#fff; font-size:0.7rem; padding:2px 8px; border-radius:6px; font-weight:700;">NO OTP</span>
+                </div>
+
                 <div class="form-input-group">
-                    <span class="form-input-icon">📱</span>
-                    <input type="text" id="login-identifier" class="app-input" placeholder="Phone Number or Email" value="09090809080" required>
+                    <span class="form-input-icon">✉️</span>
+                    <input type="text" id="login-identifier" class="app-input" placeholder="Phone Number or Email" value="admin@gmail.com" required>
                 </div>
 
                 <div class="form-input-group">
                     <span class="form-input-icon">🔒</span>
-                    <input type="password" id="login-password" class="app-input" placeholder="Password" value="Password123!" required>
+                    <input type="password" id="login-password" class="app-input" placeholder="Password" value="admin123" required>
                     <button type="button" class="form-input-eye" onclick="togglePassVisibility('login-password')">👁️</button>
                 </div>
 
@@ -843,14 +848,30 @@
                     </div>
 
                     <div style="display:flex; flex-direction:column; gap:8px;">
-                        <button type="button" id="btn-send-admin-whatsapp" class="btn-green-pill" style="display:flex; align-items:center; justify-content:center; gap:8px; padding:13px; background:#25D366; font-size:0.92rem;">
-                            <span>💬</span> <span>Send to Admin on WhatsApp</span>
+                        <button type="submit" id="btn-send-admin-chat" class="btn-green-pill" style="display:flex; align-items:center; justify-content:center; gap:8px; padding:13px; font-size:0.92rem; background:#006b38;">
+                            <span>💬</span> <span>Send In-App Message to Admin</span>
                         </button>
-                        <button type="button" id="btn-send-admin-email" class="btn-outline-pill" style="display:flex; align-items:center; justify-content:center; gap:8px; padding:13px; border-color:#2563eb; color:#2563eb; font-weight:700; font-size:0.92rem;">
-                            <span>✉️</span> <span>Send to Admin via Email</span>
+                        <button type="button" id="btn-send-admin-whatsapp" class="btn-outline-pill" style="display:flex; align-items:center; justify-content:center; gap:8px; padding:12px; border-color:#25D366; color:#128c7e; font-weight:700; font-size:0.9rem;">
+                            <span>📱</span> <span>Send via WhatsApp</span>
+                        </button>
+                        <button type="button" id="btn-send-admin-email" class="btn-outline-pill" style="display:flex; align-items:center; justify-content:center; gap:8px; padding:12px; border-color:#2563eb; color:#2563eb; font-weight:700; font-size:0.9rem;">
+                            <span>✉️</span> <span>Send via Email</span>
                         </button>
                     </div>
                 </form>
+
+                <!-- In-App Support Chat History Box -->
+                <div id="user-support-thread-card" style="margin-top:16px; border-top:1px solid var(--border-light); padding-top:16px;">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+                        <div style="font-weight:800; font-size:0.95rem; color:#0f172a; display:flex; align-items:center; gap:6px;">
+                            <span>💬</span> <span>Your Chat with Admin</span>
+                        </div>
+                        <span id="user-chat-status" style="font-size:0.75rem; background:#ecfdf5; color:#006b38; padding:2px 8px; border-radius:10px; font-weight:700;">Admin Online</span>
+                    </div>
+                    <div id="user-chat-messages-stream" style="max-height:220px; overflow-y:auto; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:10px; display:flex; flex-direction:column; gap:8px;">
+                        <div style="font-size:0.8rem; color:#94a3b8; text-align:center; padding:10px 0;">No messages yet. Send a message to get instant support!</div>
+                    </div>
+                </div>
             </div>
         </section>
 
@@ -864,6 +885,103 @@
                 <div style="background:#f8fafc; border-radius:var(--radius-md); padding:14px; border:1px solid var(--border-light);">
                     <strong>What is my calling rate?</strong>
                     <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:4px;">Calls across Nigeria are billed at just ₦12.00 per minute with HD voice clarity.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ====================================================
+             PAGE: ADMINISTRATOR PORTAL (#page-admin)
+             Users, Transfer/Deposit History, & User Support Chat
+             ==================================================== -->
+        <section class="app-page" id="page-admin">
+            <!-- Header bar with Title, Live Badge, and Refresh -->
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+                <div>
+                    <h2 style="font-size:1.4rem; font-weight:800; margin:0; color:#0f172a; display:flex; align-items:center; gap:8px;">
+                        <span>🛡️ Admin Portal</span>
+                        <span style="font-size:0.7rem; background:#10b981; color:#fff; padding:2px 8px; border-radius:12px; font-weight:700;">LIVE</span>
+                    </h2>
+                    <div style="font-size:0.8rem; color:#64748b; margin-top:2px;">User Management • Transfers • Live Support Chat</div>
+                </div>
+                <button id="btn-admin-refresh" class="btn-outline-pill" style="padding:6px 14px; font-size:0.82rem; font-weight:700; border-color:#006b38; color:#006b38; cursor:pointer;">
+                    🔄 Refresh
+                </button>
+            </div>
+
+            <!-- Quick Stats Bar -->
+            <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:10px; margin-bottom:16px;">
+                <div style="background:#ffffff; border:1px solid var(--border-light); border-radius:14px; padding:12px 8px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+                    <div style="font-size:0.75rem; color:#64748b; font-weight:600;">Users</div>
+                    <div style="font-size:1.25rem; font-weight:800; color:#0f172a; margin-top:2px;" id="admin-stat-users">0</div>
+                </div>
+                <div style="background:#ffffff; border:1px solid var(--border-light); border-radius:14px; padding:12px 8px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+                    <div style="font-size:0.75rem; color:#64748b; font-weight:600;">Deposits</div>
+                    <div style="font-size:1.15rem; font-weight:800; color:#006b38; margin-top:2px;" id="admin-stat-deposits">₦0.00</div>
+                </div>
+                <div style="background:#ffffff; border:1px solid var(--border-light); border-radius:14px; padding:12px 8px; text-align:center; box-shadow:0 2px 6px rgba(0,0,0,0.03);">
+                    <div style="font-size:0.75rem; color:#64748b; font-weight:600;">Profit (10%)</div>
+                    <div style="font-size:1.15rem; font-weight:800; color:#2563eb; margin-top:2px;" id="admin-stat-profit">₦0.00</div>
+                </div>
+            </div>
+
+            <!-- Tab Navigation Pills -->
+            <div style="display:flex; background:#f1f5f9; padding:4px; border-radius:14px; margin-bottom:16px; gap:4px;">
+                <button class="admin-tab-btn active" data-tab="users" style="flex:1; padding:10px 4px; border:none; background:#ffffff; border-radius:10px; font-weight:800; font-size:0.85rem; color:#0f172a; cursor:pointer; box-shadow:0 1px 4px rgba(0,0,0,0.06);">
+                    👥 Users (<span id="admin-tab-user-count">0</span>)
+                </button>
+                <button class="admin-tab-btn" data-tab="transfers" style="flex:1; padding:10px 4px; border:none; background:transparent; border-radius:10px; font-weight:700; font-size:0.85rem; color:#64748b; cursor:pointer;">
+                    💸 Transfers (<span id="admin-tab-transfer-count">0</span>)
+                </button>
+                <button class="admin-tab-btn" data-tab="support" style="flex:1; padding:10px 4px; border:none; background:transparent; border-radius:10px; font-weight:700; font-size:0.85rem; color:#64748b; cursor:pointer;">
+                    💬 Chat (<span id="admin-tab-msg-count">0</span>)
+                </button>
+            </div>
+
+            <!-- TAB 1: REGISTERED USERS -->
+            <div id="admin-panel-users" class="admin-tab-panel">
+                <div style="position:relative; margin-bottom:12px;">
+                    <input type="text" id="admin-search-users" class="app-input" placeholder="🔍 Search by name, phone, or email..." style="padding-left:14px; font-size:0.88rem;">
+                </div>
+                <div id="admin-users-list" style="display:flex; flex-direction:column; gap:10px;">
+                    <!-- Rendered dynamically -->
+                </div>
+            </div>
+
+            <!-- TAB 2: TRANSFERS & TRANSACTIONS (Received / Successful vs Failed) -->
+            <div id="admin-panel-transfers" class="admin-tab-panel" style="display:none;">
+                <div style="display:flex; gap:6px; margin-bottom:12px; overflow-x:auto; padding-bottom:4px;">
+                    <button class="admin-transfer-filter active" data-filter="all" style="padding:6px 12px; border-radius:20px; font-size:0.78rem; font-weight:700; border:1px solid #006b38; background:#006b38; color:#fff; cursor:pointer; white-space:nowrap;">All</button>
+                    <button class="admin-transfer-filter" data-filter="successful" style="padding:6px 12px; border-radius:20px; font-size:0.78rem; font-weight:700; border:1px solid #cbd5e1; background:#ffffff; color:#006b38; cursor:pointer; white-space:nowrap;">✅ Received / Success</button>
+                    <button class="admin-transfer-filter" data-filter="failed" style="padding:6px 12px; border-radius:20px; font-size:0.78rem; font-weight:700; border:1px solid #cbd5e1; background:#ffffff; color:#ef4444; cursor:pointer; white-space:nowrap;">❌ Failed</button>
+                    <button class="admin-transfer-filter" data-filter="reconciled" style="padding:6px 12px; border-radius:20px; font-size:0.78rem; font-weight:700; border:1px solid #cbd5e1; background:#ffffff; color:#2563eb; cursor:pointer; white-space:nowrap;">🔄 Reconciled</button>
+                </div>
+                <div id="admin-transfers-list" style="display:flex; flex-direction:column; gap:10px;">
+                    <!-- Rendered dynamically -->
+                </div>
+            </div>
+
+            <!-- TAB 3: LIVE SUPPORT CHAT WITH USERS -->
+            <div id="admin-panel-support" class="admin-tab-panel" style="display:none;">
+                <div style="background:#ffffff; border:1px solid var(--border-light); border-radius:16px; padding:16px; box-shadow:0 2px 8px rgba(0,0,0,0.03);">
+                    <div style="margin-bottom:12px;">
+                        <label style="font-size:0.82rem; font-weight:700; color:#0f172a; display:block; margin-bottom:6px;">Select User to Chat With:</label>
+                        <select id="admin-chat-user-select" class="app-input" style="padding:10px 12px; font-size:0.88rem; font-weight:600; height:auto;">
+                            <!-- Populated with users -->
+                        </select>
+                    </div>
+
+                    <!-- Chat Message Stream -->
+                    <div id="admin-chat-messages" style="height:280px; overflow-y:auto; background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:12px; display:flex; flex-direction:column; gap:10px; margin-bottom:12px;">
+                        <!-- Messages render here -->
+                    </div>
+
+                    <!-- Chat Reply Input Box -->
+                    <form id="admin-chat-reply-form" style="display:flex; gap:8px;">
+                        <input type="text" id="admin-chat-reply-input" class="app-input" placeholder="Type reply to user..." style="flex:1; padding:12px 14px;" required>
+                        <button type="submit" class="btn-green-pill" style="padding:0 18px; font-size:0.9rem; font-weight:700; white-space:nowrap; background:#006b38;">
+                            Send 💬
+                        </button>
+                    </form>
                 </div>
             </div>
         </section>
@@ -977,6 +1095,11 @@
                 <div class="drawer-menu-item drawer-install-item" id="drawer-install-app" style="display: none;">
                     <span class="drawer-item-icon">📲</span>
                     <span>Install App (PWA)</span>
+                </div>
+                <!-- Admin Portal (Always available or highlighted for Admin) -->
+                <div class="drawer-menu-item nav-page-btn" data-page="admin" id="drawer-admin-portal" style="background:#ecfdf5; border-left:3px solid #006b38;">
+                    <span class="drawer-item-icon">🛡️</span>
+                    <span style="font-weight:800; color:#006b38;">Admin Portal</span>
                 </div>
                 <!-- 1. Home -->
                 <div class="drawer-menu-item nav-page-btn" data-page="home">

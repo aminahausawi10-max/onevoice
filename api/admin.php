@@ -1,4 +1,4 @@
-﻿<?php
+<?php
 /**
  * ONE DIAL - Administrator Finance & Revenue Sharing API
  * View Total Deposits, Platform Revenue, Settlements, Calling Margins,
@@ -82,6 +82,7 @@ if ($method === 'GET') {
         "ledger" => array_reverse($ledgerEntries),
         "revenue_records" => array_reverse($store['platform_revenue_ledger'] ?? []),
         "users" => $users,
+        "support_messages" => array_values($store['support_messages'] ?? []),
         "call_summary" => [
             "total_calls" => count($callLogs),
             "recent_calls" => array_slice(array_reverse($callLogs), 0, 10)
@@ -158,6 +159,57 @@ if ($method === 'POST') {
         saveLocalStore($store);
 
         echo json_encode(["success" => true, "message" => "Transaction {$ref} reconciled successfully."]);
+        exit;
+    }
+
+    // Action 4: Admin Reply to User Support
+    if ($action === 'send_support_reply') {
+        if (!isset($store['support_messages'])) $store['support_messages'] = [];
+        $userId = intval($input['user_id'] ?? 1);
+        $reply = [
+            "id" => count($store['support_messages']) + 1,
+            "user_id" => $userId,
+            "user_name" => "Super Admin",
+            "user_phone" => "09090809080",
+            "user_member_id" => "OD-000001",
+            "subject" => $input['subject'] ?? "Support Response",
+            "message" => $input['message'] ?? "",
+            "sender" => "admin",
+            "created_at" => date("n/j/Y, g:i:s A")
+        ];
+        $store['support_messages'][] = $reply;
+        saveLocalStore($store);
+
+        echo json_encode(["success" => true, "message" => "Reply sent to user!", "reply" => $reply, "support_messages" => $store['support_messages']]);
+        exit;
+    }
+
+    // Action 5: User In-App Support Message
+    if ($action === 'user_support_message') {
+        if (!isset($store['support_messages'])) $store['support_messages'] = [];
+        $userId = intval($input['user_id'] ?? ($store['active_user_id'] ?? 3));
+        $uName = $input['user_name'] ?? "User";
+        $uPhone = $input['user_phone'] ?? "";
+        $uMemberId = $input['user_member_id'] ?? "";
+        $userMsg = [
+            "id" => count($store['support_messages']) + 1,
+            "user_id" => $userId,
+            "user_name" => $uName,
+            "user_phone" => $uPhone,
+            "user_member_id" => $uMemberId,
+            "subject" => $input['subject'] ?? "Support Inquiry",
+            "message" => $input['message'] ?? "",
+            "sender" => "user",
+            "created_at" => date("n/j/Y, g:i:s A")
+        ];
+        $store['support_messages'][] = $userMsg;
+        saveLocalStore($store);
+
+        $filtered = array_values(array_filter($store['support_messages'], function($m) use ($userId) {
+            return ($m['user_id'] ?? 0) === $userId;
+        }));
+
+        echo json_encode(["success" => true, "message" => "Message sent to Admin successfully!", "support_messages" => $filtered]);
         exit;
     }
 }

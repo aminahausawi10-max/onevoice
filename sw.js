@@ -3,7 +3,7 @@
  * Enables offline capability, faster caching, and installation on mobile devices
  */
 
-const CACHE_NAME = 'onedial-cache-v4';
+const CACHE_NAME = 'onedial-cache-v5';
 const PRECACHE_ASSETS = [
     '/',
     '/index.html',

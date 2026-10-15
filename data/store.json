@@ -1,14 +1,15 @@
 {
   "user": {
     "id": 1,
-    "member_id": "OV-784920",
-    "name": "Alex Morgan",
-    "phone": "+2348031234567",
-    "email": "demo@onedial.app",
+    "member_id": "OD-000001",
+    "name": "Super Admin",
+    "phone": "09090809080",
+    "email": "admin@gmail.com",
+    "password": "admin123",
     "language": "en",
     "virtual_account_number": "9803123456",
     "virtual_bank_name": "Wema Bank (ONE DIAL NUBAN)",
-    "virtual_account_name": "ONE DIAL / Alex Morgan",
+    "virtual_account_name": "ONE DIAL / Super Admin",
     "role": "admin",
     "status": "active",
     "is_verified": true
@@ -63,6 +64,57 @@
       "narration": "Deposit to Account 09090809080 - 10% Admin Share (₦1000.00) sent directly to MoMo 9090809080",
       "status": "successful",
       "created_at": "10/11/2026, 10:08:41 AM"
+    },
+    {
+      "id": 2,
+      "user_id": 3,
+      "transaction_type": "transfer_sent",
+      "gross_amount": 500,
+      "platform_fee": 0,
+      "net_credited": 500,
+      "balance_before": 9000,
+      "balance_after": 8500,
+      "channel": "phone_transfer",
+      "recipient_phone_account": "08099887766",
+      "recipient_name": "Fatima Bello",
+      "internal_reference": "OD-TRF-88921A",
+      "narration": "Transfer of ₦500.00 to Fatima Bello (08099887766)",
+      "status": "successful",
+      "created_at": "10/15/2026, 9:15:00 PM"
+    },
+    {
+      "id": 3,
+      "user_id": 2,
+      "transaction_type": "transfer_received",
+      "gross_amount": 500,
+      "platform_fee": 0,
+      "net_credited": 500,
+      "balance_before": 0,
+      "balance_after": 500,
+      "channel": "phone_transfer",
+      "sender_phone_account": "09090809080",
+      "sender_name": "Amina Ahmed Inuwa",
+      "internal_reference": "OD-TRF-88921A",
+      "narration": "Received ₦500.00 transfer from Amina Ahmed Inuwa",
+      "status": "successful",
+      "created_at": "10/15/2026, 9:15:00 PM"
+    },
+    {
+      "id": 4,
+      "user_id": 3,
+      "transaction_type": "phone_transfer",
+      "gross_amount": 1200,
+      "platform_fee": 0,
+      "net_credited": 1200,
+      "balance_before": 8500,
+      "balance_after": 8500,
+      "channel": "interbank_transfer",
+      "recipient_phone_account": "08012345678",
+      "recipient_name": "Unregistered Number",
+      "internal_reference": "OD-TRF-FAIL404",
+      "narration": "Transfer to 08012345678 failed: Beneficiary phone not registered on ONE DIAL",
+      "status": "failed",
+      "created_at": "10/15/2026, 10:45:00 PM"
     }
   ],
   "platform_revenue_ledger": [
@@ -128,6 +180,30 @@
       "virtual_account_name": "ONE DIAL / Amina Ahmed Inuwa",
       "language": "en",
       "is_verified": true
+    }
+  ],
+  "support_messages": [
+    {
+      "id": 1,
+      "user_id": 3,
+      "user_name": "Amina Ahmed Inuwa",
+      "user_phone": "09090809080",
+      "user_member_id": "OV-880993",
+      "subject": "Calling Issue / Quality",
+      "message": "Hello Admin, please check my international call rate for UK. Thanks!",
+      "sender": "user",
+      "created_at": "10/15/2026, 8:30:00 PM"
+    },
+    {
+      "id": 2,
+      "user_id": 3,
+      "user_name": "Super Admin",
+      "user_phone": "09090809080",
+      "user_member_id": "OD-000001",
+      "subject": "Calling Issue / Quality",
+      "message": "Hello Amina! UK rate is ₦18/min. You can buy the Value Bundle for discounted rates.",
+      "sender": "admin",
+      "created_at": "10/15/2026, 8:35:00 PM"
     }
   ],
   "active_user_id": 1
