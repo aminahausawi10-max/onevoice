@@ -4,11 +4,11 @@
     "member_id": "OV-784920",
     "name": "Alex Morgan",
     "phone": "+2348031234567",
-    "email": "demo@onevoice.app",
+    "email": "demo@onedial.app",
     "language": "en",
     "virtual_account_number": "9803123456",
-    "virtual_bank_name": "Wema Bank (ONE VOICE NUBAN)",
-    "virtual_account_name": "ONE VOICE / Alex Morgan",
+    "virtual_bank_name": "Wema Bank (ONE DIAL NUBAN)",
+    "virtual_account_name": "ONE DIAL / Alex Morgan",
     "role": "admin",
     "status": "active",
     "is_verified": true
@@ -40,7 +40,7 @@
     "virtual_bank_provider": "MoMo PSB / OPay (Phone Number Banking)",
     "admin_bank_name": "MoMo PSB (MTN MoMo)",
     "admin_account_number": "9090809080",
-    "admin_account_name": "Amina Ahmed Inuwa (ONE VOICE Admin)",
+    "admin_account_name": "Amina Ahmed Inuwa (ONE DIAL Admin)",
     "paystack_public_key": "pk_test_a8e259b3294c7b884d5df688172082b2024b176f"
   },
   "transactions": [],
@@ -112,8 +112,8 @@
       "phone": "+2348099887766",
       "email": "fatima.bello@example.com",
       "virtual_account_number": "9809988776",
-      "virtual_bank_name": "Wema Bank (ONE VOICE NUBAN)",
-      "virtual_account_name": "ONE VOICE / Fatima Bello",
+      "virtual_bank_name": "Wema Bank (ONE DIAL NUBAN)",
+      "virtual_account_name": "ONE DIAL / Fatima Bello",
       "language": "en",
       "is_verified": true
     },
@@ -124,8 +124,8 @@
       "phone": "09090809080",
       "email": "aminahausawi10@gmail.com",
       "virtual_account_number": "9909080908",
-      "virtual_bank_name": "Wema Bank (ONE VOICE NUBAN)",
-      "virtual_account_name": "ONE VOICE / Amina Ahmed Inuwa",
+      "virtual_bank_name": "Wema Bank (ONE DIAL NUBAN)",
+      "virtual_account_name": "ONE DIAL / Amina Ahmed Inuwa",
       "language": "en",
       "is_verified": true
     }

@@ -1,12 +1,12 @@
-# 🎙️ ONE VOICE — International Calling & Digital Wallet Web Platform
+﻿# ðŸŽ™ï¸ ONE DIAL â€” International Calling & Digital Wallet Web Platform
 
-A web platform for **ONE VOICE**, designed in tactile **Claymorphism** (soft 3D inflated aesthetics with multi-layered shadows and interactive feedback).
+A web platform for **ONE DIAL**, designed in tactile **Claymorphism** (soft 3D inflated aesthetics with multi-layered shadows and interactive feedback).
 
 Built with standard **HTML5, CSS3, JavaScript (Web Audio API DTMF synthesizer)** and a **PHP backend** with **Neon PostgreSQL** database integration.
 
 ---
 
-## ✨ Features
+## âœ¨ Features
 
 - **Tactile Claymorphic UI:** Custom clay buttons, cards, dial keys, and embossed inputs featuring soft multi-layered inner and outer drop shadows.
 - **Interactive Phone Dialer & DTMF Sound Engine:**
@@ -26,36 +26,36 @@ Built with standard **HTML5, CSS3, JavaScript (Web Audio API DTMF synthesizer)**
 
 ---
 
-## 🗂️ Project Structure
+## ðŸ—‚ï¸ Project Structure
 
 ```
-ONE VOICE/
-├── index.html              # Main Claymorphic web application
-├── css/
-│   └── clay.css            # 3D soft inflated clay styles & animations
-├── js/
-│   ├── app.js              # Core UI logic, wallet balance & call controller
-│   └── dtmf.js             # Web Audio API telephone tone synthesizer
-├── api/
-│   ├── db.php              # PHP database connection (Neon PostgreSQL PDO)
-│   ├── rates.php           # Calling rates endpoint (PHP)
-│   ├── wallet.php          # Wallet balance & top-up endpoint (PHP)
-│   ├── calls.php           # Call Detail Records (CDR) logger (PHP)
-│   ├── auth.php            # User authentication / OTP session (PHP)
-│   ├── rates.js            # Vercel serverless function (Node.js fallback)
-│   ├── wallet.js           # Vercel serverless function with Neon Postgres support
-│   ├── calls.js            # Vercel serverless function
-│   └── auth.js             # Vercel serverless function
-├── schema.sql              # Neon PostgreSQL schema & initial seed data
-├── server.js               # Zero-dependency local dev server & API bridge
-├── vercel.json             # Vercel deployment & API rewrite configuration
-├── package.json            # Node configuration & dependencies
-└── README.md
+ONE DIAL/
+â”œâ”€â”€ index.html              # Main Claymorphic web application
+â”œâ”€â”€ css/
+â”‚   â””â”€â”€ clay.css            # 3D soft inflated clay styles & animations
+â”œâ”€â”€ js/
+â”‚   â”œâ”€â”€ app.js              # Core UI logic, wallet balance & call controller
+â”‚   â””â”€â”€ dtmf.js             # Web Audio API telephone tone synthesizer
+â”œâ”€â”€ api/
+â”‚   â”œâ”€â”€ db.php              # PHP database connection (Neon PostgreSQL PDO)
+â”‚   â”œâ”€â”€ rates.php           # Calling rates endpoint (PHP)
+â”‚   â”œâ”€â”€ wallet.php          # Wallet balance & top-up endpoint (PHP)
+â”‚   â”œâ”€â”€ calls.php           # Call Detail Records (CDR) logger (PHP)
+â”‚   â”œâ”€â”€ auth.php            # User authentication / OTP session (PHP)
+â”‚   â”œâ”€â”€ rates.js            # Vercel serverless function (Node.js fallback)
+â”‚   â”œâ”€â”€ wallet.js           # Vercel serverless function with Neon Postgres support
+â”‚   â”œâ”€â”€ calls.js            # Vercel serverless function
+â”‚   â””â”€â”€ auth.js             # Vercel serverless function
+â”œâ”€â”€ schema.sql              # Neon PostgreSQL schema & initial seed data
+â”œâ”€â”€ server.js               # Zero-dependency local dev server & API bridge
+â”œâ”€â”€ vercel.json             # Vercel deployment & API rewrite configuration
+â”œâ”€â”€ package.json            # Node configuration & dependencies
+â””â”€â”€ README.md
 ```
 
 ---
 
-## 🚀 How to Run Locally
+## ðŸš€ How to Run Locally
 
 You can run the application immediately using either Node.js or native PHP:
 
@@ -80,7 +80,7 @@ http://localhost:8000
 
 ---
 
-## 🌐 Deployment Guide
+## ðŸŒ Deployment Guide
 
 ### 1. Set Up Neon PostgreSQL
 1. Sign up or log into [Neon](https://neon.tech).
@@ -96,7 +96,7 @@ http://localhost:8000
    ```bash
    git init
    git add .
-   git commit -m "Initial commit: ONE VOICE Claymorphic web app"
+   git commit -m "Initial commit: ONE DIAL Claymorphic web app"
    ```
 2. Create a new repository on [GitHub](https://github.com/new) named `one-voice`.
 3. Link your remote repository and push:
@@ -119,5 +119,5 @@ http://localhost:8000
 
 ---
 
-## 📱 Mobile App Compatibility
-This web platform shares the backend API and data contracts specified in the *ONE VOICE Mobile Application* architecture, allowing seamless integration with iOS (Swift / Flutter) and Android (Kotlin / Flutter) clients.
+## ðŸ“± Mobile App Compatibility
+This web platform shares the backend API and data contracts specified in the *ONE DIAL Mobile Application* architecture, allowing seamless integration with iOS (Swift / Flutter) and Android (Kotlin / Flutter) clients.

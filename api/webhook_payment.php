@@ -1,6 +1,6 @@
 <?php
 /**
- * ONE VOICE - Incoming Bank Payment Webhook Handler
+ * ONE DIAL - Incoming Bank Payment Webhook Handler
  * Supports Paystack, Flutterwave, Monnify, and Direct NIBSS Bank Transfer Webhooks
  * Features HMAC SHA512 Signature Verification, Idempotency, and Automatic Revenue Sharing
  */
@@ -18,7 +18,7 @@ $payload = file_get_contents('php://input');
 $signature = $_SERVER['HTTP_X_PAYSTACK_SIGNATURE'] ?? $_SERVER['HTTP_VERIF_HASH'] ?? $_SERVER['HTTP_X_WEBHOOK_SECRET'] ?? '';
 
 // Webhook secret configured on backend
-$webhookSecret = getenv('PAYMENT_WEBHOOK_SECRET') ?: 'onevoice_secret_whsec_994218';
+$webhookSecret = getenv('PAYMENT_WEBHOOK_SECRET') ?: 'onedial_secret_whsec_994218';
 
 // Signature verification (in production with secret key)
 if (!empty($signature) && !empty($webhookSecret)) {
@@ -83,7 +83,7 @@ if ($pdo) {
 
         $pdo->prepare("UPDATE wallets SET balance = ?, updated_at = NOW() WHERE user_id = 1")->execute([$newBal]);
 
-        $narration = "Dedicated Virtual Account Transfer (NUBAN: {$virtualAccount}) - Revenue Share: {$sharePct}% (₦" . number_format($platformFee, 2) . ")";
+        $narration = "Dedicated Virtual Account Transfer (NUBAN: {$virtualAccount}) - Revenue Share: {$sharePct}% (â‚¦" . number_format($platformFee, 2) . ")";
         $pdo->prepare("INSERT INTO wallet_ledger (user_id, transaction_type, gross_amount, platform_fee, net_credited, balance_before, balance_after, channel, provider_reference, internal_reference, narration, status) VALUES (1, 'bank_deposit', ?, ?, ?, ?, ?, 'dedicated_nuban', ?, ?, ?, 'successful')")
             ->execute([$grossAmount, $platformFee, $netCredited, $currBal, $newBal, $providerRef, $internalRef, $narration]);
 
@@ -113,7 +113,7 @@ $currBal = floatval($store['wallet']['balance'] ?? 0.0);
 $newBal = round($currBal + $netCredited, 2);
 $store['wallet']['balance'] = $newBal;
 
-$narration = "Dedicated Virtual Account Transfer (NUBAN: {$virtualAccount}) - Revenue Share: {$sharePct}% (₦" . number_format($platformFee, 2) . ")";
+$narration = "Dedicated Virtual Account Transfer (NUBAN: {$virtualAccount}) - Revenue Share: {$sharePct}% (â‚¦" . number_format($platformFee, 2) . ")";
 $store['wallet_ledger'][] = [
     "id" => count($store['wallet_ledger']) + 1,
     "user_id" => 1,

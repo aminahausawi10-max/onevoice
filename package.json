@@ -1,7 +1,7 @@
 {
-  "name": "one-voice-web",
+  "name": "one-dial-web",
   "version": "1.0.0",
-  "description": "ONE VOICE - International VoIP Calling & Digital Wallet Web Platform",
+  "description": "ONE DIAL - International VoIP Calling & Digital Wallet Web Platform",
   "main": "server.js",
   "scripts": {
     "start": "node dev-server.js",
@@ -19,6 +19,6 @@
     "php",
     "neon-postgres"
   ],
-  "author": "ONE VOICE",
+  "author": "ONE DIAL",
   "license": "MIT"
 }

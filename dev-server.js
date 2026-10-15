@@ -1,5 +1,5 @@
 /**
- * ONE VOICE - Local Dev Server & API Bridge
+ * ONE DIAL - Local Dev Server & API Bridge
  * Full support for Phone-Number Accounts, Virtual Bank NUBAN,
  * Automatic Revenue Sharing, Financial Ledgers, and Admin Dashboard
  */
@@ -60,7 +60,7 @@ function getStore() {
             virtual_bank_provider: "OPay (Paycom)",
             admin_bank_name: "OPay (Paycom)",
             admin_account_number: "9090809080",
-            admin_account_name: "ONE VOICE / Amina Ahmed Inuwa",
+            admin_account_name: "ONE DIAL / Amina Ahmed Inuwa",
             paystack_public_key: "pk_test_a8e259b3294c7b884d5df688172082b2024b176f"
         };
     }
@@ -71,10 +71,10 @@ function getStore() {
             member_id: "OV-784920",
             name: "Alex Morgan",
             phone: "+2348031234567",
-            email: "demo@onevoice.app",
-            virtual_bank_name: "Wema Bank (ONE VOICE NUBAN)",
+            email: "demo@onedial.app",
+            virtual_bank_name: "Wema Bank (ONE DIAL NUBAN)",
             virtual_account_number: "9803123456",
-            virtual_account_name: "ONE VOICE / Alex Morgan",
+            virtual_account_name: "ONE DIAL / Alex Morgan",
             language: "en",
             role: "admin",
             status: "active",
@@ -82,8 +82,8 @@ function getStore() {
         };
     } else {
         if (!store.user.virtual_account_number) store.user.virtual_account_number = "9803123456";
-        if (!store.user.virtual_bank_name) store.user.virtual_bank_name = "Wema Bank (ONE VOICE NUBAN)";
-        if (!store.user.virtual_account_name) store.user.virtual_account_name = "ONE VOICE / " + store.user.name;
+        if (!store.user.virtual_bank_name) store.user.virtual_bank_name = "Wema Bank (ONE DIAL NUBAN)";
+        if (!store.user.virtual_account_name) store.user.virtual_account_name = "ONE DIAL / " + store.user.name;
         if (!store.user.phone || !store.user.phone.startsWith('+234')) store.user.phone = "+2348031234567";
         if (!store.user.role) store.user.role = "admin";
     }
@@ -341,7 +341,7 @@ const requestHandler = (req, res) => {
         return sendJson({
             success: true,
             status: "online",
-            platform: "ONE VOICE",
+            platform: "ONE DIAL",
             environment: IS_VERCEL ? "Vercel Serverless Production" : "Local Development Server",
             github_repository: "https://github.com/aminahausawi10-max/onevoice",
             vercel_domain: "voicecloud-portal.vercel.app",
@@ -383,7 +383,7 @@ const requestHandler = (req, res) => {
                 if (found) {
                     return sendJson({ success: true, user: { id: found.id, name: found.name, phone: found.phone, member_id: found.member_id } });
                 }
-                return sendJson({ success: false, message: 'Beneficiary phone number not registered on ONE VOICE.' }, 404);
+                return sendJson({ success: false, message: 'Beneficiary phone number not registered on ONE DIAL.' }, 404);
             }
 
             const activeUser = getActiveUser(req, store) || store.user;
@@ -416,12 +416,12 @@ const requestHandler = (req, res) => {
                 account_number: accountNum,
                 user_account_number: accountNum,
                 user_phone_10digit: accountNum,
-                user_account_name: "ONE VOICE / " + activeUser.name,
+                user_account_name: "ONE DIAL / " + activeUser.name,
                 bank_name: assignedBank,
                 virtual_account: {
                     bank_name: assignedBank,
                     virtual_account_number: accountNum,
-                    account_name: "ONE VOICE / " + activeUser.name,
+                    account_name: "ONE DIAL / " + activeUser.name,
                     beneficiary_phone: activeUser.phone,
                     user_account_number: accountNum
                 },
@@ -449,7 +449,7 @@ const requestHandler = (req, res) => {
                     const targetNorm = normalizePhone(body.recipient_phone);
                     const recipient = getAllUsers(store).find(u => normalizePhone(u.phone) === targetNorm);
                     if (!recipient) {
-                        return sendJson({ success: false, message: 'Recipient phone number is not registered on ONE VOICE.' }, 404);
+                        return sendJson({ success: false, message: 'Recipient phone number is not registered on ONE DIAL.' }, 404);
                     }
                     if (recipient.id === activeUser.id) {
                         return sendJson({ success: false, message: 'Cannot transfer funds to your own account.' }, 400);
@@ -916,7 +916,7 @@ const requestHandler = (req, res) => {
 
                     const existing = getAllUsers(store).find(u => u.id !== activeUser.id && normalizePhone(u.phone) === normNew);
                     if (existing) {
-                        return sendJson({ success: false, message: 'This phone number is already registered to another ONE VOICE account.' }, 409);
+                        return sendJson({ success: false, message: 'This phone number is already registered to another ONE DIAL account.' }, 409);
                     }
 
                     const formattedPhone = newPhone.startsWith('+') ? newPhone : ('+234' + normNew.slice(-10));
@@ -954,7 +954,7 @@ const requestHandler = (req, res) => {
 
                     activeUser.phone = updatedPhone;
                     activeUser.virtual_account_number = '9' + normP;
-                    activeUser.virtual_account_name = 'ONE VOICE / ' + activeUser.name;
+                    activeUser.virtual_account_name = 'ONE DIAL / ' + activeUser.name;
 
                     if (activeUser.id === 1) {
                         store.user.phone = updatedPhone;
@@ -999,7 +999,7 @@ const requestHandler = (req, res) => {
                             activeUser.phone = formatted;
                             activeUser.virtual_account_number = account10;
                             activeUser.account_number = account10;
-                            activeUser.virtual_account_name = 'ONE VOICE / ' + activeUser.name;
+                            activeUser.virtual_account_name = 'ONE DIAL / ' + activeUser.name;
 
                             if (activeUser.id === 1) {
                                 store.user.phone = formatted;
@@ -1106,7 +1106,7 @@ const requestHandler = (req, res) => {
                         virtual_bank_name: banks[Math.floor(Math.random() * banks.length)],
                         virtual_account_number: virtualNuban,
                         account_number: virtualNuban,
-                        virtual_account_name: "ONE VOICE / " + name,
+                        virtual_account_name: "ONE DIAL / " + name,
                         language: 'en',
                         role: 'user',
                         status: 'active',
@@ -1139,7 +1139,7 @@ const requestHandler = (req, res) => {
                     const matched = users.find(u => (u.email || '').toLowerCase() === id || (normId && normalizePhone(u.phone) === normId) || (u.member_id || '').toLowerCase() === id);
 
                     if (!matched) {
-                        return sendJson({ success: false, message: 'No ONE VOICE account found with this phone number or email.' }, 404);
+                        return sendJson({ success: false, message: 'No ONE DIAL account found with this phone number or email.' }, 404);
                     }
 
                     if (matched.password && matched.password !== (body.password || '').toString()) {
@@ -1260,7 +1260,7 @@ const server = http.createServer(requestHandler);
 
 if (require.main === module) {
     server.listen(PORT, () => {
-        console.log(`ONE VOICE Web Application running at http://localhost:${PORT}`);
+        console.log(`ONE DIAL Web Application running at http://localhost:${PORT}`);
     });
 }
 

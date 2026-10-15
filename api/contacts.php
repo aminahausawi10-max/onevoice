@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 /**
- * ONE VOICE - Contacts Management API
+ * ONE DIAL - Contacts Management API
  * Add, List, and Delete Contacts
  */
 

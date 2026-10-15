@@ -1,5 +1,5 @@
 /**
- * ONE VOICE - Modern Mobile Web Application Controller
+ * ONE DIAL - Modern Mobile Web Application Controller
  * Handles 10-screen navigation, dialpad, Web Audio DTMF, country picker,
  * wallet deposits, drawer navigation, and direct authentication without OTP.
  */
@@ -397,7 +397,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (setDisplayId) setDisplayId.textContent = `ID: ${memberId}`;
         if (setInputName) setInputName.value = name;
         if (setInputPhone) setInputPhone.value = user.phone || '09090809080';
-        if (setInputEmail) setInputEmail.value = user.email || 'user@onevoice.app';
+        if (setInputEmail) setInputEmail.value = user.email || 'user@onedial.app';
 
         // Load avatar if present
         const savedAvatar = user.avatar || localStorage.getItem('ov_user_avatar');

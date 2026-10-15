@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 /**
- * ONE VOICE - Customer Wallet & Automatic Revenue-Sharing API
+ * ONE DIAL - Customer Wallet & Automatic Revenue-Sharing API
  * Handles Phone-Number Account Identification, Dedicated Virtual NUBAN,
  * Bank Payment Ingestion, and Server-Side Revenue Splits
  */
@@ -24,7 +24,7 @@ if ($method === 'GET') {
             }
         }
         http_response_code(404);
-        echo json_encode(["success" => false, "message" => "Beneficiary phone number not registered on ONE VOICE."]);
+        echo json_encode(["success" => false, "message" => "Beneficiary phone number not registered on ONE DIAL."]);
         exit;
     }
 
@@ -71,9 +71,9 @@ if ($method === 'GET') {
                 "currency" => $currency,
                 "account_number" => $user['phone'],
                 "virtual_account" => [
-                    "bank_name" => $user['virtual_bank_name'] ?? 'Wema Bank (ONE VOICE NUBAN)',
+                    "bank_name" => $user['virtual_bank_name'] ?? 'Wema Bank (ONE DIAL NUBAN)',
                     "virtual_account_number" => $user['virtual_account_number'] ?? '9803123456',
-                    "account_name" => $user['virtual_account_name'] ?? ('ONE VOICE / ' . $user['name']),
+                    "account_name" => $user['virtual_account_name'] ?? ('ONE DIAL / ' . $user['name']),
                     "beneficiary_phone" => $user['phone']
                 ],
                 "revenue_sharing" => [
@@ -92,9 +92,9 @@ if ($method === 'GET') {
         "currency" => $currency,
         "account_number" => $user['phone'],
         "virtual_account" => [
-            "bank_name" => $user['virtual_bank_name'] ?? 'Wema Bank (ONE VOICE NUBAN)',
+            "bank_name" => $user['virtual_bank_name'] ?? 'Wema Bank (ONE DIAL NUBAN)',
             "virtual_account_number" => $user['virtual_account_number'] ?? '9803123456',
-            "account_name" => $user['virtual_account_name'] ?? ('ONE VOICE / ' . $user['name']),
+            "account_name" => $user['virtual_account_name'] ?? ('ONE DIAL / ' . $user['name']),
             "beneficiary_phone" => $user['phone']
         ],
         "revenue_sharing" => [
@@ -118,7 +118,7 @@ if ($method === 'POST') {
 
         if ($amount < 50.00) {
             http_response_code(400);
-            echo json_encode(["success" => false, "message" => "Minimum transfer amount is ₦50.00."]);
+            echo json_encode(["success" => false, "message" => "Minimum transfer amount is â‚¦50.00."]);
             exit;
         }
 
@@ -134,7 +134,7 @@ if ($method === 'POST') {
 
         if (!$recipient) {
             http_response_code(404);
-            echo json_encode(["success" => false, "message" => "Recipient phone number not registered on ONE VOICE."]);
+            echo json_encode(["success" => false, "message" => "Recipient phone number not registered on ONE DIAL."]);
             exit;
         }
 
@@ -147,7 +147,7 @@ if ($method === 'POST') {
         $senderBal = floatval($store['wallet']['balance'] ?? 0);
         if ($senderBal < $amount) {
             http_response_code(400);
-            echo json_encode(["success" => false, "message" => "Insufficient wallet credit (₦" . number_format($senderBal, 2) . ") to complete this transfer."]);
+            echo json_encode(["success" => false, "message" => "Insufficient wallet credit (â‚¦" . number_format($senderBal, 2) . ") to complete this transfer."]);
             exit;
         }
 
@@ -182,7 +182,7 @@ if ($method === 'POST') {
             "balance_after" => $amount,
             "channel" => "phone_transfer",
             "internal_reference" => $ref . '-R',
-            "narration" => "Received transfer from ONE VOICE user",
+            "narration" => "Received transfer from ONE DIAL user",
             "status" => "successful",
             "created_at" => date("Y-m-d H:i:s")
         ];
@@ -191,7 +191,7 @@ if ($method === 'POST') {
 
         echo json_encode([
             "success" => true,
-            "message" => "₦" . number_format($amount, 2) . " transferred successfully to {$recipient['name']}!",
+            "message" => "â‚¦" . number_format($amount, 2) . " transferred successfully to {$recipient['name']}!",
             "new_balance" => $newSenderBal,
             "reference" => $ref,
             "recipient" => ["name" => $recipient['name'], "phone" => $recipient['phone']]
@@ -218,7 +218,7 @@ if ($method === 'POST') {
 
         if ($amount <= 0 || $userBal < $amount) {
             http_response_code(400);
-            echo json_encode(["success" => false, "message" => "Insufficient wallet credit (₦" . number_format($userBal, 2) . ") to purchase this bundle."]);
+            echo json_encode(["success" => false, "message" => "Insufficient wallet credit (â‚¦" . number_format($userBal, 2) . ") to purchase this bundle."]);
             exit;
         }
 
@@ -261,7 +261,7 @@ if ($method === 'POST') {
 
         echo json_encode([
             "success" => true,
-            "message" => "{$bundleName} activated successfully! ₦" . number_format($amount, 2) . " deducted.",
+            "message" => "{$bundleName} activated successfully! â‚¦" . number_format($amount, 2) . " deducted.",
             "new_balance" => $newBal,
             "reference" => $ref,
             "minutes_added" => $minutes
@@ -278,7 +278,7 @@ if ($method === 'POST') {
 
         if ($grossAmount < 10.00) {
             http_response_code(400);
-            echo json_encode(["success" => false, "message" => "Minimum deposit is ₦10.00."]);
+            echo json_encode(["success" => false, "message" => "Minimum deposit is â‚¦10.00."]);
             exit;
         }
 
@@ -325,7 +325,7 @@ if ($method === 'POST') {
                 $uStmt->execute([$balanceAfter, $userId]);
 
                 // Append to wallet_ledger
-                $narration = "Bank Transfer via {$channel} - Platform Share: {$sharePct}% (₦" . number_format($platformFee, 2) . ")";
+                $narration = "Bank Transfer via {$channel} - Platform Share: {$sharePct}% (â‚¦" . number_format($platformFee, 2) . ")";
                 $lStmt = $pdo->prepare("INSERT INTO wallet_ledger (user_id, transaction_type, gross_amount, platform_fee, net_credited, balance_before, balance_after, channel, provider_reference, internal_reference, narration, status) VALUES (?, 'bank_deposit', ?, ?, ?, ?, ?, ?, ?, ?, ?, 'successful') RETURNING id");
                 $lStmt->execute([$userId, $grossAmount, $platformFee, $netCredited, $balanceBefore, $balanceAfter, $channel, $providerRef, $internalRef, $narration]);
                 $ledgerId = $lStmt->fetchColumn();
@@ -342,7 +342,7 @@ if ($method === 'POST') {
 
                 echo json_encode([
                     "success" => true,
-                    "message" => "Bank payment verified! ₦" . number_format($netCredited, 2) . " credited to wallet.",
+                    "message" => "Bank payment verified! â‚¦" . number_format($netCredited, 2) . " credited to wallet.",
                     "deposit_breakdown" => [
                         "gross_deposit" => $grossAmount,
                         "platform_revenue_share" => $platformFee,
@@ -376,7 +376,7 @@ if ($method === 'POST') {
         $balanceAfter = round($balanceBefore + $netCredited, 2);
         $store['wallet']['balance'] = $balanceAfter;
 
-        $narration = "Bank Transfer via {$channel} - Platform Share: {$sharePct}% (₦" . number_format($platformFee, 2) . ")";
+        $narration = "Bank Transfer via {$channel} - Platform Share: {$sharePct}% (â‚¦" . number_format($platformFee, 2) . ")";
         $newLedgerEntry = [
             "id" => count($store['wallet_ledger'] ?? []) + 1,
             "user_id" => $userId,
@@ -417,7 +417,7 @@ if ($method === 'POST') {
 
         echo json_encode([
             "success" => true,
-            "message" => "Bank payment verified! ₦" . number_format($netCredited, 2) . " credited to wallet.",
+            "message" => "Bank payment verified! â‚¦" . number_format($netCredited, 2) . " credited to wallet.",
             "deposit_breakdown" => [
                 "gross_deposit" => $grossAmount,
                 "platform_revenue_share" => $platformFee,

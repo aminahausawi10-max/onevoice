@@ -1,5 +1,5 @@
--- ==========================================================
--- ONE VOICE: Database Schema for Neon PostgreSQL
+﻿-- ==========================================================
+-- ONE DIAL: Database Schema for Neon PostgreSQL
 -- Phone Account Identification, Dedicated Virtual NUBAN Accounts,
 -- Automatic Revenue Sharing, and Append-Only Financial Ledger
 -- ==========================================================
@@ -19,7 +19,7 @@ VALUES
 ('nigeria_call_rate_per_min', '12.00', 'Customer retail call rate per minute in NGN for Nigerian networks'),
 ('carrier_wholesale_cost_per_min', '8.50', 'Carrier wholesale cost per minute in NGN for Nigerian networks'),
 ('primary_currency', 'NGN', 'Primary operating currency (NGN - Nigerian Naira)'),
-('virtual_bank_provider', 'Wema Bank (ONE VOICE NUBAN)', 'Assigned banking institution for dedicated virtual accounts')
+('virtual_bank_provider', 'Wema Bank (ONE DIAL NUBAN)', 'Assigned banking institution for dedicated virtual accounts')
 ON CONFLICT (key) DO NOTHING;
 
 -- 2. Users Table
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     member_id VARCHAR(20) UNIQUE NOT NULL,
     name VARCHAR(120) NOT NULL,
-    phone VARCHAR(30) UNIQUE NOT NULL, -- Serves as the ONE VOICE Account Number
+    phone VARCHAR(30) UNIQUE NOT NULL, -- Serves as the ONE DIAL Account Number
     email VARCHAR(150) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     virtual_bank_name VARCHAR(100) DEFAULT 'Wema Bank',
@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS call_logs (
     retail_rate_per_min NUMERIC(8, 2) DEFAULT 12.00,
     cost NUMERIC(10, 2) DEFAULT 0.00, -- Retail cost deducted from user
     carrier_cost NUMERIC(10, 2) DEFAULT 0.00, -- Wholesale carrier cost
-    platform_margin NUMERIC(10, 2) DEFAULT 0.00, -- ONE VOICE profit margin
+    platform_margin NUMERIC(10, 2) DEFAULT 0.00, -- ONE DIAL profit margin
     status VARCHAR(20) DEFAULT 'completed',
     started_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     ended_at TIMESTAMP WITH TIME ZONE
@@ -122,18 +122,18 @@ CREATE TABLE IF NOT EXISTS calling_rates (
 -- Seed Calling Rates (In NGN - Nigerian Naira)
 INSERT INTO calling_rates (country_name, country_code, dial_code, flag_emoji, rate_per_minute, roaming_rate, is_popular)
 VALUES 
-('Nigeria (All Networks)', 'NG', '+234', '🇳🇬', 12.00, 45.00, TRUE),
-('United States', 'US', '+1', '🇺🇸', 18.00, 180.00, TRUE),
-('United Kingdom', 'GB', '+44', '🇬🇧', 25.00, 250.00, TRUE),
-('Ghana', 'GH', '+233', '🇬🇭', 65.00, 350.00, TRUE),
-('Kenya', 'KE', '+254', '🇰🇪', 75.00, 320.00, TRUE),
-('South Africa', 'ZA', '+27', '🇿🇦', 55.00, 280.00, TRUE),
-('Canada', 'CA', '+1', '🇨🇦', 18.00, 180.00, TRUE),
-('India', 'IN', '+91', '🇮🇳', 22.00, 220.00, TRUE),
-('United Arab Emirates', 'AE', '+971', '🇦🇪', 95.00, 400.00, TRUE),
-('Saudi Arabia', 'SA', '+966', '🇸🇦', 85.00, 380.00, FALSE),
-('China', 'CN', '+86', '🇨🇳', 25.00, 200.00, FALSE),
-('Germany', 'DE', '+49', '🇩🇪', 30.00, 260.00, FALSE)
+('Nigeria (All Networks)', 'NG', '+234', 'ðŸ‡³ðŸ‡¬', 12.00, 45.00, TRUE),
+('United States', 'US', '+1', 'ðŸ‡ºðŸ‡¸', 18.00, 180.00, TRUE),
+('United Kingdom', 'GB', '+44', 'ðŸ‡¬ðŸ‡§', 25.00, 250.00, TRUE),
+('Ghana', 'GH', '+233', 'ðŸ‡¬ðŸ‡­', 65.00, 350.00, TRUE),
+('Kenya', 'KE', '+254', 'ðŸ‡°ðŸ‡ª', 75.00, 320.00, TRUE),
+('South Africa', 'ZA', '+27', 'ðŸ‡¿ðŸ‡¦', 55.00, 280.00, TRUE),
+('Canada', 'CA', '+1', 'ðŸ‡¨ðŸ‡¦', 18.00, 180.00, TRUE),
+('India', 'IN', '+91', 'ðŸ‡®ðŸ‡³', 22.00, 220.00, TRUE),
+('United Arab Emirates', 'AE', '+971', 'ðŸ‡¦ðŸ‡ª', 95.00, 400.00, TRUE),
+('Saudi Arabia', 'SA', '+966', 'ðŸ‡¸ðŸ‡¦', 85.00, 380.00, FALSE),
+('China', 'CN', '+86', 'ðŸ‡¨ðŸ‡³', 25.00, 200.00, FALSE),
+('Germany', 'DE', '+49', 'ðŸ‡©ðŸ‡ª', 30.00, 260.00, FALSE)
 ON CONFLICT DO NOTHING;
 
 -- Seed Default Demo Account
@@ -144,11 +144,11 @@ VALUES (
     'OV-784920', 
     'Alex Morgan', 
     '+2348031234567', 
-    'demo@onevoice.app', 
+    'demo@onedial.app', 
     '$2y$10$eA3pU2s7J6zZ1x.mE1Vz0Ou8mP7mN4dK2j9wE0l5e0/2y.Hk5w6Ce', 
-    'Wema Bank (ONE VOICE)', 
+    'Wema Bank (ONE DIAL)', 
     '9803123456', 
-    'ONE VOICE / Alex Morgan', 
+    'ONE DIAL / Alex Morgan', 
     'en', 
     'admin', 
     'active'

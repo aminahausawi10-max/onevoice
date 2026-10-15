@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 /**
- * ONE VOICE - Call Detail Records (CDR) & Telephony Margin API
+ * ONE DIAL - Call Detail Records (CDR) & Telephony Margin API
  * Tracks Nigerian & International Calls, Deducts Wallet Credits,
  * and Calculates Platform Profit Margins (Retail Rate - Carrier Cost)
  */
@@ -76,7 +76,7 @@ if ($method === 'POST') {
 
             // Insert deduction into wallet ledger
             $ref = "OV-CALL-" . $callId;
-            $narration = "Call to {$destCountry} ({$duration}s) @ ₦{$retailRate}/min";
+            $narration = "Call to {$destCountry} ({$duration}s) @ â‚¦{$retailRate}/min";
             $pdo->prepare("INSERT INTO wallet_ledger (user_id, transaction_type, gross_amount, platform_fee, net_credited, balance_before, balance_after, channel, internal_reference, narration, status) VALUES (?, 'call_charge', ?, 0.00, ?, ?, ?, 'telephony_deduction', ?, ?, 'successful')")
                 ->execute([$userId, $retailCost, -$retailCost, $currBal, $newBal, $ref, $narration]);
 
@@ -129,7 +129,7 @@ if ($method === 'POST') {
     $store['call_logs'][] = $callRecord;
 
     $ref = "OV-CALL-" . $callRecord['id'];
-    $narration = "Call to {$destCountry} ({$duration}s) @ ₦{$retailRate}/min";
+    $narration = "Call to {$destCountry} ({$duration}s) @ â‚¦{$retailRate}/min";
     $store['wallet_ledger'][] = [
         "id" => count($store['wallet_ledger'] ?? []) + 1,
         "user_id" => $userId,

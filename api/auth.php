@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 /**
- * ONE VOICE - Authentication & Security API
+ * ONE DIAL - Authentication & Security API
  * Implements Registration, Password Hashing, Login, OTP Verification,
  * Member ID Generation, Rate Limiting, Forgot Password, and Secure Logout
  */
@@ -249,7 +249,7 @@ if ($method === 'POST') {
         if (!$matchedUser) {
             // Check fallback store or demo user
             $store = getLocalStore();
-            if ($identifier === 'demo@onevoice.app' || $identifier === '+14155552671' || $identifier === 'demo') {
+            if ($identifier === 'demo@onedial.app' || $identifier === '+14155552671' || $identifier === 'demo') {
                 $matchedUser = $store['user'];
             } else if (!empty($store['users'])) {
                 foreach ($store['users'] as $u) {
@@ -340,7 +340,7 @@ if ($method === 'POST') {
 
         sendResponse([
             "success" => true,
-            "message" => "OTP verified successfully. Welcome to your ONE VOICE Dashboard!",
+            "message" => "OTP verified successfully. Welcome to your ONE DIAL Dashboard!",
             "token" => $_SESSION['user_token'],
             "user" => $store['user']
         ]);
