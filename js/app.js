@@ -1380,6 +1380,73 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    // Customer Support: Send Message to Admin
+    const btnSendAdminWhatsapp = document.getElementById('btn-send-admin-whatsapp');
+    const btnSendAdminEmail = document.getElementById('btn-send-admin-email');
+    const supportSubject = document.getElementById('support-subject');
+    const supportMessageText = document.getElementById('support-message-text');
+
+    function getAdminMessagePayload() {
+        const subject = supportSubject ? supportSubject.value : 'General Inquiry';
+        const msg = supportMessageText ? supportMessageText.value.trim() : '';
+        if (!msg) {
+            showToast('Please type a message for the admin first.', 'error');
+            if (supportMessageText) supportMessageText.focus();
+            return null;
+        }
+
+        const userStr = localStorage.getItem('ov_current_user');
+        let user = null;
+        if (userStr) {
+            try { user = JSON.parse(userStr); } catch (e) {}
+        }
+        const userName = user ? (user.name || 'ONE DIAL User') : 'ONE DIAL User';
+        const userPhone = user ? (user.phone || '') : '';
+        const userMemberId = user ? (user.member_id || '') : '';
+
+        return {
+            subject,
+            msg,
+            userName,
+            userPhone,
+            userMemberId
+        };
+    }
+
+    if (btnSendAdminWhatsapp) {
+        btnSendAdminWhatsapp.addEventListener('click', () => {
+            const payload = getAdminMessagePayload();
+            if (!payload) return;
+
+            let text = `Hello Admin,\n*ONE DIAL Support Request*\n\n*Subject:* ${payload.subject}\n*Name:* ${payload.userName}`;
+            if (payload.userPhone) text += `\n*Phone:* ${payload.userPhone}`;
+            if (payload.userMemberId) text += `\n*Member ID:* ${payload.userMemberId}`;
+            text += `\n\n*Message:*\n${payload.msg}`;
+
+            const waUrl = `https://wa.me/2347047000070?text=${encodeURIComponent(text)}`;
+            window.open(waUrl, '_blank');
+            showToast('Opening WhatsApp to send your message to Admin...', 'success');
+            if (supportMessageText) supportMessageText.value = '';
+        });
+    }
+
+    if (btnSendAdminEmail) {
+        btnSendAdminEmail.addEventListener('click', () => {
+            const payload = getAdminMessagePayload();
+            if (!payload) return;
+
+            let body = `Hello Admin,\n\nONE DIAL Support Request\n\nSubject: ${payload.subject}\nName: ${payload.userName}`;
+            if (payload.userPhone) body += `\nPhone: ${payload.userPhone}`;
+            if (payload.userMemberId) body += `\nMember ID: ${payload.userMemberId}`;
+            body += `\n\nMessage:\n${payload.msg}\n\n---\nSent from ONE DIAL Web App`;
+
+            const mailUrl = `mailto:onedail2030@gmail.com?subject=${encodeURIComponent('[ONE DIAL Support] ' + payload.subject)}&body=${encodeURIComponent(body)}`;
+            window.location.href = mailUrl;
+            showToast('Opening email to send your message to Admin...', 'success');
+            if (supportMessageText) supportMessageText.value = '';
+        });
+    }
+
     initSession();
     renderContacts();
     renderRates();
