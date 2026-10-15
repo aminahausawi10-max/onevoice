@@ -164,6 +164,20 @@ document.addEventListener('DOMContentLoaded', () => {
     const mobileBottomNav = document.getElementById('mobile-bottom-nav');
 
     function navigateToPage(pageName) {
+        // Strict Security Guard: Only authenticated Admin (admin@gmail.com / role=admin) can access the Admin Portal
+        const isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.email === 'admin@gmail.com');
+        if (pageName === 'admin') {
+            if (!isAdmin) {
+                showToast('Access denied: Administrator login required.', 'error');
+                if (currentUser) {
+                    navigateToPage('home');
+                } else {
+                    navigateToPage('login');
+                }
+                return;
+            }
+        }
+
         allPages.forEach(p => p.classList.remove('active'));
         const targetPage = document.getElementById(`page-${pageName}`);
         if (targetPage) {
@@ -179,6 +193,23 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (mobileBottomNav) {
             mobileBottomNav.style.display = isPublicAuthPage ? 'none' : 'flex';
+        }
+
+        // Admin Navigation & Quick Switcher Controls
+        const drawerAdmin = document.getElementById('drawer-admin-portal');
+        const headerAdminBtn = document.getElementById('header-btn-admin-switch');
+        const floatingAdminBtn = document.getElementById('admin-floating-portal-btn');
+
+        if (drawerAdmin) {
+            drawerAdmin.style.display = isAdmin ? 'flex' : 'none';
+        }
+        if (headerAdminBtn) {
+            // Header button to switch to admin portal (visible for admin when on normal pages)
+            headerAdminBtn.style.display = (isAdmin && !isPublicAuthPage && pageName !== 'admin') ? 'inline-flex' : 'none';
+        }
+        if (floatingAdminBtn) {
+            // Floating shortcut to jump back to admin portal when admin is browsing the website
+            floatingAdminBtn.style.display = (isAdmin && !isPublicAuthPage && pageName !== 'admin') ? 'inline-flex' : 'none';
         }
 
         // Update Bottom Nav active state
@@ -412,11 +443,24 @@ document.addEventListener('DOMContentLoaded', () => {
             updateUserAvatarUI(savedAvatar);
         }
 
-        // Toggle Admin Portal in side drawer
+        // Toggle Admin Portal controls (Side Drawer, Header Switcher, Floating Return Pill)
         const drawerAdmin = document.getElementById('drawer-admin-portal');
-        const isAdmin = user.role === 'admin' || user.email === 'admin@gmail.com';
+        const headerAdminBtn = document.getElementById('header-btn-admin-switch');
+        const floatingAdminBtn = document.getElementById('admin-floating-portal-btn');
+        const isAdmin = user && (user.role === 'admin' || user.email === 'admin@gmail.com');
+
         if (drawerAdmin) {
             drawerAdmin.style.display = isAdmin ? 'flex' : 'none';
+        }
+        if (headerAdminBtn) {
+            const activePage = document.querySelector('.app-page.active');
+            const onAdminPage = activePage && activePage.id === 'page-admin';
+            headerAdminBtn.style.display = (isAdmin && !onAdminPage) ? 'inline-flex' : 'none';
+        }
+        if (floatingAdminBtn) {
+            const activePage = document.querySelector('.app-page.active');
+            const onAdminPage = activePage && activePage.id === 'page-admin';
+            floatingAdminBtn.style.display = (isAdmin && !onAdminPage) ? 'inline-flex' : 'none';
         }
 
         loadWalletData();
@@ -427,6 +471,14 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             localStorage.removeItem('ov_current_user');
         } catch (e) {}
+
+        const drawerAdmin = document.getElementById('drawer-admin-portal');
+        const headerAdminBtn = document.getElementById('header-btn-admin-switch');
+        const floatingAdminBtn = document.getElementById('admin-floating-portal-btn');
+        if (drawerAdmin) drawerAdmin.style.display = 'none';
+        if (headerAdminBtn) headerAdminBtn.style.display = 'none';
+        if (floatingAdminBtn) floatingAdminBtn.style.display = 'none';
+
         navigateToPage('install-gate');
     }
 
@@ -1389,14 +1441,16 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
             if (data.success && data.authenticated && data.user) {
                 setAuthenticatedUI(data.user);
-                navigateToPage('home');
+                const isAdmin = data.user.role === 'admin' || data.user.email === 'admin@gmail.com';
+                navigateToPage(isAdmin ? 'admin' : 'home');
             } else {
                 setUnauthenticatedUI();
             }
         } catch (e) {
             if (savedUser) {
                 setAuthenticatedUI(savedUser);
-                navigateToPage('home');
+                const isAdmin = savedUser.role === 'admin' || savedUser.email === 'admin@gmail.com';
+                navigateToPage(isAdmin ? 'admin' : 'home');
             } else {
                 setUnauthenticatedUI();
             }

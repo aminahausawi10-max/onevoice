@@ -35,11 +35,16 @@
                 </div>
                 <div class="brand-sub-title">International Calls</div>
             </div>
-            <button class="header-icon-btn nav-page-btn" data-page="settings" id="header-btn-settings" title="Settings" aria-label="Settings">
-                <svg viewBox="0 0 24 24" width="22" height="22" fill="#006b38">
-                    <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
-                </svg>
-            </button>
+            <div style="display:flex; align-items:center; gap:6px;">
+                <button class="nav-page-btn" data-page="admin" id="header-btn-admin-switch" title="Admin Portal" style="display:none; background:#ecfdf5; border:1px solid #10b981; color:#006b38; padding:5px 10px; border-radius:10px; font-size:0.75rem; font-weight:800; cursor:pointer;">
+                    🛡️ Admin
+                </button>
+                <button class="header-icon-btn nav-page-btn" data-page="settings" id="header-btn-settings" title="Settings" aria-label="Settings">
+                    <svg viewBox="0 0 24 24" width="22" height="22" fill="#006b38">
+                        <path d="M19.14 12.94c.04-.3.06-.61.06-.94 0-.32-.02-.64-.07-.94l2.03-1.58c.18-.14.23-.41.12-.61l-1.92-3.32c-.12-.22-.37-.29-.59-.22l-2.39.96c-.5-.38-1.03-.7-1.62-.94l-.36-2.54c-.04-.24-.24-.41-.48-.41h-3.84c-.24 0-.43.17-.47.41l-.36 2.54c-.59.24-1.13.57-1.62.94l-2.39-.96c-.22-.08-.47 0-.59.22L2.74 8.87c-.12.21-.08.47.12.61l2.03 1.58c-.05.3-.09.63-.09.94s.02.64.07.94l-2.03 1.58c-.18.14-.23.41-.12.61l1.92 3.32c.12.22.37.29.59.22l2.39-.96c.5.38 1.03.7 1.62.94l.36 2.54c.05.24.24.41.48.41h3.84c.24 0 .44-.17.47-.41l.36-2.54c.59-.24 1.13-.56 1.62-.94l2.39.96c.22.08.47 0 .59-.22l1.92-3.32c.12-.22.07-.47-.12-.61l-2.01-1.58zM12 15.6c-1.98 0-3.6-1.62-3.6-3.6s1.62-3.6 3.6-3.6 3.6 1.62 3.6 3.6-1.62 3.6-3.6 3.6z"/>
+                    </svg>
+                </button>
+            </div>
         </header>
 
         <!-- Floating Popover Menu (Directly matching user design reference) -->
@@ -275,19 +280,14 @@
             </div>
 
             <form id="form-login" style="margin-top: 14px;">
-                <div style="background:#f0fdf4; border:1px solid #bbf7d0; border-radius:10px; padding:10px 12px; font-size:0.8rem; color:#166534; margin-bottom:14px; display:flex; align-items:center; justify-content:space-between;">
-                    <div><strong>Admin Login:</strong> admin@gmail.com / admin123</div>
-                    <span style="background:#166534; color:#fff; font-size:0.7rem; padding:2px 8px; border-radius:6px; font-weight:700;">NO OTP</span>
-                </div>
-
                 <div class="form-input-group">
-                    <span class="form-input-icon">✉️</span>
-                    <input type="text" id="login-identifier" class="app-input" placeholder="Phone Number or Email" value="admin@gmail.com" required>
+                    <span class="form-input-icon">📱</span>
+                    <input type="text" id="login-identifier" class="app-input" placeholder="Phone Number or Email" required>
                 </div>
 
                 <div class="form-input-group">
                     <span class="form-input-icon">🔒</span>
-                    <input type="password" id="login-password" class="app-input" placeholder="Password" value="admin123" required>
+                    <input type="password" id="login-password" class="app-input" placeholder="Password" required>
                     <button type="button" class="form-input-eye" onclick="togglePassVisibility('login-password')">👁️</button>
                 </div>
 
@@ -894,18 +894,23 @@
              Users, Transfer/Deposit History, & User Support Chat
              ==================================================== -->
         <section class="app-page" id="page-admin">
-            <!-- Header bar with Title, Live Badge, and Refresh -->
-            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px;">
+            <!-- Header bar with Title, Live Badge, Visit Website, and Refresh -->
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:14px; flex-wrap:wrap; gap:8px;">
                 <div>
-                    <h2 style="font-size:1.4rem; font-weight:800; margin:0; color:#0f172a; display:flex; align-items:center; gap:8px;">
+                    <h2 style="font-size:1.35rem; font-weight:800; margin:0; color:#0f172a; display:flex; align-items:center; gap:8px;">
                         <span>🛡️ Admin Portal</span>
                         <span style="font-size:0.7rem; background:#10b981; color:#fff; padding:2px 8px; border-radius:12px; font-weight:700;">LIVE</span>
                     </h2>
                     <div style="font-size:0.8rem; color:#64748b; margin-top:2px;">User Management • Transfers • Live Support Chat</div>
                 </div>
-                <button id="btn-admin-refresh" class="btn-outline-pill" style="padding:6px 14px; font-size:0.82rem; font-weight:700; border-color:#006b38; color:#006b38; cursor:pointer;">
-                    🔄 Refresh
-                </button>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <button class="nav-page-btn" data-page="home" style="display:flex; align-items:center; gap:6px; padding:7px 14px; background:#006b38; color:#ffffff; border:none; border-radius:12px; font-weight:700; font-size:0.82rem; cursor:pointer; box-shadow:0 2px 6px rgba(0,107,56,0.25);">
+                        <span>🌐</span> <span>Visit Website</span>
+                    </button>
+                    <button id="btn-admin-refresh" class="btn-outline-pill" style="padding:7px 12px; font-size:0.82rem; font-weight:700; border-color:#006b38; color:#006b38; cursor:pointer;">
+                        🔄 Refresh
+                    </button>
+                </div>
             </div>
 
             <!-- Quick Stats Bar -->
@@ -1051,6 +1056,11 @@
             </button>
         </nav>
 
+        <!-- Floating Switch Button: Back to Admin Portal (Visible strictly for logged-in Admin when viewing website) -->
+        <button id="admin-floating-portal-btn" class="nav-page-btn" data-page="admin" style="display:none; position:fixed; bottom:78px; right:16px; z-index:999; background:#006b38; color:#ffffff; border:none; padding:10px 16px; border-radius:30px; font-weight:800; font-size:0.82rem; box-shadow:0 4px 14px rgba(0,107,56,0.35); cursor:pointer; align-items:center; gap:6px;">
+            <span>🛡️</span> <span>Admin Portal</span>
+        </button>
+
         <!-- ====================================================
              SCREEN 8: IN-CALL SCREEN OVERLAY (#calling-overlay)
              ==================================================== -->
@@ -1096,8 +1106,8 @@
                     <span class="drawer-item-icon">📲</span>
                     <span>Install App (PWA)</span>
                 </div>
-                <!-- Admin Portal (Always available or highlighted for Admin) -->
-                <div class="drawer-menu-item nav-page-btn" data-page="admin" id="drawer-admin-portal" style="background:#ecfdf5; border-left:3px solid #006b38;">
+                <!-- Admin Portal (Strictly for signed-in Administrator) -->
+                <div class="drawer-menu-item nav-page-btn" data-page="admin" id="drawer-admin-portal" style="display: none; background:#ecfdf5; border-left:3px solid #006b38;">
                     <span class="drawer-item-icon">🛡️</span>
                     <span style="font-weight:800; color:#006b38;">Admin Portal</span>
                 </div>

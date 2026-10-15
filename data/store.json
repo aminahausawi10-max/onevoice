@@ -3,7 +3,7 @@
     "id": 1,
     "member_id": "OD-000001",
     "name": "Super Admin",
-    "phone": "09090809080",
+    "phone": "+2348031234567",
     "email": "admin@gmail.com",
     "password": "admin123",
     "language": "en",
@@ -204,6 +204,17 @@
       "message": "Hello Amina! UK rate is ₦18/min. You can buy the Value Bundle for discounted rates.",
       "sender": "admin",
       "created_at": "10/15/2026, 8:35:00 PM"
+    },
+    {
+      "id": 3,
+      "user_id": 3,
+      "user_name": "Super Admin",
+      "user_phone": "09090809080",
+      "user_member_id": "OD-000001",
+      "subject": "Support Response",
+      "message": "Hello Amina, your transfer issue has been resolved!",
+      "sender": "admin",
+      "created_at": "10/16/2026, 12:27:13 AM"
     }
   ],
   "active_user_id": 1

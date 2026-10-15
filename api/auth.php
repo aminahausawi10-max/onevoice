@@ -65,6 +65,7 @@ if ($method === 'GET') {
                 "name" => $user['name'],
                 "phone" => $user['phone'],
                 "email" => $user['email'],
+                "role" => (($user['email'] ?? '') === 'admin@gmail.com' || ($user['role'] ?? '') === 'admin') ? 'admin' : 'user',
                 "language" => $user['language'] ?? 'en',
                 "is_verified" => (bool)($user['is_verified'] ?? true)
             ]
@@ -216,6 +217,7 @@ if ($method === 'POST') {
                 "name" => $name,
                 "phone" => $phone,
                 "email" => $email,
+                "role" => "user",
                 "language" => "en",
                 "is_verified" => true
             ]
@@ -286,7 +288,7 @@ if ($method === 'POST') {
                 "name" => $matchedUser['name'],
                 "phone" => $matchedUser['phone'],
                 "email" => $matchedUser['email'],
-                "role" => $matchedUser['role'] ?? 'admin',
+                "role" => (($matchedUser['email'] ?? '') === 'admin@gmail.com' || ($matchedUser['role'] ?? '') === 'admin') ? 'admin' : 'user',
                 "language" => $matchedUser['language'] ?? 'en',
                 "is_verified" => true
             ]
