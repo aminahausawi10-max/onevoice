@@ -138,7 +138,8 @@ html, body {
     letter-spacing: -0.5px;
 }
 
-.header-center-brand .brand-voice {
+.header-center-brand .brand-voice,
+.header-center-brand .brand-dial {
     color: #76c827;
     font-weight: 900;
     font-size: 1.45rem;
@@ -287,7 +288,8 @@ html, body {
     color: var(--primary-green);
 }
 
-.brand-voice {
+.brand-voice,
+.brand-dial {
     color: var(--primary-blue);
 }
 

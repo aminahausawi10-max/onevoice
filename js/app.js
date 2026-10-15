@@ -1340,7 +1340,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('[PWA] Installed successfully');
         hideInstallTriggers();
         localStorage.setItem('gate_dismissed', 'true');
-        showNotification('ONE VOICE App installed successfully!', 'success');
+        showNotification('ONE DIAL App installed successfully!', 'success');
         deferredPrompt = null;
         revealPostInstallOptions();
     });

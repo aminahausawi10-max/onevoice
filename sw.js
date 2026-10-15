@@ -1,9 +1,9 @@
 /**
- * ONE VOICE - Service Worker (PWA)
+ * ONE DIAL - Service Worker (PWA)
  * Enables offline capability, faster caching, and installation on mobile devices
  */
 
-const CACHE_NAME = 'onevoice-cache-v3';
+const CACHE_NAME = 'onedial-cache-v4';
 const PRECACHE_ASSETS = [
     '/',
     '/index.html',
