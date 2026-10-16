@@ -3,7 +3,7 @@
  * Enables offline capability, faster caching, and installation on mobile devices
  */
 
-const CACHE_NAME = 'onedial-cache-v6';
+const CACHE_NAME = 'onedial-cache-v7';
 const PRECACHE_ASSETS = [
     '/',
     '/index.html',
@@ -11,11 +11,11 @@ const PRECACHE_ASSETS = [
     '/js/app.js',
     '/manifest.json',
     '/site.webmanifest',
-    '/assets/logo.png?v=onedial',
-    '/assets/icon-192.png?v=onedial',
-    '/assets/icon-512.png?v=onedial',
-    '/assets/apple-touch-icon.png?v=onedial',
-    '/assets/favicon.png?v=onedial'
+    '/assets/logo.png?v=v2',
+    '/assets/icon-192.png?v=v2',
+    '/assets/icon-512.png?v=v2',
+    '/assets/apple-touch-icon.png?v=v2',
+    '/assets/favicon.png?v=v2'
 ];
 
 self.addEventListener('install', (event) => {

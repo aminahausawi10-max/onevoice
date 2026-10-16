@@ -413,6 +413,7 @@ const requestHandler = (req, res) => {
             return sendJson({
                 success: true,
                 balance: parseFloat(userWallet.balance || 0),
+                bundle_minutes: parseInt(userWallet.bundle_minutes || 0, 10),
                 currency: (store.settings && store.settings.currency) || 'NGN',
                 account_number: accountNum,
                 user_account_number: accountNum,
@@ -523,7 +524,11 @@ const requestHandler = (req, res) => {
 
                     const newBal = Math.round((currBal - amount) * 100) / 100;
                     userWallet.balance = newBal;
-                    if (activeUser.id === 1) store.wallet.balance = newBal;
+                    userWallet.bundle_minutes = (parseInt(userWallet.bundle_minutes || 0, 10) + minutes);
+                    if (activeUser.id === 1) {
+                        store.wallet.balance = newBal;
+                        store.wallet.bundle_minutes = userWallet.bundle_minutes;
+                    }
 
                     const ref = 'OV-BDL-' + Math.random().toString(36).substring(2, 9).toUpperCase();
                     if (!store.wallet_ledger) store.wallet_ledger = [];
