@@ -794,9 +794,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
             if (data.success) {
                 userWalletBalance = parseFloat(data.balance || 0);
-                if (data.bundle_minutes !== undefined) {
-                    localStorage.setItem('onedial_bundle_mins', data.bundle_minutes);
-                }
                 updateBalanceUI(userWalletBalance);
                 if (data.bank_name) {
                     const elBank = document.getElementById('wallet-bank-name');
@@ -818,14 +815,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (dashBal) dashBal.textContent = str;
         if (wallBal) wallBal.textContent = str;
 
-        const bundleMins = parseInt(localStorage.getItem('onedial_bundle_mins') || '0', 10);
-        const wallBundleBal = document.getElementById('wallet-bundle-balance');
-        const dashBundleBal = document.getElementById('dash-bundle-balance');
-        const bundleStr = `${bundleMins} Mins`;
-        if (wallBundleBal) wallBundleBal.textContent = bundleStr;
-        if (dashBundleBal) dashBundleBal.textContent = bundleStr;
-
-        const mins = Math.floor(balance / 12.0) + bundleMins;
+        const mins = Math.floor(balance / 12.0);
         const minsEl = document.getElementById('dialer-mins-left');
         const headerMinsEl = document.getElementById('header-user-mins');
         if (minsEl) minsEl.textContent = `${mins} mins`;
@@ -1037,8 +1027,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await res.json();
                 if (data.success) {
                     userWalletBalance = parseFloat(data.new_balance !== undefined ? data.new_balance : (userWalletBalance - cost));
-                    const currentBundleMins = parseInt(localStorage.getItem('onedial_bundle_mins') || '0', 10);
-                    localStorage.setItem('onedial_bundle_mins', currentBundleMins + bundleMins);
                     updateBalanceUI(userWalletBalance);
                     showToast(`🎉 ${bundleName} activated successfully!`, 'success');
                     if (buyBundleModal) buyBundleModal.classList.remove('active');
@@ -1048,8 +1036,6 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (err) {
                 userWalletBalance = Math.max(0, userWalletBalance - cost);
-                const currentBundleMins = parseInt(localStorage.getItem('onedial_bundle_mins') || '0', 10);
-                localStorage.setItem('onedial_bundle_mins', currentBundleMins + bundleMins);
                 updateBalanceUI(userWalletBalance);
                 showToast(`🎉 ${bundleName} activated successfully!`, 'success');
                 if (buyBundleModal) buyBundleModal.classList.remove('active');

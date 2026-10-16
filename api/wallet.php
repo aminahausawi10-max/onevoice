@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 /**
  * ONE DIAL - Customer Wallet & Automatic Revenue-Sharing API
  * Handles Phone-Number Account Identification, Dedicated Virtual NUBAN,
@@ -68,7 +68,6 @@ if ($method === 'GET') {
             echo json_encode([
                 "success" => true,
                 "balance" => $balance,
-                "bundle_minutes" => intval($store['wallet']['bundle_minutes'] ?? 0),
                 "currency" => $currency,
                 "account_number" => $user['phone'],
                 "virtual_account" => [
@@ -225,7 +224,6 @@ if ($method === 'POST') {
 
         $newBal = round($userBal - $amount, 2);
         $store['wallet']['balance'] = $newBal;
-        $store['wallet']['bundle_minutes'] = intval($store['wallet']['bundle_minutes'] ?? 0) + $minutes;
         $ref = 'OV-BDL-' . strtoupper(substr(md5(uniqid()), 0, 8));
 
         if ($pdo) {
