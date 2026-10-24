@@ -1,5 +1,5 @@
 /**
- * Three Stars - Modern Mobile Web Application Controller
+ * Three Star - Modern Mobile Web Application Controller
  * Handles 10-screen navigation, dialpad, Web Audio DTMF, country picker,
  * wallet deposits, drawer navigation, and direct authentication without OTP.
  */
@@ -436,7 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (setDisplayId) setDisplayId.textContent = `ID: ${memberId}`;
         if (setInputName) setInputName.value = name;
         if (setInputPhone) setInputPhone.value = user.phone || '09090809080';
-        if (setInputEmail) setInputEmail.value = user.email || 'user@threestars.app';
+        if (setInputEmail) setInputEmail.value = user.email || 'user@threestar.app';
 
         // Load avatar if present
         const savedAvatar = user.avatar || localStorage.getItem('ov_user_avatar');
@@ -1431,7 +1431,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('[PWA] Installed successfully');
         hideInstallTriggers();
         localStorage.setItem('gate_dismissed', 'true');
-        showNotification('Three Stars App installed successfully!', 'success');
+        showNotification('Three Star App installed successfully!', 'success');
         deferredPrompt = null;
         revealPostInstallOptions();
     });
@@ -1493,7 +1493,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (userStr) {
             try { user = JSON.parse(userStr); } catch (e) {}
         }
-        const userName = user ? (user.name || 'Three Stars User') : 'Three Stars User';
+        const userName = user ? (user.name || 'Three Star User') : 'Three Star User';
         const userPhone = user ? (user.phone || '') : '';
         const userMemberId = user ? (user.member_id || '') : '';
 
@@ -1511,7 +1511,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const payload = getAdminMessagePayload();
             if (!payload) return;
 
-            let text = `Hello Admin,\n*Three Stars Support Request*\n\n*Subject:* ${payload.subject}\n*Name:* ${payload.userName}`;
+            let text = `Hello Admin,\n*Three Star Support Request*\n\n*Subject:* ${payload.subject}\n*Name:* ${payload.userName}`;
             if (payload.userPhone) text += `\n*Phone:* ${payload.userPhone}`;
             if (payload.userMemberId) text += `\n*Member ID:* ${payload.userMemberId}`;
             text += `\n\n*Message:*\n${payload.msg}`;
@@ -1528,12 +1528,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const payload = getAdminMessagePayload();
             if (!payload) return;
 
-            let body = `Hello Admin,\n\nThree Stars Support Request\n\nSubject: ${payload.subject}\nName: ${payload.userName}`;
+            let body = `Hello Admin,\n\nThree Star Support Request\n\nSubject: ${payload.subject}\nName: ${payload.userName}`;
             if (payload.userPhone) body += `\nPhone: ${payload.userPhone}`;
             if (payload.userMemberId) body += `\nMember ID: ${payload.userMemberId}`;
-            body += `\n\nMessage:\n${payload.msg}\n\n---\nSent from Three Stars Web App`;
+            body += `\n\nMessage:\n${payload.msg}\n\n---\nSent from Three Star Web App`;
 
-            const mailUrl = `mailto:threestars2030@gmail.com?subject=${encodeURIComponent('[Three Stars Support] ' + payload.subject)}&body=${encodeURIComponent(body)}`;
+            const mailUrl = `mailto:threestar2030@gmail.com?subject=${encodeURIComponent('[Three Star Support] ' + payload.subject)}&body=${encodeURIComponent(body)}`;
             window.location.href = mailUrl;
             showToast('Opening email to send your message to Admin...', 'success');
             if (supportMessageText) supportMessageText.value = '';

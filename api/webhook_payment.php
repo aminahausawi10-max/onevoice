@@ -1,6 +1,6 @@
-﻿<?php
+<?php
 /**
- * Three Stars - Incoming Bank Payment Webhook Handler
+ * Three Star - Incoming Bank Payment Webhook Handler
  * Supports Paystack, Flutterwave, Monnify, and Direct NIBSS Bank Transfer Webhooks
  * Features HMAC SHA512 Signature Verification, Idempotency, and Automatic Revenue Sharing
  */
@@ -18,7 +18,7 @@ $payload = file_get_contents('php://input');
 $signature = $_SERVER['HTTP_X_PAYSTACK_SIGNATURE'] ?? $_SERVER['HTTP_VERIF_HASH'] ?? $_SERVER['HTTP_X_WEBHOOK_SECRET'] ?? '';
 
 // Webhook secret configured on backend
-$webhookSecret = getenv('PAYMENT_WEBHOOK_SECRET') ?: 'threestars_secret_whsec_994218';
+$webhookSecret = getenv('PAYMENT_WEBHOOK_SECRET') ?: 'threestar_secret_whsec_994218';
 
 // Signature verification (in production with secret key)
 if (!empty($signature) && !empty($webhookSecret)) {

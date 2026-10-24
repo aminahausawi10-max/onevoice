@@ -1,6 +1,6 @@
-﻿<?php
+<?php
 /**
- * Three Stars - Administrator Finance & Revenue Sharing API
+ * Three Star - Administrator Finance & Revenue Sharing API
  * View Total Deposits, Platform Revenue, Settlements, Calling Margins,
  * Configure Revenue Share %, and Reconcile Transaction Ledgers
  */

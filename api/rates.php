@@ -1,6 +1,6 @@
-﻿<?php
+<?php
 /**
- * Three Stars - Calling Rates API
+ * Three Star - Calling Rates API
  * Returns supported countries, dial codes, rates, and roaming savings
  */
 

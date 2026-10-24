@@ -1,5 +1,5 @@
-﻿/* ==========================================================
-   Three Stars - Modern Mobile-First Design System
+/* ==========================================================
+   Three Star - Modern Mobile-First Design System
    Exact visual implementation matching reference specifications
    ========================================================== */
 
@@ -140,7 +140,8 @@ html, body {
 
 .header-center-brand .brand-voice,
 .header-center-brand .brand-dial,
-.header-center-brand .brand-stars {
+.header-center-brand .brand-stars,
+.header-center-brand .brand-star {
     color: #fbbf24;
     font-weight: 900;
     font-size: 1.45rem;
@@ -299,7 +300,8 @@ html, body {
 
 .brand-voice,
 .brand-dial,
-.brand-stars {
+.brand-stars,
+.brand-star {
     color: var(--primary-blue);
 }
 

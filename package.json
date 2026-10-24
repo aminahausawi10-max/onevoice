@@ -1,7 +1,7 @@
 {
-  "name": "three-stars-web",
+  "name": "three-star-web",
   "version": "1.0.0",
-  "description": "Three Stars - International VoIP Calling & Digital Wallet Web Platform",
+  "description": "Three Star - International VoIP Calling & Digital Wallet Web Platform",
   "main": "server.js",
   "scripts": {
     "start": "node dev-server.js",
@@ -19,6 +19,6 @@
     "php",
     "neon-postgres"
   ],
-  "author": "Three Stars",
+  "author": "Three Star",
   "license": "MIT"
 }

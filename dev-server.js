@@ -1,5 +1,5 @@
-﻿/**
- * Three Stars - Local Dev Server & API Bridge
+/**
+ * Three Star - Local Dev Server & API Bridge
  * Full support for Phone-Number Accounts, Virtual Bank NUBAN,
  * Automatic Revenue Sharing, Financial Ledgers, and Admin Dashboard
  */
@@ -60,7 +60,7 @@ function getStore() {
             virtual_bank_provider: "OPay (Paycom)",
             admin_bank_name: "OPay (Paycom)",
             admin_account_number: "9090809080",
-            admin_account_name: "Three Stars / Amina Ahmed Inuwa",
+            admin_account_name: "Three Star / Amina Ahmed Inuwa",
             paystack_public_key: "pk_test_a8e259b3294c7b884d5df688172082b2024b176f"
         };
     }
@@ -73,9 +73,9 @@ function getStore() {
             phone: "09090809080",
             email: "admin@gmail.com",
             password: "admin123",
-            virtual_bank_name: "Wema Bank (Three Stars NUBAN)",
+            virtual_bank_name: "Wema Bank (Three Star NUBAN)",
             virtual_account_number: "9803123456",
-            virtual_account_name: "Three Stars / Super Admin",
+            virtual_account_name: "Three Star / Super Admin",
             language: "en",
             role: "admin",
             status: "active",
@@ -83,8 +83,8 @@ function getStore() {
         };
     } else {
         if (!store.user.virtual_account_number) store.user.virtual_account_number = "9803123456";
-        if (!store.user.virtual_bank_name) store.user.virtual_bank_name = "Wema Bank (Three Stars NUBAN)";
-        if (!store.user.virtual_account_name) store.user.virtual_account_name = "Three Stars / " + store.user.name;
+        if (!store.user.virtual_bank_name) store.user.virtual_bank_name = "Wema Bank (Three Star NUBAN)";
+        if (!store.user.virtual_account_name) store.user.virtual_account_name = "Three Star / " + store.user.name;
         if (!store.user.phone || !store.user.phone.startsWith('+234')) store.user.phone = "+2348031234567";
         if (!store.user.role) store.user.role = "admin";
     }
@@ -342,7 +342,7 @@ const requestHandler = (req, res) => {
         return sendJson({
             success: true,
             status: "online",
-            platform: "Three Stars",
+            platform: "Three Star",
             environment: IS_VERCEL ? "Vercel Serverless Production" : "Local Development Server",
             github_repository: "https://github.com/aminahausawi10-max/onevoice",
             vercel_domain: "voicecloud-portal.vercel.app",
@@ -384,7 +384,7 @@ const requestHandler = (req, res) => {
                 if (found) {
                     return sendJson({ success: true, user: { id: found.id, name: found.name, phone: found.phone, member_id: found.member_id } });
                 }
-                return sendJson({ success: false, message: 'Beneficiary phone number not registered on Three Stars.' }, 404);
+                return sendJson({ success: false, message: 'Beneficiary phone number not registered on Three Star.' }, 404);
             }
 
             const activeUser = getActiveUser(req, store) || store.user;
@@ -418,12 +418,12 @@ const requestHandler = (req, res) => {
                 account_number: accountNum,
                 user_account_number: accountNum,
                 user_phone_10digit: accountNum,
-                user_account_name: "Three Stars / " + activeUser.name,
+                user_account_name: "Three Star / " + activeUser.name,
                 bank_name: assignedBank,
                 virtual_account: {
                     bank_name: assignedBank,
                     virtual_account_number: accountNum,
-                    account_name: "Three Stars / " + activeUser.name,
+                    account_name: "Three Star / " + activeUser.name,
                     beneficiary_phone: activeUser.phone,
                     user_account_number: accountNum
                 },
@@ -451,7 +451,7 @@ const requestHandler = (req, res) => {
                     const targetNorm = normalizePhone(body.recipient_phone);
                     const recipient = getAllUsers(store).find(u => normalizePhone(u.phone) === targetNorm);
                     if (!recipient) {
-                        return sendJson({ success: false, message: 'Recipient phone number is not registered on Three Stars.' }, 404);
+                        return sendJson({ success: false, message: 'Recipient phone number is not registered on Three Star.' }, 404);
                     }
                     if (recipient.id === activeUser.id) {
                         return sendJson({ success: false, message: 'Cannot transfer funds to your own account.' }, 400);
@@ -958,7 +958,7 @@ const requestHandler = (req, res) => {
 
                     const existing = getAllUsers(store).find(u => u.id !== activeUser.id && normalizePhone(u.phone) === normNew);
                     if (existing) {
-                        return sendJson({ success: false, message: 'This phone number is already registered to another Three Stars account.' }, 409);
+                        return sendJson({ success: false, message: 'This phone number is already registered to another Three Star account.' }, 409);
                     }
 
                     const formattedPhone = newPhone.startsWith('+') ? newPhone : ('+234' + normNew.slice(-10));
@@ -996,7 +996,7 @@ const requestHandler = (req, res) => {
 
                     activeUser.phone = updatedPhone;
                     activeUser.virtual_account_number = '9' + normP;
-                    activeUser.virtual_account_name = 'Three Stars / ' + activeUser.name;
+                    activeUser.virtual_account_name = 'Three Star / ' + activeUser.name;
 
                     if (activeUser.id === 1) {
                         store.user.phone = updatedPhone;
@@ -1041,7 +1041,7 @@ const requestHandler = (req, res) => {
                             activeUser.phone = formatted;
                             activeUser.virtual_account_number = account10;
                             activeUser.account_number = account10;
-                            activeUser.virtual_account_name = 'Three Stars / ' + activeUser.name;
+                            activeUser.virtual_account_name = 'Three Star / ' + activeUser.name;
 
                             if (activeUser.id === 1) {
                                 store.user.phone = formatted;
@@ -1148,7 +1148,7 @@ const requestHandler = (req, res) => {
                         virtual_bank_name: banks[Math.floor(Math.random() * banks.length)],
                         virtual_account_number: virtualNuban,
                         account_number: virtualNuban,
-                        virtual_account_name: "Three Stars / " + name,
+                        virtual_account_name: "Three Star / " + name,
                         language: 'en',
                         role: 'user',
                         status: 'active',
@@ -1189,7 +1189,7 @@ const requestHandler = (req, res) => {
                     } else {
                         matched = users.find(u => (u.email || '').toLowerCase() === id || (normId && normalizePhone(u.phone) === normId) || (u.member_id || '').toLowerCase() === id);
                         if (!matched) {
-                            return sendJson({ success: false, message: 'No Three Stars account found with this phone number or email.' }, 404);
+                            return sendJson({ success: false, message: 'No Three Star account found with this phone number or email.' }, 404);
                         }
                         if (matched.password && matched.password !== pass) {
                             return sendJson({ success: false, message: 'Incorrect password.' }, 401);
@@ -1310,7 +1310,7 @@ const server = http.createServer(requestHandler);
 
 if (require.main === module) {
     server.listen(PORT, () => {
-        console.log(`Three Stars Web Application running at http://localhost:${PORT}`);
+        console.log(`Three Star Web Application running at http://localhost:${PORT}`);
     });
 }
 

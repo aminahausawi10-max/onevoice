@@ -1,6 +1,6 @@
-﻿<?php
+<?php
 /**
- * Three Stars - Contacts Management API
+ * Three Star - Contacts Management API
  * Add, List, and Delete Contacts
  */
 

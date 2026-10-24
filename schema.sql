@@ -1,5 +1,5 @@
-﻿-- ==========================================================
--- Three Stars: Database Schema for Neon PostgreSQL
+-- ==========================================================
+-- Three Star: Database Schema for Neon PostgreSQL
 -- Phone Account Identification, Dedicated Virtual NUBAN Accounts,
 -- Automatic Revenue Sharing, and Append-Only Financial Ledger
 -- ==========================================================
@@ -19,7 +19,7 @@ VALUES
 ('nigeria_call_rate_per_min', '12.00', 'Customer retail call rate per minute in NGN for Nigerian networks'),
 ('carrier_wholesale_cost_per_min', '8.50', 'Carrier wholesale cost per minute in NGN for Nigerian networks'),
 ('primary_currency', 'NGN', 'Primary operating currency (NGN - Nigerian Naira)'),
-('virtual_bank_provider', 'Wema Bank (Three Stars NUBAN)', 'Assigned banking institution for dedicated virtual accounts')
+('virtual_bank_provider', 'Wema Bank (Three Star NUBAN)', 'Assigned banking institution for dedicated virtual accounts')
 ON CONFLICT (key) DO NOTHING;
 
 -- 2. Users Table
@@ -27,7 +27,7 @@ CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     member_id VARCHAR(20) UNIQUE NOT NULL,
     name VARCHAR(120) NOT NULL,
-    phone VARCHAR(30) UNIQUE NOT NULL, -- Serves as the Three Stars Account Number
+    phone VARCHAR(30) UNIQUE NOT NULL, -- Serves as the Three Star Account Number
     email VARCHAR(150) UNIQUE NOT NULL,
     password_hash VARCHAR(255) NOT NULL,
     virtual_bank_name VARCHAR(100) DEFAULT 'Wema Bank',
@@ -91,7 +91,7 @@ CREATE TABLE IF NOT EXISTS call_logs (
     retail_rate_per_min NUMERIC(8, 2) DEFAULT 12.00,
     cost NUMERIC(10, 2) DEFAULT 0.00, -- Retail cost deducted from user
     carrier_cost NUMERIC(10, 2) DEFAULT 0.00, -- Wholesale carrier cost
-    platform_margin NUMERIC(10, 2) DEFAULT 0.00, -- Three Stars profit margin
+    platform_margin NUMERIC(10, 2) DEFAULT 0.00, -- Three Star profit margin
     status VARCHAR(20) DEFAULT 'completed',
     started_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP,
     ended_at TIMESTAMP WITH TIME ZONE
@@ -144,11 +144,11 @@ VALUES (
     'OV-784920', 
     'Alex Morgan', 
     '+2348031234567', 
-    'demo@threestars.app', 
+    'demo@threestar.app', 
     '$2y$10$eA3pU2s7J6zZ1x.mE1Vz0Ou8mP7mN4dK2j9wE0l5e0/2y.Hk5w6Ce', 
-    'Wema Bank (Three Stars)', 
+    'Wema Bank (Three Star)', 
     '9803123456', 
-    'Three Stars / Alex Morgan', 
+    'Three Star / Alex Morgan', 
     'en', 
     'admin', 
     'active'

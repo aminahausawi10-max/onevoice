@@ -1,6 +1,6 @@
-﻿# ðŸŽ™ï¸ Three Stars â€” International Calling & Digital Wallet Web Platform
+# ðŸŽ™ï¸ Three Star â€” International Calling & Digital Wallet Web Platform
 
-A web platform for **Three Stars**, designed in tactile **Claymorphism** (soft 3D inflated aesthetics with multi-layered shadows and interactive feedback).
+A web platform for **Three Star**, designed in tactile **Claymorphism** (soft 3D inflated aesthetics with multi-layered shadows and interactive feedback).
 
 Built with standard **HTML5, CSS3, JavaScript (Web Audio API DTMF synthesizer)** and a **PHP backend** with **Neon PostgreSQL** database integration.
 
@@ -29,7 +29,7 @@ Built with standard **HTML5, CSS3, JavaScript (Web Audio API DTMF synthesizer)**
 ## ðŸ—‚ï¸ Project Structure
 
 ```
-Three Stars/
+Three Star/
 â”œâ”€â”€ index.html              # Main Claymorphic web application
 â”œâ”€â”€ css/
 â”‚   â””â”€â”€ clay.css            # 3D soft inflated clay styles & animations
@@ -96,7 +96,7 @@ http://localhost:8000
    ```bash
    git init
    git add .
-   git commit -m "Initial commit: Three Stars Claymorphic web app"
+   git commit -m "Initial commit: Three Star Claymorphic web app"
    ```
 2. Create a new repository on [GitHub](https://github.com/new) named `one-voice`.
 3. Link your remote repository and push:
@@ -120,4 +120,4 @@ http://localhost:8000
 ---
 
 ## ðŸ“± Mobile App Compatibility
-This web platform shares the backend API and data contracts specified in the *Three Stars Mobile Application* architecture, allowing seamless integration with iOS (Swift / Flutter) and Android (Kotlin / Flutter) clients.
+This web platform shares the backend API and data contracts specified in the *Three Star Mobile Application* architecture, allowing seamless integration with iOS (Swift / Flutter) and Android (Kotlin / Flutter) clients.

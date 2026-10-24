@@ -8,8 +8,8 @@
     "password": "admin123",
     "language": "en",
     "virtual_account_number": "9803123456",
-    "virtual_bank_name": "Wema Bank (Three Stars NUBAN)",
-    "virtual_account_name": "Three Stars / Super Admin",
+    "virtual_bank_name": "Wema Bank (Three Star NUBAN)",
+    "virtual_account_name": "Three Star / Super Admin",
     "role": "admin",
     "status": "active",
     "is_verified": true
@@ -41,7 +41,7 @@
     "virtual_bank_provider": "MoMo PSB / OPay (Phone Number Banking)",
     "admin_bank_name": "MoMo PSB (MTN MoMo)",
     "admin_account_number": "9090809080",
-    "admin_account_name": "Amina Ahmed Inuwa (Three Stars Admin)",
+    "admin_account_name": "Amina Ahmed Inuwa (Three Star Admin)",
     "paystack_public_key": "pk_test_a8e259b3294c7b884d5df688172082b2024b176f"
   },
   "transactions": [],
@@ -112,7 +112,7 @@
       "recipient_phone_account": "08012345678",
       "recipient_name": "Unregistered Number",
       "internal_reference": "OD-TRF-FAIL404",
-      "narration": "Transfer to 08012345678 failed: Beneficiary phone not registered on Three Stars",
+      "narration": "Transfer to 08012345678 failed: Beneficiary phone not registered on Three Star",
       "status": "failed",
       "created_at": "10/15/2026, 10:45:00 PM"
     }
@@ -164,8 +164,8 @@
       "phone": "+2348099887766",
       "email": "fatima.bello@example.com",
       "virtual_account_number": "9809988776",
-      "virtual_bank_name": "Wema Bank (Three Stars NUBAN)",
-      "virtual_account_name": "Three Stars / Fatima Bello",
+      "virtual_bank_name": "Wema Bank (Three Star NUBAN)",
+      "virtual_account_name": "Three Star / Fatima Bello",
       "language": "en",
       "is_verified": true
     },
@@ -176,8 +176,8 @@
       "phone": "09090809080",
       "email": "aminahausawi10@gmail.com",
       "virtual_account_number": "9909080908",
-      "virtual_bank_name": "Wema Bank (Three Stars NUBAN)",
-      "virtual_account_name": "Three Stars / Amina Ahmed Inuwa",
+      "virtual_bank_name": "Wema Bank (Three Star NUBAN)",
+      "virtual_account_name": "Three Star / Amina Ahmed Inuwa",
       "language": "en",
       "is_verified": true
     }

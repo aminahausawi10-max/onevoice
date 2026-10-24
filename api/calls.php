@@ -1,6 +1,6 @@
-﻿<?php
+<?php
 /**
- * Three Stars - Call Detail Records (CDR) & Telephony Margin API
+ * Three Star - Call Detail Records (CDR) & Telephony Margin API
  * Tracks Nigerian & International Calls, Deducts Wallet Credits,
  * and Calculates Platform Profit Margins (Retail Rate - Carrier Cost)
  */

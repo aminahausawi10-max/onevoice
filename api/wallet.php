@@ -1,6 +1,6 @@
 <?php
 /**
- * Three Stars - Customer Wallet & Automatic Revenue-Sharing API
+ * Three Star - Customer Wallet & Automatic Revenue-Sharing API
  * Handles Phone-Number Account Identification, Dedicated Virtual NUBAN,
  * Bank Payment Ingestion, and Server-Side Revenue Splits
  */
@@ -24,7 +24,7 @@ if ($method === 'GET') {
             }
         }
         http_response_code(404);
-        echo json_encode(["success" => false, "message" => "Beneficiary phone number not registered on Three Stars."]);
+        echo json_encode(["success" => false, "message" => "Beneficiary phone number not registered on Three Star."]);
         exit;
     }
 
@@ -71,9 +71,9 @@ if ($method === 'GET') {
                 "currency" => $currency,
                 "account_number" => $user['phone'],
                 "virtual_account" => [
-                    "bank_name" => $user['virtual_bank_name'] ?? 'Wema Bank (Three Stars NUBAN)',
+                    "bank_name" => $user['virtual_bank_name'] ?? 'Wema Bank (Three Star NUBAN)',
                     "virtual_account_number" => $user['virtual_account_number'] ?? '9803123456',
-                    "account_name" => $user['virtual_account_name'] ?? ('Three Stars / ' . $user['name']),
+                    "account_name" => $user['virtual_account_name'] ?? ('Three Star / ' . $user['name']),
                     "beneficiary_phone" => $user['phone']
                 ],
                 "revenue_sharing" => [
@@ -93,9 +93,9 @@ if ($method === 'GET') {
         "currency" => $currency,
         "account_number" => $user['phone'],
         "virtual_account" => [
-            "bank_name" => $user['virtual_bank_name'] ?? 'Wema Bank (Three Stars NUBAN)',
+            "bank_name" => $user['virtual_bank_name'] ?? 'Wema Bank (Three Star NUBAN)',
             "virtual_account_number" => $user['virtual_account_number'] ?? '9803123456',
-            "account_name" => $user['virtual_account_name'] ?? ('Three Stars / ' . $user['name']),
+            "account_name" => $user['virtual_account_name'] ?? ('Three Star / ' . $user['name']),
             "beneficiary_phone" => $user['phone']
         ],
         "revenue_sharing" => [
@@ -135,7 +135,7 @@ if ($method === 'POST') {
 
         if (!$recipient) {
             http_response_code(404);
-            echo json_encode(["success" => false, "message" => "Recipient phone number not registered on Three Stars."]);
+            echo json_encode(["success" => false, "message" => "Recipient phone number not registered on Three Star."]);
             exit;
         }
 
@@ -183,7 +183,7 @@ if ($method === 'POST') {
             "balance_after" => $amount,
             "channel" => "phone_transfer",
             "internal_reference" => $ref . '-R',
-            "narration" => "Received transfer from Three Stars user",
+            "narration" => "Received transfer from Three Star user",
             "status" => "successful",
             "created_at" => date("Y-m-d H:i:s")
         ];

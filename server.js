@@ -1,4 +1,4 @@
-﻿/**
- * Three Stars - Vercel & Node entrypoint
+/**
+ * Three Star - Vercel & Node entrypoint
  */
 module.exports = require('./dev-server.js');
