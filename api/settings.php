@@ -1,6 +1,6 @@
 ﻿<?php
 /**
- * ONE DIAL - User Account Settings API
+ * Three Stars - User Account Settings API
  * Handles Profile, Email, Phone, Language (en/ha), and Password Changes
  */
 
@@ -65,7 +65,7 @@ if ($method === 'POST') {
 
         $store['user']['phone'] = $newPhone;
         $store['user']['virtual_account_number'] = '9' . $norm;
-        $store['user']['virtual_account_name'] = 'ONE DIAL / ' . $store['user']['name'];
+        $store['user']['virtual_account_name'] = 'Three Stars / ' . $store['user']['name'];
         unset($store['phone_change_otp']);
         saveLocalStore($store);
 
@@ -100,7 +100,7 @@ if ($method === 'POST') {
                 $store['user']['phone'] = $formattedPhone;
                 $store['user']['virtual_account_number'] = $norm;
                 $store['user']['account_number'] = $norm;
-                $store['user']['virtual_account_name'] = 'ONE DIAL / ' . ($name ?: $store['user']['name']);
+                $store['user']['virtual_account_name'] = 'Three Stars / ' . ($name ?: $store['user']['name']);
             }
         }
 

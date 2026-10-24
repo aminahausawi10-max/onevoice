@@ -1,6 +1,6 @@
 ﻿<?php
 /**
- * ONE DIAL - Database Connection Helper & Resilient Store
+ * Three Stars - Database Connection Helper & Resilient Store
  * Supports Neon PostgreSQL via PDO with fallback to JSON store
  */
 
@@ -59,17 +59,17 @@ function getLocalStore() {
                 "nigeria_call_rate_per_min" => 12.00,
                 "carrier_wholesale_cost_per_min" => 8.50,
                 "currency" => "NGN",
-                "virtual_bank_provider" => "Wema Bank (ONE DIAL NUBAN)"
+                "virtual_bank_provider" => "Wema Bank (Three Stars NUBAN)"
             ],
             "user" => [
                 "id" => 1,
                 "member_id" => "OV-784920",
                 "name" => "Alex Morgan",
-                "phone" => "+2348031234567", // Phone number acts as ONE DIAL Account Number
-                "email" => "demo@onedial.app",
-                "virtual_bank_name" => "Wema Bank (ONE DIAL)",
+                "phone" => "+2348031234567", // Phone number acts as Three Stars Account Number
+                "email" => "demo@threestars.app",
+                "virtual_bank_name" => "Wema Bank (Three Stars)",
                 "virtual_account_number" => "9803123456",
-                "virtual_account_name" => "ONE DIAL / Alex Morgan",
+                "virtual_account_name" => "Three Stars / Alex Morgan",
                 "language" => "en",
                 "role" => "admin",
                 "status" => "active",

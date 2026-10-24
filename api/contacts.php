@@ -1,6 +1,6 @@
 ﻿<?php
 /**
- * ONE DIAL - Contacts Management API
+ * Three Stars - Contacts Management API
  * Add, List, and Delete Contacts
  */
 

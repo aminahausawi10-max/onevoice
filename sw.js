@@ -1,9 +1,9 @@
-/**
- * ONE DIAL - Service Worker (PWA)
+﻿/**
+ * Three Stars - Service Worker (PWA)
  * Enables offline capability, faster caching, and installation on mobile devices
  */
 
-const CACHE_NAME = 'onedial-cache-v7';
+const CACHE_NAME = 'threestars-cache-v1';
 const PRECACHE_ASSETS = [
     '/',
     '/index.html',
@@ -11,11 +11,11 @@ const PRECACHE_ASSETS = [
     '/js/app.js',
     '/manifest.json',
     '/site.webmanifest',
-    '/assets/logo.png?v=v2',
-    '/assets/icon-192.png?v=v2',
-    '/assets/icon-512.png?v=v2',
-    '/assets/apple-touch-icon.png?v=v2',
-    '/assets/favicon.png?v=v2'
+    '/assets/logo.png?v=v3',
+    '/assets/icon-192.png?v=v3',
+    '/assets/icon-512.png?v=v3',
+    '/assets/apple-touch-icon.png?v=v3',
+    '/assets/favicon.png?v=v3'
 ];
 
 self.addEventListener('install', (event) => {

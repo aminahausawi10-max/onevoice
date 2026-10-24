@@ -1,6 +1,6 @@
 ﻿<?php
 /**
- * ONE DIAL - Call Detail Records (CDR) & Telephony Margin API
+ * Three Stars - Call Detail Records (CDR) & Telephony Margin API
  * Tracks Nigerian & International Calls, Deducts Wallet Credits,
  * and Calculates Platform Profit Margins (Retail Rate - Carrier Cost)
  */

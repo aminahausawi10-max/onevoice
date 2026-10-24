@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 /**
- * ONE DIAL - Authentication & Security API
+ * Three Stars - Authentication & Security API
  * Implements Registration, Password Hashing, Login, OTP Verification,
  * Member ID Generation, Rate Limiting, Forgot Password, and Secure Logout
  */
@@ -256,7 +256,7 @@ if ($method === 'POST') {
                     $matchedUser = $store['user'];
                     $matchedUser['role'] = 'admin';
                 }
-            } else if ($identifier === 'demo@onedial.app' || $identifier === '+14155552671' || $identifier === 'demo') {
+            } else if ($identifier === 'demo@threestars.app' || $identifier === '+14155552671' || $identifier === 'demo') {
                 $matchedUser = $store['user'];
             } else if (!empty($store['users'])) {
                 foreach ($store['users'] as $u) {
@@ -348,7 +348,7 @@ if ($method === 'POST') {
 
         sendResponse([
             "success" => true,
-            "message" => "OTP verified successfully. Welcome to your ONE DIAL Dashboard!",
+            "message" => "OTP verified successfully. Welcome to your Three Stars Dashboard!",
             "token" => $_SESSION['user_token'],
             "user" => $store['user']
         ]);

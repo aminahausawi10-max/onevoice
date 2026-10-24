@@ -1,5 +1,5 @@
-/* ==========================================================
-   ONE DIAL - Modern Mobile-First Design System
+﻿/* ==========================================================
+   Three Stars - Modern Mobile-First Design System
    Exact visual implementation matching reference specifications
    ========================================================== */
 
@@ -139,8 +139,16 @@ html, body {
 }
 
 .header-center-brand .brand-voice,
-.header-center-brand .brand-dial {
-    color: #76c827;
+.header-center-brand .brand-dial,
+.header-center-brand .brand-stars {
+    color: #fbbf24;
+    font-weight: 900;
+    font-size: 1.45rem;
+    letter-spacing: -0.5px;
+}
+
+.header-center-brand .brand-three {
+    color: #ffffff;
     font-weight: 900;
     font-size: 1.45rem;
     letter-spacing: -0.5px;
@@ -284,12 +292,14 @@ html, body {
     line-height: 1;
 }
 
-.brand-one {
+.brand-one,
+.brand-three {
     color: var(--primary-green);
 }
 
 .brand-voice,
-.brand-dial {
+.brand-dial,
+.brand-stars {
     color: var(--primary-blue);
 }
 

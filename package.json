@@ -1,7 +1,7 @@
-{
-  "name": "one-dial-web",
+﻿{
+  "name": "three-stars-web",
   "version": "1.0.0",
-  "description": "ONE DIAL - International VoIP Calling & Digital Wallet Web Platform",
+  "description": "Three Stars - International VoIP Calling & Digital Wallet Web Platform",
   "main": "server.js",
   "scripts": {
     "start": "node dev-server.js",
@@ -19,6 +19,6 @@
     "php",
     "neon-postgres"
   ],
-  "author": "ONE DIAL",
+  "author": "Three Stars",
   "license": "MIT"
 }

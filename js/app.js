@@ -1,5 +1,5 @@
 /**
- * ONE DIAL - Modern Mobile Web Application Controller
+ * Three Stars - Modern Mobile Web Application Controller
  * Handles 10-screen navigation, dialpad, Web Audio DTMF, country picker,
  * wallet deposits, drawer navigation, and direct authentication without OTP.
  */
@@ -84,6 +84,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Application State
     let currentUser = null;
     let userWalletBalance = 9000.00;
+    let userBundleBalance = 0.00;
     let currentDialNumber = '+234';
     let activeCallDuration = 0;
     let callTimerInterval = null;
@@ -435,7 +436,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (setDisplayId) setDisplayId.textContent = `ID: ${memberId}`;
         if (setInputName) setInputName.value = name;
         if (setInputPhone) setInputPhone.value = user.phone || '09090809080';
-        if (setInputEmail) setInputEmail.value = user.email || 'user@onedial.app';
+        if (setInputEmail) setInputEmail.value = user.email || 'user@threestars.app';
 
         // Load avatar if present
         const savedAvatar = user.avatar || localStorage.getItem('ov_user_avatar');
@@ -794,7 +795,13 @@ document.addEventListener('DOMContentLoaded', () => {
             const data = await res.json();
             if (data.success) {
                 userWalletBalance = parseFloat(data.balance || 0);
-                updateBalanceUI(userWalletBalance);
+                if (data.bundle_balance !== undefined) {
+                    userBundleBalance = parseFloat(data.bundle_balance);
+                } else {
+                    const savedBundle = localStorage.getItem('user_bundle_balance');
+                    if (savedBundle !== null) userBundleBalance = parseFloat(savedBundle);
+                }
+                updateBalanceUI(userWalletBalance, userBundleBalance);
                 if (data.bank_name) {
                     const elBank = document.getElementById('wallet-bank-name');
                     const modalBank = document.getElementById('modal-user-bank-name');
@@ -804,16 +811,23 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderWalletTransactions(data.transactions || []);
             }
         } catch (err) {
-            updateBalanceUI(userWalletBalance);
+            updateBalanceUI(userWalletBalance, userBundleBalance);
         }
     }
 
-    function updateBalanceUI(balance) {
+    function updateBalanceUI(balance, bundleBal) {
+        if (bundleBal !== undefined) {
+            userBundleBalance = parseFloat(bundleBal);
+            localStorage.setItem('user_bundle_balance', userBundleBalance);
+        }
         const str = `₦ ${balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
+        const bundleStr = `₦ ${userBundleBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
         const dashBal = document.getElementById('dash-wallet-balance');
         const wallBal = document.getElementById('wallet-page-balance');
+        const wallBundleBal = document.getElementById('wallet-page-bundle-balance');
         if (dashBal) dashBal.textContent = str;
         if (wallBal) wallBal.textContent = str;
+        if (wallBundleBal) wallBundleBal.textContent = bundleStr;
 
         const mins = Math.floor(balance / 12.0);
         const minsEl = document.getElementById('dialer-mins-left');
@@ -1027,7 +1041,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await res.json();
                 if (data.success) {
                     userWalletBalance = parseFloat(data.new_balance !== undefined ? data.new_balance : (userWalletBalance - cost));
-                    updateBalanceUI(userWalletBalance);
+                    userBundleBalance = parseFloat(data.new_bundle_balance !== undefined ? data.new_bundle_balance : (userBundleBalance + cost));
+                    updateBalanceUI(userWalletBalance, userBundleBalance);
                     showToast(`🎉 ${bundleName} activated successfully!`, 'success');
                     if (buyBundleModal) buyBundleModal.classList.remove('active');
                     loadWalletData();
@@ -1036,7 +1051,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } catch (err) {
                 userWalletBalance = Math.max(0, userWalletBalance - cost);
-                updateBalanceUI(userWalletBalance);
+                userBundleBalance += cost;
+                updateBalanceUI(userWalletBalance, userBundleBalance);
                 showToast(`🎉 ${bundleName} activated successfully!`, 'success');
                 if (buyBundleModal) buyBundleModal.classList.remove('active');
             } finally {
@@ -1415,7 +1431,7 @@ document.addEventListener('DOMContentLoaded', () => {
         console.log('[PWA] Installed successfully');
         hideInstallTriggers();
         localStorage.setItem('gate_dismissed', 'true');
-        showNotification('ONE DIAL App installed successfully!', 'success');
+        showNotification('Three Stars App installed successfully!', 'success');
         deferredPrompt = null;
         revealPostInstallOptions();
     });
@@ -1477,7 +1493,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (userStr) {
             try { user = JSON.parse(userStr); } catch (e) {}
         }
-        const userName = user ? (user.name || 'ONE DIAL User') : 'ONE DIAL User';
+        const userName = user ? (user.name || 'Three Stars User') : 'Three Stars User';
         const userPhone = user ? (user.phone || '') : '';
         const userMemberId = user ? (user.member_id || '') : '';
 
@@ -1495,7 +1511,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const payload = getAdminMessagePayload();
             if (!payload) return;
 
-            let text = `Hello Admin,\n*ONE DIAL Support Request*\n\n*Subject:* ${payload.subject}\n*Name:* ${payload.userName}`;
+            let text = `Hello Admin,\n*Three Stars Support Request*\n\n*Subject:* ${payload.subject}\n*Name:* ${payload.userName}`;
             if (payload.userPhone) text += `\n*Phone:* ${payload.userPhone}`;
             if (payload.userMemberId) text += `\n*Member ID:* ${payload.userMemberId}`;
             text += `\n\n*Message:*\n${payload.msg}`;
@@ -1512,12 +1528,12 @@ document.addEventListener('DOMContentLoaded', () => {
             const payload = getAdminMessagePayload();
             if (!payload) return;
 
-            let body = `Hello Admin,\n\nONE DIAL Support Request\n\nSubject: ${payload.subject}\nName: ${payload.userName}`;
+            let body = `Hello Admin,\n\nThree Stars Support Request\n\nSubject: ${payload.subject}\nName: ${payload.userName}`;
             if (payload.userPhone) body += `\nPhone: ${payload.userPhone}`;
             if (payload.userMemberId) body += `\nMember ID: ${payload.userMemberId}`;
-            body += `\n\nMessage:\n${payload.msg}\n\n---\nSent from ONE DIAL Web App`;
+            body += `\n\nMessage:\n${payload.msg}\n\n---\nSent from Three Stars Web App`;
 
-            const mailUrl = `mailto:onedail2030@gmail.com?subject=${encodeURIComponent('[ONE DIAL Support] ' + payload.subject)}&body=${encodeURIComponent(body)}`;
+            const mailUrl = `mailto:threestars2030@gmail.com?subject=${encodeURIComponent('[Three Stars Support] ' + payload.subject)}&body=${encodeURIComponent(body)}`;
             window.location.href = mailUrl;
             showToast('Opening email to send your message to Admin...', 'success');
             if (supportMessageText) supportMessageText.value = '';

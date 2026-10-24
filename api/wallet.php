@@ -1,6 +1,6 @@
-﻿<?php
+<?php
 /**
- * ONE DIAL - Customer Wallet & Automatic Revenue-Sharing API
+ * Three Stars - Customer Wallet & Automatic Revenue-Sharing API
  * Handles Phone-Number Account Identification, Dedicated Virtual NUBAN,
  * Bank Payment Ingestion, and Server-Side Revenue Splits
  */
@@ -24,7 +24,7 @@ if ($method === 'GET') {
             }
         }
         http_response_code(404);
-        echo json_encode(["success" => false, "message" => "Beneficiary phone number not registered on ONE DIAL."]);
+        echo json_encode(["success" => false, "message" => "Beneficiary phone number not registered on Three Stars."]);
         exit;
     }
 
@@ -71,9 +71,9 @@ if ($method === 'GET') {
                 "currency" => $currency,
                 "account_number" => $user['phone'],
                 "virtual_account" => [
-                    "bank_name" => $user['virtual_bank_name'] ?? 'Wema Bank (ONE DIAL NUBAN)',
+                    "bank_name" => $user['virtual_bank_name'] ?? 'Wema Bank (Three Stars NUBAN)',
                     "virtual_account_number" => $user['virtual_account_number'] ?? '9803123456',
-                    "account_name" => $user['virtual_account_name'] ?? ('ONE DIAL / ' . $user['name']),
+                    "account_name" => $user['virtual_account_name'] ?? ('Three Stars / ' . $user['name']),
                     "beneficiary_phone" => $user['phone']
                 ],
                 "revenue_sharing" => [
@@ -89,12 +89,13 @@ if ($method === 'GET') {
     echo json_encode([
         "success" => true,
         "balance" => $balance,
+        "bundle_balance" => floatval($store['wallets'][$userId]['bundle_balance'] ?? ($store['wallet']['bundle_balance'] ?? 0.0)),
         "currency" => $currency,
         "account_number" => $user['phone'],
         "virtual_account" => [
-            "bank_name" => $user['virtual_bank_name'] ?? 'Wema Bank (ONE DIAL NUBAN)',
+            "bank_name" => $user['virtual_bank_name'] ?? 'Wema Bank (Three Stars NUBAN)',
             "virtual_account_number" => $user['virtual_account_number'] ?? '9803123456',
-            "account_name" => $user['virtual_account_name'] ?? ('ONE DIAL / ' . $user['name']),
+            "account_name" => $user['virtual_account_name'] ?? ('Three Stars / ' . $user['name']),
             "beneficiary_phone" => $user['phone']
         ],
         "revenue_sharing" => [
@@ -134,7 +135,7 @@ if ($method === 'POST') {
 
         if (!$recipient) {
             http_response_code(404);
-            echo json_encode(["success" => false, "message" => "Recipient phone number not registered on ONE DIAL."]);
+            echo json_encode(["success" => false, "message" => "Recipient phone number not registered on Three Stars."]);
             exit;
         }
 
@@ -182,7 +183,7 @@ if ($method === 'POST') {
             "balance_after" => $amount,
             "channel" => "phone_transfer",
             "internal_reference" => $ref . '-R',
-            "narration" => "Received transfer from ONE DIAL user",
+            "narration" => "Received transfer from Three Stars user",
             "status" => "successful",
             "created_at" => date("Y-m-d H:i:s")
         ];
@@ -257,12 +258,20 @@ if ($method === 'POST') {
             "created_at" => date("Y-m-d H:i:s")
         ];
 
+        $curBundleBal = floatval($store['wallets'][$userId]['bundle_balance'] ?? ($store['wallet']['bundle_balance'] ?? 0.0));
+        $newBundleBal = round($curBundleBal + $amount, 2);
+        if (isset($store['wallets'][$userId])) {
+            $store['wallets'][$userId]['bundle_balance'] = $newBundleBal;
+        }
+        $store['wallet']['bundle_balance'] = $newBundleBal;
+
         saveLocalStore($store);
 
         echo json_encode([
             "success" => true,
-            "message" => "{$bundleName} activated successfully! â‚¦" . number_format($amount, 2) . " deducted.",
+            "message" => "{$bundleName} activated successfully! ₦" . number_format($amount, 2) . " deducted.",
             "new_balance" => $newBal,
+            "new_bundle_balance" => $newBundleBal,
             "reference" => $ref,
             "minutes_added" => $minutes
         ]);

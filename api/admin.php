@@ -1,6 +1,6 @@
-<?php
+﻿<?php
 /**
- * ONE DIAL - Administrator Finance & Revenue Sharing API
+ * Three Stars - Administrator Finance & Revenue Sharing API
  * View Total Deposits, Platform Revenue, Settlements, Calling Margins,
  * Configure Revenue Share %, and Reconcile Transaction Ledgers
  */
