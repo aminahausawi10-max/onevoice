@@ -1177,21 +1177,24 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
+    function deleteOneDigit() {
+        if (currentDialNumber.length > 0) {
+            currentDialNumber = currentDialNumber.slice(0, -1);
+        }
+        updateDialerDisplay();
+    }
+
     if (btnDialClear) {
-        btnDialClear.addEventListener('click', () => {
-            currentDialNumber = selectedCountry.dial_code;
-            updateDialerDisplay();
+        btnDialClear.addEventListener('click', (e) => {
+            e.preventDefault();
+            deleteOneDigit();
         });
     }
 
     if (btnDialBackspace) {
-        btnDialBackspace.addEventListener('click', () => {
-            if (currentDialNumber.length > selectedCountry.dial_code.length) {
-                currentDialNumber = currentDialNumber.slice(0, -1);
-            } else {
-                currentDialNumber = selectedCountry.dial_code;
-            }
-            updateDialerDisplay();
+        btnDialBackspace.addEventListener('click', (e) => {
+            e.preventDefault();
+            deleteOneDigit();
         });
     }
 
