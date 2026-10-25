@@ -7,28 +7,28 @@
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#0a192f",
-  "theme_color": "#006b38",
+  "theme_color": "#1d4ed8",
   "icons": [
     {
-      "src": "/assets/icon-192.png?v=v6",
+      "src": "/assets/icon-192.png?v=v7",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/assets/icon-192.png?v=v6",
+      "src": "/assets/icon-192.png?v=v7",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "maskable"
     },
     {
-      "src": "/assets/icon-512.png?v=v6",
+      "src": "/assets/icon-512.png?v=v7",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "/assets/icon-512.png?v=v6",
+      "src": "/assets/icon-512.png?v=v7",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
@@ -47,7 +47,7 @@
       "url": "/#dialer",
       "icons": [
         {
-          "src": "/assets/icon-192.png?v=v6",
+          "src": "/assets/icon-192.png?v=v7",
           "sizes": "192x192"
         }
       ]
@@ -59,7 +59,7 @@
       "url": "/#wallet",
       "icons": [
         {
-          "src": "/assets/icon-192.png?v=v6",
+          "src": "/assets/icon-192.png?v=v7",
           "sizes": "192x192"
         }
       ]

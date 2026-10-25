@@ -1000,8 +1000,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 c.style.background = '#ffffff';
                 c.classList.remove('selected-bundle');
             });
-            card.style.border = '2px solid #059669';
-            card.style.background = '#f0fdf4';
+            card.style.border = '2px solid #2563eb';
+            card.style.background = '#eff6ff';
             card.classList.add('selected-bundle');
             const radio = card.querySelector('input[type="radio"]');
             if (radio) radio.checked = true;
@@ -1390,7 +1390,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (btnGateInstall) {
             btnGateInstall.innerHTML = '✓ App Installed';
-            btnGateInstall.style.background = '#059669';
+            btnGateInstall.style.background = '#1d4ed8';
         }
     }
 
@@ -1693,12 +1693,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                         <div style="text-align:right;">
                             <div style="font-size:0.75rem; color:#64748b;">Wallet Balance</div>
-                            <div style="font-size:1.05rem; font-weight:800; color:#006b38;">₦${bal}</div>
+                            <div style="font-size:1.05rem; font-weight:800; color:#1d4ed8;">₦${bal}</div>
                         </div>
                     </div>
 
                     <div style="display:flex; gap:6px;">
-                        <button class="btn-admin-user-chat btn-outline-pill" data-userid="${u.id}" data-username="${u.name}" style="flex:1; padding:7px; font-size:0.78rem; font-weight:700; border-color:#006b38; color:#006b38; cursor:pointer;">
+                        <button class="btn-admin-user-chat btn-outline-pill" data-userid="${u.id}" data-username="${u.name}" style="flex:1; padding:7px; font-size:0.78rem; font-weight:700; border-color:#1d4ed8; color:#1d4ed8; cursor:pointer;">
                             💬 Chat
                         </button>
                         ${cleanPhone ? `
@@ -1767,7 +1767,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     </div>
 
                     <div style="display:flex; align-items:baseline; justify-content:space-between; margin-bottom:8px;">
-                        <div style="font-size:1.25rem; font-weight:800; color:${e.status === 'failed' ? '#b91c1c' : '#006b38'};">
+                        <div style="font-size:1.25rem; font-weight:800; color:${e.status === 'failed' ? '#b91c1c' : '#1d4ed8'};">
                             ₦${amount}
                         </div>
                         <div style="font-size:0.75rem; color:#64748b;">${e.created_at || ''}</div>
@@ -1863,7 +1863,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const isAdmin = m.sender === 'admin';
             return `
                 <div style="display:flex; flex-direction:column; align-items:${isAdmin ? 'flex-end' : 'flex-start'};">
-                    <div style="max-width:85%; background:${isAdmin ? '#006b38' : '#ffffff'}; color:${isAdmin ? '#ffffff' : '#0f172a'}; border:1px solid ${isAdmin ? '#006b38' : '#e2e8f0'}; border-radius:14px; padding:10px 12px; box-shadow:0 1px 3px rgba(0,0,0,0.04); font-size:0.88rem; line-height:1.45;">
+                    <div style="max-width:85%; background:${isAdmin ? '#1d4ed8' : '#ffffff'}; color:${isAdmin ? '#ffffff' : '#0f172a'}; border:1px solid ${isAdmin ? '#1d4ed8' : '#e2e8f0'}; border-radius:14px; padding:10px 12px; box-shadow:0 1px 3px rgba(0,0,0,0.04); font-size:0.88rem; line-height:1.45;">
                         <div style="font-size:0.68rem; opacity:0.8; margin-bottom:3px; font-weight:700;">
                             ${isAdmin ? '🛡️ Super Admin' : (m.user_name || '👤 User')}
                         </div>
@@ -1904,7 +1904,7 @@ document.addEventListener('DOMContentLoaded', () => {
             document.querySelectorAll('.admin-transfer-filter').forEach(b => {
                 const isActive = b.getAttribute('data-filter') === filter;
                 b.classList.toggle('active', isActive);
-                b.style.background = isActive ? '#006b38' : '#ffffff';
+                b.style.background = isActive ? '#1d4ed8' : '#ffffff';
                 b.style.color = isActive ? '#ffffff' : '#0f172a';
             });
             renderAdminTransfers();
@@ -2011,7 +2011,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const isAdmin = m.sender === 'admin';
             return `
                 <div style="display:flex; flex-direction:column; align-items:${isAdmin ? 'flex-start' : 'flex-end'};">
-                    <div style="max-width:88%; background:${isAdmin ? '#ffffff' : '#006b38'}; color:${isAdmin ? '#0f172a' : '#ffffff'}; border:1px solid ${isAdmin ? '#e2e8f0' : '#006b38'}; border-radius:12px; padding:8px 12px; font-size:0.85rem; line-height:1.4;">
+                    <div style="max-width:88%; background:${isAdmin ? '#ffffff' : '#1d4ed8'}; color:${isAdmin ? '#0f172a' : '#ffffff'}; border:1px solid ${isAdmin ? '#e2e8f0' : '#1d4ed8'}; border-radius:12px; padding:8px 12px; font-size:0.85rem; line-height:1.4;">
                         <div style="font-size:0.68rem; opacity:0.8; margin-bottom:2px; font-weight:700;">
                             ${isAdmin ? '🛡️ Admin Response' : '👤 You'}
                         </div>

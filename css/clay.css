@@ -6,11 +6,12 @@
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
 :root {
-    --primary-green: #10b981;
-    --primary-green-dark: #059669;
     --primary-blue: #2563eb;
     --primary-blue-dark: #1d4ed8;
     --primary-blue-light: #3b82f6;
+    --primary-navy: #0b1e4c;
+    --primary-green: #2563eb;
+    --primary-green-dark: #1d4ed8;
     --bg-page: #f8fafc;
     --bg-surface: #ffffff;
     --text-primary: #0f172a;
@@ -81,12 +82,12 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: space-between;
-    background: #006b38;
+    background: linear-gradient(135deg, #0b1e4c 0%, #1d4ed8 100%);
     color: #ffffff;
     position: sticky;
     top: 0;
     z-index: 1000;
-    box-shadow: 0 4px 16px rgba(0, 107, 56, 0.22);
+    box-shadow: 0 4px 20px rgba(11, 30, 76, 0.35);
 }
 
 .header-icon-btn {
@@ -111,7 +112,7 @@ html, body {
     transform: scale(0.92);
 }
 .header-icon-btn svg {
-    fill: #006b38;
+    fill: #1d4ed8;
 }
 
 .header-center-brand {
@@ -240,8 +241,8 @@ html, body {
 }
 
 .popover-menu-item.active {
-    background: #e8f5e9;
-    color: #007a3d;
+    background: #eff6ff;
+    color: #1d4ed8;
 }
 
 .popover-menu-item .popover-item-icon {
@@ -264,9 +265,9 @@ html, body {
 }
 
 .header-install-btn {
-    background: #ecfdf5;
-    color: var(--primary-green-dark);
-    border: 1px solid #a7f3d0;
+    background: #eff6ff;
+    color: var(--primary-blue-dark);
+    border: 1px solid #bfdbfe;
     font-size: 0.8rem;
     font-weight: 700;
     padding: 6px 12px;
@@ -279,7 +280,7 @@ html, body {
 }
 
 .header-install-btn:hover {
-    background: var(--primary-green);
+    background: var(--primary-blue);
     color: #ffffff;
 }
 
@@ -350,7 +351,7 @@ html, body {
 .btn-green-pill {
     width: 100%;
     padding: 15px 20px;
-    background: linear-gradient(135deg, var(--primary-green), var(--primary-green-dark));
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
     color: #ffffff;
     border: none;
     border-radius: var(--radius-pill);
@@ -358,13 +359,18 @@ html, body {
     font-size: 1rem;
     font-weight: 700;
     cursor: pointer;
-    box-shadow: 0 6px 18px rgba(16, 185, 129, 0.35);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
     display: flex;
     align-items: center;
     justify-content: center;
     gap: 8px;
     text-decoration: none;
     transition: all 0.2s ease;
+}
+
+.btn-green-pill:hover {
+    background: linear-gradient(135deg, #1d4ed8 0%, #1e40af 100%);
+    box-shadow: 0 8px 24px rgba(37, 99, 235, 0.45);
 }
 
 .btn-green-pill:active {
@@ -554,16 +560,16 @@ html, body {
 }
 
 .drawer-install-item {
-    background: #ecfdf5 !important;
-    color: var(--primary-green-dark) !important;
+    background: #eff6ff !important;
+    color: var(--primary-blue-dark) !important;
     font-weight: 700 !important;
-    border: 1px solid #a7f3d0 !important;
+    border: 1px solid #bfdbfe !important;
 }
 
 /* PWA Dashboard Install Banner */
 .pwa-install-banner {
-    background: linear-gradient(135deg, #ecfdf5 0%, #eff6ff 100%);
-    border: 1px solid #a7f3d0;
+    background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+    border: 1px solid #bfdbfe;
     border-radius: var(--radius-card);
     padding: 12px 14px;
     margin-bottom: 16px;
@@ -571,7 +577,7 @@ html, body {
     align-items: center;
     justify-content: space-between;
     gap: 12px;
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.08);
+    box-shadow: 0 4px 12px rgba(37, 99, 235, 0.1);
 }
 
 .pwa-banner-left {
@@ -584,9 +590,9 @@ html, body {
     width: 38px;
     height: 38px;
     border-radius: 10px;
-    object-fit: contain;
+    object-fit: cover;
     box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-    background: #ffffff;
+    background: transparent;
     flex-shrink: 0;
 }
 
@@ -602,7 +608,7 @@ html, body {
 }
 
 .btn-sm-install {
-    background: var(--primary-green);
+    background: var(--primary-blue);
     color: #ffffff;
     border: none;
     padding: 7px 14px;
@@ -611,12 +617,12 @@ html, body {
     font-size: 0.82rem;
     cursor: pointer;
     flex-shrink: 0;
-    box-shadow: 0 2px 6px rgba(16, 185, 129, 0.3);
+    box-shadow: 0 2px 6px rgba(37, 99, 235, 0.3);
     transition: all 0.2s ease;
 }
 
 .btn-sm-install:hover {
-    background: var(--primary-green-dark);
+    background: var(--primary-blue-dark);
 }
 
 .welcome-actions-wrap {
@@ -778,16 +784,16 @@ html, body {
     color: var(--text-muted);
 }
 
-/* Green Wallet Balance Banner */
+/* Royal Blue Wallet Balance Banner */
 .wallet-balance-banner {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+    background: linear-gradient(135deg, #1e40af 0%, #2563eb 50%, #3b82f6 100%);
     border-radius: var(--radius-xl);
     padding: 18px 20px;
     color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    box-shadow: 0 10px 24px rgba(16, 185, 129, 0.28);
+    box-shadow: 0 12px 28px rgba(37, 99, 235, 0.35);
     margin-bottom: 22px;
 }
 
@@ -826,7 +832,7 @@ html, body {
 
 .wallet-topup-btn {
     background: rgba(255, 255, 255, 0.22);
-    border: 1.5px solid rgba(255, 255, 255, 0.6);
+    border: 1.5px solid rgba(255, 255, 255, 0.7);
     color: #ffffff;
     padding: 8px 18px;
     border-radius: var(--radius-pill);
@@ -839,7 +845,7 @@ html, body {
 
 .wallet-topup-btn:active {
     background: #ffffff;
-    color: var(--primary-green-dark);
+    color: var(--primary-blue-dark);
 }
 
 /* 3x3 Dashboard Action Grid */
@@ -887,13 +893,13 @@ html, body {
 }
 
 /* Tile Icon Themes */
-.icon-make-call { background: #ecfdf5; color: #059669; }
+.icon-make-call { background: #eff6ff; color: #1d4ed8; }
 .icon-contacts { background: #eff6ff; color: #2563eb; }
 .icon-rates { background: #ecfeff; color: #0891b2; }
 .icon-history { background: #fffbeb; color: #d97706; }
 .icon-wallet { background: #f5f3ff; color: #7c3aed; }
 .icon-settings { background: #f1f5f9; color: #475569; }
-.icon-support { background: #ecfdf5; color: #059669; }
+.icon-support { background: #eff6ff; color: #2563eb; }
 .icon-help { background: #f0f9ff; color: #0284c7; }
 .icon-logout { background: #fff1f2; color: #e11d48; }
 
@@ -937,8 +943,8 @@ html, body {
     align-items: center;
     gap: 6px;
     padding: 4px 10px;
-    background: #ecfdf5;
-    color: #059669;
+    background: #eff6ff;
+    color: #1d4ed8;
     font-size: 0.78rem;
     font-weight: 700;
     border-radius: var(--radius-pill);
@@ -1006,7 +1012,7 @@ html, body {
     display: inline-block;
     width: 2.5px;
     height: 1.6rem;
-    background: #10b981;
+    background: #2563eb;
     margin-left: 2px;
     border-radius: 2px;
     animation: cursorBlink 1s infinite ease-in-out;
@@ -1496,18 +1502,18 @@ html, body {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #10b981;
+    color: #2563eb;
 }
 
 .bottom-nav-item.active {
-    color: #059669;
+    color: #1d4ed8;
 }
 
 .bottom-nav-item.active .bottom-nav-icon {
-    color: #059669;
+    color: #1d4ed8;
 }
 
-/* Center Dial Button: Circular Floating Green Bubble */
+/* Center Dial Button: Circular Floating Royal Blue Bubble */
 .bottom-nav-dial-center {
     position: relative;
     top: -14px;
@@ -1517,12 +1523,12 @@ html, body {
     width: 52px;
     height: 52px;
     border-radius: 50%;
-    background: #10b981;
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
     color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: center;
-    box-shadow: 0 6px 16px rgba(16, 185, 129, 0.4);
+    box-shadow: 0 8px 22px rgba(37, 99, 235, 0.45);
     transition: transform 0.15s ease, background 0.15s ease;
 }
 
@@ -1531,11 +1537,11 @@ html, body {
 }
 
 .bottom-nav-dial-center.active .bottom-nav-dial-bubble {
-    background: #059669;
+    background: #1d4ed8;
 }
 
 .bottom-nav-dial-center span:last-child {
-    color: #059669;
+    color: #1d4ed8;
     font-weight: 800;
 }
 
@@ -1686,18 +1692,16 @@ html, body {
     margin-top: 2px;
 }
 
-/* ==========================================================
-   Image 4 Settings Design: Green Top Navbar & iOS-style Rows
-   ========================================================== */
+/* Settings Design: Royal Blue Top Navbar & iOS-style Rows */
 .settings-top-navbar-green {
-    background: #059669;
+    background: linear-gradient(135deg, #0b1e4c 0%, #1d4ed8 100%);
     color: #ffffff;
     display: flex;
     align-items: center;
     justify-content: space-between;
     padding: 14px 16px;
     margin: -16px -16px 16px;
-    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.2);
+    box-shadow: 0 4px 16px rgba(11, 30, 76, 0.28);
 }
 
 .settings-back-btn {
@@ -1766,7 +1770,7 @@ html, body {
 }
 
 .bg-green-box {
-    background: #10b981;
+    background: #2563eb;
 }
 
 .bg-blue-box {
@@ -1778,7 +1782,7 @@ html, body {
 }
 
 .bg-white-green-icon {
-    background: #f0fdf4;
+    background: #eff6ff;
 }
 
 .settings-row-texts {
@@ -1833,7 +1837,7 @@ html, body {
     right: 2px;
     width: 32px;
     height: 32px;
-    background: #007a3d;
+    background: #1d4ed8;
     color: #ffffff;
     border-radius: 50%;
     display: flex;
@@ -1848,7 +1852,7 @@ html, body {
 
 .settings-avatar-edit-badge:hover {
     transform: scale(1.1);
-    background: #059669;
+    background: #1e40af;
 }
 
 .dash-user-avatar-badge {
