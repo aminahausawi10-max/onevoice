@@ -515,11 +515,12 @@ html, body {
     max-width: 70vw;
     height: auto;
     aspect-ratio: 1 / 1;
-    object-fit: contain;
+    object-fit: cover;
     border-radius: 28px;
-    box-shadow: 0 16px 36px rgba(37, 99, 235, 0.22), 0 4px 12px rgba(16, 185, 129, 0.15);
-    background: #ffffff;
-    padding: 6px;
+    box-shadow: 0 16px 36px rgba(0, 45, 198, 0.35), 0 4px 14px rgba(0, 0, 0, 0.15);
+    background: transparent;
+    padding: 0;
+    overflow: hidden;
     transition: transform 0.3s ease;
 }
 
@@ -530,22 +531,26 @@ html, body {
 .auth-logo-badge {
     width: 58px;
     height: 58px;
-    object-fit: contain;
+    object-fit: cover;
     border-radius: 14px;
     margin: 0 auto 10px;
-    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.15);
-    background: #ffffff;
+    box-shadow: 0 4px 14px rgba(0, 45, 198, 0.25);
+    background: transparent;
+    padding: 0;
+    overflow: hidden;
     display: block;
 }
 
 .drawer-brand-logo {
     width: 60px;
     height: 60px;
-    object-fit: contain;
+    object-fit: cover;
     border-radius: 14px;
     margin-bottom: 12px;
-    background: #ffffff;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    background: transparent;
+    padding: 0;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
 }
 
 .drawer-install-item {
