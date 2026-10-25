@@ -3,19 +3,19 @@
  * Enables offline capability, faster caching, and installation on mobile devices
  */
 
-const CACHE_NAME = 'threestar-cache-v4';
+const CACHE_NAME = 'threestar-cache-v5';
 const PRECACHE_ASSETS = [
     '/',
     '/index.html',
-    '/css/clay.css',
-    '/js/app.js',
+    '/css/clay.css?v=v8',
+    '/js/app.js?v=v8',
     '/manifest.json',
     '/site.webmanifest',
-    '/assets/logo.png?v=v7',
-    '/assets/icon-192.png?v=v7',
-    '/assets/icon-512.png?v=v7',
-    '/assets/apple-touch-icon.png?v=v7',
-    '/assets/favicon.png?v=v7'
+    '/assets/logo.png?v=v8',
+    '/assets/icon-192.png?v=v8',
+    '/assets/icon-512.png?v=v8',
+    '/assets/apple-touch-icon.png?v=v8',
+    '/assets/favicon.png?v=v8'
 ];
 
 self.addEventListener('install', (event) => {
