@@ -1318,7 +1318,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (btnEndCall) btnEndCall.addEventListener('click', endCall);
 
     // ----------------------------------------------------
-    // Contacts Modal & List
+    // Mobile Contacts Integration (iPhone & Samsung/Android)
+    // Supports Web Contacts Picker API with Manual Fallback & Search
     // ----------------------------------------------------
     const addContactModal = document.getElementById('add-contact-modal');
     const btnOpenContactModal = document.getElementById('btn-add-contact-modal-trigger');
@@ -1326,32 +1327,256 @@ document.addEventListener('DOMContentLoaded', () => {
     const btnCloseContactModal = document.getElementById('btn-close-contact-modal');
     const formAddContact = document.getElementById('form-add-contact');
     const contactsContainer = document.getElementById('contacts-list-container');
+    const btnDeviceContactsSync = document.getElementById('btn-device-contacts-sync');
+    const btnModalPickContacts = document.getElementById('btn-modal-pick-contacts');
+    const contactsSearchInput = document.getElementById('contacts-search-input');
+    const btnClearContactsSearch = document.getElementById('btn-clear-contacts-search');
+    const contactsCountLabel = document.getElementById('contacts-count-label');
+    const devicePickerStatus = document.getElementById('device-picker-status');
+    const contactsPermissionHint = document.getElementById('contacts-permission-hint');
+    const btnDismissContactsHint = document.getElementById('btn-dismiss-contacts-hint');
 
-    let contactsList = [
-        { name: "Aminu Kano", phone: "+2348031234567" },
-        { name: "Fatima Aliyu", phone: "+2348029876543" },
-        { name: "Ibrahim Musa", phone: "+2348123456789" }
-    ];
+    const LOCAL_CONTACTS_KEY = 'ov_user_contacts_list';
 
-    function renderContacts() {
+    function getSavedContacts() {
+        try {
+            const raw = localStorage.getItem(LOCAL_CONTACTS_KEY);
+            if (raw) {
+                const parsed = JSON.parse(raw);
+                if (Array.isArray(parsed) && parsed.length > 0) return parsed;
+            }
+        } catch (e) {}
+        return [
+            { name: "Aminu Kano", phone: "+2348031234567" },
+            { name: "Fatima Aliyu", phone: "+2348029876543" },
+            { name: "Ibrahim Musa", phone: "+2348123456789" },
+            { name: "Chinedu Okeke", phone: "+2348109876543" },
+            { name: "Folake Adeleke", phone: "+2349012345678" }
+        ];
+    }
+
+    function saveContactsToStorage(list) {
+        try {
+            localStorage.setItem(LOCAL_CONTACTS_KEY, JSON.stringify(list));
+        } catch (e) {}
+    }
+
+    let contactsList = getSavedContacts();
+
+    // Check device Web Contacts Picker API support (Chrome on Samsung/Android, supported browsers)
+    const hasContactPicker = ('contacts' in navigator && 'ContactsManager' in window && 'select' in navigator.contacts);
+
+    if (devicePickerStatus) {
+        if (hasContactPicker) {
+            devicePickerStatus.textContent = '● Device Picker Ready';
+        } else {
+            devicePickerStatus.textContent = '';
+        }
+    }
+
+    if (btnDismissContactsHint && contactsPermissionHint) {
+        btnDismissContactsHint.addEventListener('click', () => {
+            contactsPermissionHint.style.display = 'none';
+        });
+    }
+
+    function renderContacts(filterQuery = '') {
         if (!contactsContainer) return;
         contactsContainer.innerHTML = '';
-        contactsList.forEach(c => {
-            const div = document.createElement('div');
-            div.style.cssText = 'background:#f8fafc; border:1px solid var(--border-light); border-radius:14px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center;';
-            div.innerHTML = `
-                <div>
-                    <div style="font-weight:700; font-size:0.92rem;">${c.name}</div>
-                    <div style="font-size:0.8rem; color:var(--text-muted);">${c.phone}</div>
+
+        const query = filterQuery.toLowerCase().trim();
+        const filtered = contactsList.filter(c => {
+            const nameMatch = (c.name || '').toLowerCase().includes(query);
+            const phoneMatch = (c.phone || '').replace(/[^0-9]/g, '').includes(query.replace(/[^0-9]/g, '')) || (c.phone || '').includes(query);
+            return nameMatch || phoneMatch;
+        });
+
+        if (contactsCountLabel) {
+            contactsCountLabel.textContent = `Showing ${filtered.length} contact${filtered.length === 1 ? '' : 's'}`;
+        }
+
+        if (filtered.length === 0) {
+            contactsContainer.innerHTML = `
+                <div style="text-align:center; padding:32px 16px; background:#f8fafc; border:1px dashed var(--border-light); border-radius:16px;">
+                    <div style="font-size:2rem; margin-bottom:8px;">👥</div>
+                    <div style="font-weight:700; color:var(--text-primary); margin-bottom:4px;">No contacts found</div>
+                    <div style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:14px;">${query ? 'No contacts match your search query.' : 'Add contacts manually or import directly from your phone.'}</div>
+                    <button class="btn-outline-pill" id="btn-empty-import" style="width:auto; padding:8px 16px; font-size:0.85rem; border:1px solid #2563eb; color:#1d4ed8; background:#eff6ff;">
+                        📱 Select from Phone Contacts
+                    </button>
                 </div>
-                <button class="btn-call-circle" style="width:38px; height:38px; font-size:1rem;">📞</button>
             `;
-            div.querySelector('button').addEventListener('click', () => {
+            const btnEmpty = document.getElementById('btn-empty-import');
+            if (btnEmpty) btnEmpty.addEventListener('click', pickDeviceContacts);
+            return;
+        }
+
+        filtered.forEach(c => {
+            const div = document.createElement('div');
+            div.style.cssText = 'background:#ffffff; border:1px solid var(--border-light); border-radius:14px; padding:12px 14px; display:flex; justify-content:space-between; align-items:center; box-shadow:0 1px 4px rgba(0,0,0,0.03); transition:all 0.15s ease;';
+
+            // Get initials for avatar
+            const initials = (c.name || 'User')
+                .split(' ')
+                .map(n => n[0])
+                .slice(0, 2)
+                .join('')
+                .toUpperCase();
+
+            div.innerHTML = `
+                <div style="display:flex; align-items:center; gap:12px; min-width:0; flex:1; cursor:pointer;" class="contact-info-clickable">
+                    <div style="width:40px; height:40px; border-radius:12px; background:linear-gradient(135deg, #eff6ff, #dbeafe); color:#1d4ed8; font-weight:800; font-size:0.92rem; display:flex; align-items:center; justify-content:center; flex-shrink:0; border:1px solid #bfdbfe;">
+                        ${initials || '📞'}
+                    </div>
+                    <div style="min-width:0; flex:1;">
+                        <div style="font-weight:700; font-size:0.92rem; color:var(--text-primary); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${c.name}</div>
+                        <div style="font-size:0.8rem; color:var(--text-secondary); margin-top:1px;">${c.phone}</div>
+                    </div>
+                </div>
+                <div style="display:flex; align-items:center; gap:8px; flex-shrink:0;">
+                    <button class="btn-contact-call" title="Call this number" style="width:38px; height:38px; border-radius:50%; background:#2563eb; color:#ffffff; border:none; display:flex; align-items:center; justify-content:center; cursor:pointer; font-size:0.95rem; box-shadow:0 2px 8px rgba(37,99,235,0.3);">
+                        📞
+                    </button>
+                    <button class="btn-contact-del" title="Delete contact" style="width:28px; height:28px; border-radius:8px; background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:0.85rem;">
+                        ✕
+                    </button>
+                </div>
+            `;
+
+            // Call button / click info connects contact to existing calling dialer
+            const handleCall = () => {
                 currentDialNumber = c.phone;
                 updateDialerDisplay();
                 navigateToPage('dialer');
+                showToast(`Selected contact: ${c.name} (${c.phone})`, 'info');
+            };
+
+            div.querySelector('.contact-info-clickable').addEventListener('click', handleCall);
+            div.querySelector('.btn-contact-call').addEventListener('click', (e) => {
+                e.stopPropagation();
+                handleCall();
             });
+
+            // Delete single contact
+            div.querySelector('.btn-contact-del').addEventListener('click', (e) => {
+                e.stopPropagation();
+                contactsList = contactsList.filter(item => item !== c);
+                saveContactsToStorage(contactsList);
+                renderContacts(contactsSearchInput ? contactsSearchInput.value : '');
+                showToast(`Removed ${c.name}`, 'info');
+            });
+
             contactsContainer.appendChild(div);
+        });
+    }
+
+    // Search input handler
+    if (contactsSearchInput) {
+        contactsSearchInput.addEventListener('input', (e) => {
+            const val = e.target.value;
+            if (btnClearContactsSearch) {
+                btnClearContactsSearch.style.display = val ? 'block' : 'none';
+            }
+            renderContacts(val);
+        });
+    }
+
+    if (btnClearContactsSearch) {
+        btnClearContactsSearch.addEventListener('click', () => {
+            if (contactsSearchInput) {
+                contactsSearchInput.value = '';
+                contactsSearchInput.focus();
+            }
+            btnClearContactsSearch.style.display = 'none';
+            renderContacts('');
+        });
+    }
+
+    // Web Contacts Picker & Device Integration (Samsung, Android, iPhone)
+    async function pickDeviceContacts() {
+        // Standard Web Contacts Picker API (Chrome on Samsung / Android devices, progressive web apps)
+        if (hasContactPicker) {
+            try {
+                const props = ['name', 'tel'];
+                const opts = { multiple: true };
+                // Request user permission directly via native device dialog
+                const picked = await navigator.contacts.select(props, opts);
+                if (picked && picked.length > 0) {
+                    let addedCount = 0;
+                    picked.forEach(item => {
+                        const contactName = (item.name && item.name[0]) ? item.name[0].trim() : 'Phone Contact';
+                        const contactTels = item.tel || [];
+                        contactTels.forEach(rawPhone => {
+                            const clean = rawPhone.trim();
+                            if (clean) {
+                                // Avoid exact duplicate
+                                const exists = contactsList.some(c => c.phone.replace(/[^0-9]/g, '') === clean.replace(/[^0-9]/g, ''));
+                                if (!exists) {
+                                    contactsList.unshift({ name: contactName, phone: clean });
+                                    addedCount++;
+                                }
+                            }
+                        });
+                    });
+
+                    if (addedCount > 0) {
+                        saveContactsToStorage(contactsList);
+                        renderContacts(contactsSearchInput ? contactsSearchInput.value : '');
+                        showToast(`Successfully imported ${addedCount} contact${addedCount === 1 ? '' : 's'} from your phone!`, 'success');
+                    } else {
+                        showToast('Contacts selected were already saved.', 'info');
+                    }
+                    if (addContactModal) addContactModal.classList.remove('active');
+                    return;
+                }
+            } catch (err) {
+                console.warn('[Contacts Picker API canceled or denied]:', err);
+            }
+        }
+
+        // iPhone / iOS Safari or devices where Web Contacts API is restricted:
+        // Offer quick interactive prompt to enter or paste contact without manual navigation
+        const promptInput = window.prompt(
+            '📱 Import Contact:\nEnter the Contact Name & Phone number separated by a comma:\n(e.g. John Doe, +2348031234567 or 080...)',
+            ''
+        );
+
+        if (promptInput) {
+            const parts = promptInput.split(',');
+            if (parts.length >= 2) {
+                const name = parts[0].trim();
+                const phone = parts.slice(1).join(',').trim();
+                if (name && phone) {
+                    contactsList.unshift({ name, phone });
+                    saveContactsToStorage(contactsList);
+                    renderContacts(contactsSearchInput ? contactsSearchInput.value : '');
+                    showToast(`Contact ${name} added!`, 'success');
+                    if (addContactModal) addContactModal.classList.remove('active');
+                    return;
+                }
+            } else if (promptInput.trim()) {
+                // If only phone was provided
+                const phoneOnly = promptInput.trim();
+                contactsList.unshift({ name: 'Saved Contact', phone: phoneOnly });
+                saveContactsToStorage(contactsList);
+                renderContacts(contactsSearchInput ? contactsSearchInput.value : '');
+                showToast(`Contact saved!`, 'success');
+                if (addContactModal) addContactModal.classList.remove('active');
+                return;
+            }
+        }
+
+        // Open manual add contact modal if user skips prompt
+        if (addContactModal) addContactModal.classList.add('active');
+    }
+
+    if (btnDeviceContactsSync) {
+        btnDeviceContactsSync.addEventListener('click', pickDeviceContacts);
+    }
+
+    if (btnModalPickContacts) {
+        btnModalPickContacts.addEventListener('click', () => {
+            pickDeviceContacts();
         });
     }
 
@@ -1370,8 +1595,13 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             const name = document.getElementById('contact-input-name').value.trim();
             const phone = document.getElementById('contact-input-phone').value.trim();
+            if (!name || !phone) {
+                showToast('Name and phone number are required', 'error');
+                return;
+            }
             contactsList.unshift({ name, phone });
-            renderContacts();
+            saveContactsToStorage(contactsList);
+            renderContacts(contactsSearchInput ? contactsSearchInput.value : '');
             showToast(`Contact ${name} saved!`, 'success');
             if (addContactModal) addContactModal.classList.remove('active');
             formAddContact.reset();

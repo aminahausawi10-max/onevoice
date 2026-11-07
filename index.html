@@ -532,10 +532,41 @@
              PAGE: CONTACTS (#page-contacts)
              ==================================================== -->
         <section class="app-page" id="page-contacts">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                <h2 style="font-size:1.35rem; font-weight:800;">Contacts</h2>
-                <button class="btn-green-pill" id="btn-add-contact-modal-trigger" style="width:auto; padding:8px 16px; font-size:0.85rem;">+ Add</button>
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; gap:8px;">
+                <h2 style="font-size:1.35rem; font-weight:800; margin:0;">Contacts</h2>
+                <div style="display:flex; gap:6px;">
+                    <button class="btn-outline-pill" id="btn-device-contacts-sync" style="width:auto; padding:8px 12px; font-size:0.8rem; font-weight:700; border:1px solid #2563eb; color:#1d4ed8; background:#eff6ff; display:inline-flex; align-items:center; gap:5px;" title="Import from iPhone/Android device">
+                        📱 Phone Contacts
+                    </button>
+                    <button class="btn-green-pill" id="btn-add-contact-modal-trigger" style="width:auto; padding:8px 14px; font-size:0.82rem; font-weight:700; background:linear-gradient(135deg, #2563eb, #1d4ed8);">
+                        + Add
+                    </button>
+                </div>
             </div>
+
+            <!-- Permission / Feature Notice Banner (Privacy First) -->
+            <div id="contacts-permission-hint" style="background:#eff6ff; border:1px solid #bfdbfe; border-radius:12px; padding:10px 12px; margin-bottom:12px; font-size:0.8rem; color:#1e40af; display:flex; justify-content:space-between; align-items:center;">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <span style="font-size:1.1rem;">🔒</span>
+                    <span>100% Private: Contacts are only accessed with your permission on your device and are never uploaded without consent.</span>
+                </div>
+                <button id="btn-dismiss-contacts-hint" style="background:none; border:none; color:#1e40af; font-size:0.9rem; cursor:pointer; font-weight:700; padding:0 4px;">✕</button>
+            </div>
+
+            <!-- Contacts Search Bar -->
+            <div style="position:relative; margin-bottom:12px;">
+                <input type="text" id="contacts-search-input" class="app-input" style="padding-left:38px; padding-right:32px; font-size:0.9rem;" placeholder="Search by contact name or phone...">
+                <span style="position:absolute; left:14px; top:50%; transform:translateY(-50%); font-size:0.95rem; opacity:0.6;">🔍</span>
+                <button id="btn-clear-contacts-search" style="display:none; position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:0.85rem; font-weight:700;">✕</button>
+            </div>
+
+            <!-- Contacts Tabs / Stats Bar -->
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; font-size:0.8rem; color:var(--text-secondary); padding:0 4px;">
+                <span id="contacts-count-label">Showing 0 contacts</span>
+                <span id="device-picker-status" style="font-weight:600; color:#2563eb;"></span>
+            </div>
+
+            <!-- Contacts Container -->
             <div id="contacts-list-container" style="display:flex; flex-direction:column; gap:8px;">
                 <!-- Populated dynamically -->
             </div>
@@ -1299,21 +1330,34 @@
             </div>
         </div>
 
-        <!-- Add Contact Modal -->
+        <!-- Add Contact Modal (Manual Entry + Device Import Fallback) -->
         <div class="app-modal-overlay" id="add-contact-modal">
             <div class="app-modal-card">
                 <div class="modal-header-row">
-                    <div class="modal-title">Add New Contact</div>
+                    <div class="modal-title">Add Contact</div>
                     <button class="modal-close-x" id="btn-close-contact-modal">✕</button>
                 </div>
+
+                <!-- Quick Device Picker Button inside Modal -->
+                <button type="button" id="btn-modal-pick-contacts" class="btn-outline-pill" style="width:100%; padding:12px; margin-bottom:14px; font-weight:700; border:2px solid #2563eb; color:#1d4ed8; background:#eff6ff; display:flex; align-items:center; justify-content:center; gap:8px;">
+                    <span>📱</span>
+                    <span>Select from Phone Contacts</span>
+                </button>
+
+                <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px; color:var(--text-muted); font-size:0.78rem;">
+                    <span style="flex:1; height:1px; background:var(--border-light);"></span>
+                    <span>OR ENTER MANUALLY</span>
+                    <span style="flex:1; height:1px; background:var(--border-light);"></span>
+                </div>
+
                 <form id="form-add-contact">
                     <div class="form-input-group">
                         <input type="text" id="contact-input-name" class="app-input" style="padding-left:14px;" placeholder="Contact Name" required>
                     </div>
                     <div class="form-input-group">
-                        <input type="tel" id="contact-input-phone" class="app-input" style="padding-left:14px;" placeholder="Phone Number (e.g. +234...)" required>
+                        <input type="tel" id="contact-input-phone" class="app-input" style="padding-left:14px;" placeholder="Phone Number (e.g. +234... or 080...)" required>
                     </div>
-                    <button type="submit" class="btn-green-pill">Save Contact</button>
+                    <button type="submit" class="btn-green-pill" style="background:linear-gradient(135deg, #2563eb, #1d4ed8);">Save Contact</button>
                 </form>
             </div>
         </div>
@@ -1548,6 +1592,6 @@
     <div class="toast-wrap" id="toast-container"></div>
 
     <!-- JavaScript Application Logic -->
-    <script src="js/app.js?v=v10"></script>
+    <script src="js/app.js?v=v11"></script>
 </body>
 </html>

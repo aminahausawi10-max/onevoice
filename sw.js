@@ -3,12 +3,12 @@
  * Enables offline capability, faster caching, and installation on mobile devices
  */
 
-const CACHE_NAME = 'threestar-cache-v7';
+const CACHE_NAME = 'threestar-cache-v8';
 const PRECACHE_ASSETS = [
     '/',
     '/index.html',
     '/css/clay.css?v=v8',
-    '/js/app.js?v=v10',
+    '/js/app.js?v=v11',
     '/manifest.json',
     '/site.webmanifest',
     '/assets/logo.png?v=v8',
