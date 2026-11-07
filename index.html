@@ -297,6 +297,12 @@
 
                 <button type="submit" class="btn-green-pill" id="btn-submit-login">Login</button>
 
+                <div style="margin-top: 14px; display: flex; gap: 8px; justify-content: center; align-items: center; font-size: 0.78rem;">
+                    <span style="color: #64748b; font-weight: 500;">Quick Demo:</span>
+                    <button type="button" class="btn-clay" onclick="quickFillCredentials('admin@gmail.com', 'admin123')" style="padding: 5px 12px; font-size: 0.74rem; font-weight: 600; border-radius: 999px; background: rgba(30, 58, 138, 0.08); border: 1px solid rgba(30, 58, 138, 0.22); color: #1e3a8a; cursor: pointer;">🔑 Admin</button>
+                    <button type="button" class="btn-clay" onclick="quickFillCredentials('09090809080', 'user123')" style="padding: 5px 12px; font-size: 0.74rem; font-weight: 600; border-radius: 999px; background: rgba(16, 185, 129, 0.08); border: 1px solid rgba(16, 185, 129, 0.22); color: #047857; cursor: pointer;">👤 User</button>
+                </div>
+
                 <div class="auth-link-row" style="margin-top: 24px;">
                     Don't have an account? <span class="auth-link-bold nav-page-btn" data-page="register">Create Account</span>
                 </div>
@@ -1707,6 +1713,6 @@
     <div class="toast-wrap" id="toast-container"></div>
 
     <!-- JavaScript Application Logic -->
-    <script src="js/app.js?v=v13"></script>
+    <script src="js/app.js?v=v14"></script>
 </body>
 </html>

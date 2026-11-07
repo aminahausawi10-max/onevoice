@@ -1,1 +1,8 @@
-module.exports = require('../dev-server.js');
+const handler = require('../dev-server.js');
+
+module.exports = (req, res) => {
+    const qIdx = (req.url || '').indexOf('?');
+    const query = qIdx >= 0 ? req.url.slice(qIdx) : '';
+    req.url = '/api/voice_status' + query;
+    return handler(req, res);
+};

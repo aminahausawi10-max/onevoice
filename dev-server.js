@@ -522,17 +522,17 @@ const requestHandler = (req, res) => {
     const cleanPath = pathname.replace(/\.(php|js)$/, '');
     const reqCleanPath = (reqParsed.pathname || '').replace(/\.(php|js)$/, '');
 
-    const isRates = cleanPath === '/api/rates' || reqCleanPath === '/api/rates';
-    const isWallet = cleanPath === '/api/wallet' || reqCleanPath === '/api/wallet';
-    const isWebhook = cleanPath === '/api/webhook_payment' || reqCleanPath === '/api/webhook_payment';
-    const isAdmin = cleanPath === '/api/admin' || reqCleanPath === '/api/admin';
-    const isCalls = cleanPath === '/api/calls' || reqCleanPath === '/api/calls';
-    const isVoiceWebhook = cleanPath === '/api/voice_webhook' || reqCleanPath === '/api/voice_webhook';
-    const isVoiceStatus = cleanPath === '/api/voice_status' || reqCleanPath === '/api/voice_status';
-    const isContacts = cleanPath === '/api/contacts' || reqCleanPath === '/api/contacts';
-    const isSettings = cleanPath === '/api/settings' || reqCleanPath === '/api/settings';
-    const isAuth = cleanPath === '/api/auth' || reqCleanPath === '/api/auth';
-    const isHealth = cleanPath === '/api/health' || reqCleanPath === '/api/health' || cleanPath === '/api/status';
+    const isRates = cleanPath === '/api/rates' || reqCleanPath === '/api/rates' || cleanPath === '/rates' || reqCleanPath === '/rates';
+    const isWallet = cleanPath === '/api/wallet' || reqCleanPath === '/api/wallet' || cleanPath === '/wallet' || reqCleanPath === '/wallet';
+    const isWebhook = cleanPath === '/api/webhook_payment' || reqCleanPath === '/api/webhook_payment' || cleanPath === '/webhook_payment' || reqCleanPath === '/webhook_payment';
+    const isAdmin = cleanPath === '/api/admin' || reqCleanPath === '/api/admin' || cleanPath === '/admin' || reqCleanPath === '/admin';
+    const isCalls = cleanPath === '/api/calls' || reqCleanPath === '/api/calls' || cleanPath === '/calls' || reqCleanPath === '/calls';
+    const isVoiceWebhook = cleanPath === '/api/voice_webhook' || reqCleanPath === '/api/voice_webhook' || cleanPath === '/voice_webhook' || reqCleanPath === '/voice_webhook';
+    const isVoiceStatus = cleanPath === '/api/voice_status' || reqCleanPath === '/api/voice_status' || cleanPath === '/voice_status' || reqCleanPath === '/voice_status';
+    const isContacts = cleanPath === '/api/contacts' || reqCleanPath === '/api/contacts' || cleanPath === '/contacts' || reqCleanPath === '/contacts';
+    const isSettings = cleanPath === '/api/settings' || reqCleanPath === '/api/settings' || cleanPath === '/settings' || reqCleanPath === '/settings';
+    const isAuth = cleanPath === '/api/auth' || reqCleanPath === '/api/auth' || cleanPath === '/auth' || reqCleanPath === '/auth';
+    const isHealth = cleanPath === '/api/health' || reqCleanPath === '/api/health' || cleanPath === '/health' || reqCleanPath === '/health' || cleanPath === '/api/status' || cleanPath === '/status';
 
     const sendJson = (data, status = 200) => {
         res.writeHead(status, { 'Content-Type': 'application/json' });
