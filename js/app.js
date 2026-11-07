@@ -283,6 +283,10 @@ document.addEventListener('DOMContentLoaded', () => {
             loadAdminPortalData();
         } else if (pageName === 'support') {
             loadUserSupportMessages();
+        } else if (pageName === 'contacts') {
+            if (typeof renderContacts === 'function') {
+                renderContacts(contactsSearchInput ? contactsSearchInput.value : '');
+            }
         }
 
         // Close drawer if open
@@ -1347,11 +1351,14 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         } catch (e) {}
         return [
-            { name: "Aminu Kano", phone: "+2348031234567" },
-            { name: "Fatima Aliyu", phone: "+2348029876543" },
-            { name: "Ibrahim Musa", phone: "+2348123456789" },
-            { name: "Chinedu Okeke", phone: "+2348109876543" },
-            { name: "Folake Adeleke", phone: "+2349012345678" }
+            { name: "Amina Ahmed Inuwa", phone: "09090809080", country: "Nigeria" },
+            { name: "Fatima Bello", phone: "+2348099887766", country: "Nigeria" },
+            { name: "Aminu Kano", phone: "+2348031234567", country: "Nigeria" },
+            { name: "Fatima Aliyu", phone: "+2348029876543", country: "Nigeria" },
+            { name: "Ibrahim Musa", phone: "+2348123456789", country: "Nigeria" },
+            { name: "Chinedu Okeke", phone: "+2348109876543", country: "Nigeria" },
+            { name: "Folake Adeleke", phone: "+2349012345678", country: "Nigeria" },
+            { name: "Customer Care (Three Star)", phone: "07047000070", country: "Nigeria" }
         ];
     }
 
