@@ -1393,29 +1393,91 @@ const requestHandler = (req, res) => {
         }
     }
 
-    // 6. API: Contacts
+    // 6. API: Contacts (Auto-Save, Device Batch Sync, Persistent Storage)
     if (isContacts) {
         const store = getStore();
+        const activeUser = getActiveUser(req, store) || store.user;
+
         if (req.method === 'GET') {
-            return sendJson({ success: true, contacts: store.contacts || [] });
+            const userContacts = (store.contacts || []).filter(c => !c.user_id || c.user_id === activeUser.id);
+            return sendJson({ success: true, contacts: userContacts });
         }
+
         if (req.method === 'POST') {
             return parseBody((body) => {
-                const action = body.action || 'add';
+                const action = body.action || (Array.isArray(body.contacts) ? 'batch_add' : 'add');
+
+                // BATCH ADD: When user presses "Allow All Contacts", automatically saves all contacts in one shot
+                if (action === 'batch_add' || Array.isArray(body.contacts)) {
+                    const listToAdd = Array.isArray(body.contacts) ? body.contacts : (body.list || []);
+                    if (!store.contacts) store.contacts = [];
+                    let added = 0;
+
+                    listToAdd.forEach(item => {
+                        const name = (item.name || '').trim();
+                        const phone = (item.phone || '').trim();
+                        if (!name || !phone) return;
+
+                        const norm = normalizePhone(phone);
+                        const exists = store.contacts.some(c => 
+                            (c.user_id === activeUser.id || !c.user_id) && 
+                            normalizePhone(c.phone) === norm
+                        );
+
+                        if (!exists) {
+                            store.contacts.push({
+                                id: store.contacts.length + 1,
+                                user_id: activeUser.id,
+                                name: name,
+                                phone: phone,
+                                country: item.country || 'Nigeria',
+                                created_at: new Date().toISOString()
+                            });
+                            added++;
+                        }
+                    });
+
+                    saveStore(store);
+                    const userContacts = store.contacts.filter(c => !c.user_id || c.user_id === activeUser.id);
+                    return sendJson({
+                        success: true,
+                        message: `Successfully saved ${added} contacts!`,
+                        added_count: added,
+                        total_count: userContacts.length,
+                        contacts: userContacts
+                    });
+                }
+
                 if (action === 'add') {
                     if (!body.name || !body.phone) return sendJson({ success: false, message: 'Name and phone required' }, 400);
                     if (!store.contacts) store.contacts = [];
-                    const newC = { id: store.contacts.length + 1, name: body.name, phone: body.phone, country: body.country || 'Nigeria' };
+                    const newC = {
+                        id: store.contacts.length + 1,
+                        user_id: activeUser.id,
+                        name: body.name.trim(),
+                        phone: body.phone.trim(),
+                        country: body.country || 'Nigeria',
+                        created_at: new Date().toISOString()
+                    };
                     store.contacts.push(newC);
                     saveStore(store);
                     return sendJson({ success: true, message: 'Contact saved!', contact: newC });
                 }
+
                 if (action === 'delete') {
                     const id = parseInt(body.id || 0);
-                    store.contacts = (store.contacts || []).filter(c => c.id !== id);
+                    const phone = (body.phone || '').trim();
+                    if (id > 0) {
+                        store.contacts = (store.contacts || []).filter(c => c.id !== id);
+                    } else if (phone) {
+                        const norm = normalizePhone(phone);
+                        store.contacts = (store.contacts || []).filter(c => normalizePhone(c.phone) !== norm);
+                    }
                     saveStore(store);
                     return sendJson({ success: true, message: 'Contact deleted' });
                 }
+
+                return sendJson({ success: false, message: 'Unknown action' }, 400);
             });
         }
     }

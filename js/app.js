@@ -284,6 +284,9 @@ document.addEventListener('DOMContentLoaded', () => {
         } else if (pageName === 'support') {
             loadUserSupportMessages();
         } else if (pageName === 'contacts') {
+            if (typeof loadBackendContacts === 'function') {
+                loadBackendContacts();
+            }
             if (typeof renderContacts === 'function') {
                 renderContacts(contactsSearchInput ? contactsSearchInput.value : '');
             }
@@ -1291,6 +1294,7 @@ document.addEventListener('DOMContentLoaded', () => {
     let callStatusPollInterval = null;
 
     async function startCall() {
+        if (btnMakeCall && btnMakeCall.disabled) return;
         const dest = (currentDialNumber || '').trim();
         if (!dest || dest === '+' || dest === '+234' || dest.replace(/[^\d]/g, '').length < 7) {
             showToast('Please enter a valid telephone number to dial.', 'warning');
@@ -1604,6 +1608,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     const LOCAL_CONTACTS_KEY = 'ov_user_contacts_list';
+    const contactVCardInput = document.getElementById('contact-vcard-input');
 
     function getSavedContacts() {
         try {
@@ -1632,6 +1637,108 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     let contactsList = getSavedContacts();
+
+    async function syncContactsWithBackend(contactsArray) {
+        if (!Array.isArray(contactsArray) || contactsArray.length === 0) return;
+        try {
+            await fetch('api/contacts.js', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + (currentUser ? currentUser.token : '')
+                },
+                body: JSON.stringify({
+                    action: 'batch_add',
+                    contacts: contactsArray
+                })
+            });
+        } catch (e) {
+            console.warn('Backend contacts sync:', e);
+        }
+    }
+
+    async function loadBackendContacts() {
+        try {
+            const res = await fetch('api/contacts.js', {
+                headers: { 'Authorization': 'Bearer ' + (currentUser ? currentUser.token : '') }
+            });
+            const data = await res.json();
+            if (data.success && Array.isArray(data.contacts) && data.contacts.length > 0) {
+                let updated = false;
+                data.contacts.forEach(bc => {
+                    const norm = (bc.phone || '').replace(/[^0-9]/g, '');
+                    if (norm && !contactsList.some(c => (c.phone || '').replace(/[^0-9]/g, '') === norm)) {
+                        contactsList.push({ name: bc.name, phone: bc.phone, country: bc.country || 'Nigeria' });
+                        updated = true;
+                    }
+                });
+                if (updated) {
+                    saveContactsToStorage(contactsList);
+                    renderContacts(contactsSearchInput ? contactsSearchInput.value : '');
+                }
+            }
+        } catch (e) {
+            console.warn('Load backend contacts:', e);
+        }
+    }
+
+    function parseVCard(vcardText) {
+        const results = [];
+        const cards = vcardText.split(/BEGIN:VCARD/i);
+        cards.forEach(card => {
+            let name = '';
+            let phone = '';
+            const lines = card.split(/\r\n|\r|\n/);
+            lines.forEach(line => {
+                if (/^FN:/i.test(line)) {
+                    name = line.replace(/^FN:/i, '').trim();
+                } else if (!name && /^N:/i.test(line)) {
+                    const parts = line.replace(/^N:/i, '').split(';').filter(Boolean);
+                    name = parts.reverse().join(' ').trim();
+                } else if (/^TEL[^:]*:/i.test(line)) {
+                    phone = line.replace(/^TEL[^:]*:/i, '').trim();
+                }
+            });
+            if (name && phone) {
+                results.push({ name, phone, country: 'Nigeria' });
+            }
+        });
+        return results;
+    }
+
+    if (contactVCardInput) {
+        contactVCardInput.addEventListener('change', (e) => {
+            const file = e.target.files && e.target.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = async (evt) => {
+                const text = evt.target.result;
+                const parsed = parseVCard(text);
+                if (parsed.length > 0) {
+                    let added = 0;
+                    const toSync = [];
+                    parsed.forEach(item => {
+                        const norm = item.phone.replace(/[^0-9]/g, '');
+                        if (norm && !contactsList.some(c => c.phone.replace(/[^0-9]/g, '') === norm)) {
+                            contactsList.unshift(item);
+                            toSync.push(item);
+                            added++;
+                        }
+                    });
+                    saveContactsToStorage(contactsList);
+                    renderContacts(contactsSearchInput ? contactsSearchInput.value : '');
+                    if (toSync.length > 0) {
+                        await syncContactsWithBackend(toSync);
+                    }
+                    showToast(`✅ Automatically saved ${added} contacts from your file!`, 'success');
+                    if (contactPermissionModal) contactPermissionModal.classList.remove('active');
+                } else {
+                    showToast('Could not find contacts in the selected file.', 'warning');
+                }
+            };
+            reader.readAsText(file);
+        });
+    }
 
     // Check device Web Contacts Picker API support (Chrome on Samsung/Android, supported browsers)
     const hasContactPicker = ('contacts' in navigator && 'ContactsManager' in window && 'select' in navigator.contacts);
@@ -1730,9 +1837,15 @@ document.addEventListener('DOMContentLoaded', () => {
             // Delete single contact
             div.querySelector('.btn-contact-del').addEventListener('click', (e) => {
                 e.stopPropagation();
+                const phoneToDelete = c.phone;
                 contactsList = contactsList.filter(item => item !== c);
                 saveContactsToStorage(contactsList);
                 renderContacts(contactsSearchInput ? contactsSearchInput.value : '');
+                fetch('api/contacts.js', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'delete', phone: phoneToDelete })
+                }).catch(() => {});
                 showToast(`Removed ${c.name}`, 'info');
             });
 
@@ -1775,16 +1888,19 @@ document.addEventListener('DOMContentLoaded', () => {
                 const picked = await navigator.contacts.select(props, opts);
                 if (picked && picked.length > 0) {
                     let addedCount = 0;
+                    const toSync = [];
                     picked.forEach(item => {
                         const contactName = (item.name && item.name[0]) ? item.name[0].trim() : 'Phone Contact';
                         const contactTels = item.tel || [];
                         contactTels.forEach(rawPhone => {
                             const clean = rawPhone.trim();
                             if (clean) {
-                                // Avoid exact duplicate
-                                const exists = contactsList.some(c => c.phone.replace(/[^0-9]/g, '') === clean.replace(/[^0-9]/g, ''));
+                                const norm = clean.replace(/[^0-9]/g, '');
+                                const exists = contactsList.some(c => c.phone.replace(/[^0-9]/g, '') === norm);
                                 if (!exists) {
-                                    contactsList.unshift({ name: contactName, phone: clean });
+                                    const newContact = { name: contactName, phone: clean, country: 'Nigeria' };
+                                    contactsList.unshift(newContact);
+                                    toSync.push(newContact);
                                     addedCount++;
                                 }
                             }
@@ -1794,9 +1910,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (addedCount > 0) {
                         saveContactsToStorage(contactsList);
                         renderContacts(contactsSearchInput ? contactsSearchInput.value : '');
-                        showToast(`Successfully added ${addedCount} contact${addedCount === 1 ? '' : 's'} from your device!`, 'success');
+                        syncContactsWithBackend(toSync);
+                        showToast(`✅ Automatically saved ${addedCount} contact${addedCount === 1 ? '' : 's'} to Contacts!`, 'success');
                     } else {
-                        showToast('Contacts selected were already in your list.', 'info');
+                        showToast('Selected contacts are already in your Contacts list.', 'info');
                     }
                     if (addContactModal) addContactModal.classList.remove('active');
                     if (contactPermissionModal) contactPermissionModal.classList.remove('active');
@@ -1808,38 +1925,59 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         // iPhone / iOS Safari or devices where Web Contacts API is restricted:
-        // Offer quick interactive prompt to enter or paste contact without manual navigation
+        // Automatically open contact file picker (.vcf / Address book) if "Allow All Contacts" pressed
+        if (options.isAll && contactVCardInput) {
+            if (contactPermissionModal) contactPermissionModal.classList.remove('active');
+            contactVCardInput.click();
+            return;
+        }
+
         const promptTitle = options.isAll 
-            ? '📱 Import Contacts:\nEnter Contact Name & Phone number separated by a comma:\n(e.g. John Doe, +2348031234567 or 080...)'
+            ? '📱 Import Contacts:\nEnter Contact Name & Phone number separated by a comma (or multiple contacts):\n(e.g. John Doe, 08031234567)'
             : '👉 Choose Contact:\nEnter Contact Name & Phone number:\n(e.g. Mary Jane, 08123456789)';
 
         const promptInput = window.prompt(promptTitle, '');
 
         if (promptInput) {
-            const parts = promptInput.split(',');
-            if (parts.length >= 2) {
-                const name = parts[0].trim();
-                const phone = parts.slice(1).join(',').trim();
-                if (name && phone) {
-                    contactsList.unshift({ name, phone });
-                    saveContactsToStorage(contactsList);
-                    renderContacts(contactsSearchInput ? contactsSearchInput.value : '');
-                    showToast(`Contact ${name} added!`, 'success');
-                    if (addContactModal) addContactModal.classList.remove('active');
-                    if (contactPermissionModal) contactPermissionModal.classList.remove('active');
-                    return;
+            const lines = promptInput.split('\n');
+            let addedCount = 0;
+            const toSync = [];
+
+            lines.forEach(line => {
+                const parts = line.split(',');
+                if (parts.length >= 2) {
+                    const name = parts[0].trim();
+                    const phone = parts.slice(1).join(',').trim();
+                    if (name && phone) {
+                        const norm = phone.replace(/[^0-9]/g, '');
+                        if (!contactsList.some(c => c.phone.replace(/[^0-9]/g, '') === norm)) {
+                            const newContact = { name, phone, country: 'Nigeria' };
+                            contactsList.unshift(newContact);
+                            toSync.push(newContact);
+                            addedCount++;
+                        }
+                    }
+                } else if (line.trim()) {
+                    const phoneOnly = line.trim();
+                    const norm = phoneOnly.replace(/[^0-9]/g, '');
+                    if (!contactsList.some(c => c.phone.replace(/[^0-9]/g, '') === norm)) {
+                        const newContact = { name: 'Saved Contact', phone: phoneOnly, country: 'Nigeria' };
+                        contactsList.unshift(newContact);
+                        toSync.push(newContact);
+                        addedCount++;
+                    }
                 }
-            } else if (promptInput.trim()) {
-                // If only phone was provided
-                const phoneOnly = promptInput.trim();
-                contactsList.unshift({ name: 'Saved Contact', phone: phoneOnly });
+            });
+
+            if (addedCount > 0) {
                 saveContactsToStorage(contactsList);
                 renderContacts(contactsSearchInput ? contactsSearchInput.value : '');
-                showToast(`Contact saved!`, 'success');
-                if (addContactModal) addContactModal.classList.remove('active');
-                if (contactPermissionModal) contactPermissionModal.classList.remove('active');
-                return;
+                syncContactsWithBackend(toSync);
+                showToast(`✅ Saved ${addedCount} contact${addedCount === 1 ? '' : 's'} to Contacts!`, 'success');
             }
+            if (addContactModal) addContactModal.classList.remove('active');
+            if (contactPermissionModal) contactPermissionModal.classList.remove('active');
+            return;
         }
 
         // Open manual add contact modal if user skips prompt
@@ -1865,8 +2003,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 showToast('Name and phone number are required', 'error');
                 return;
             }
-            contactsList.unshift({ name, phone });
+            const newObj = { name, phone, country: 'Nigeria' };
+            contactsList.unshift(newObj);
             saveContactsToStorage(contactsList);
+            syncContactsWithBackend([newObj]);
             renderContacts(contactsSearchInput ? contactsSearchInput.value : '');
             showToast(`Contact ${name} saved!`, 'success');
             if (addContactModal) addContactModal.classList.remove('active');
@@ -2742,6 +2882,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initSession();
     renderContacts();
+    loadBackendContacts();
     renderRates();
     loadCallHistory();
     updateDialerDisplay();
