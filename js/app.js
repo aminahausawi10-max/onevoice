@@ -1323,8 +1323,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // ----------------------------------------------------
     // Mobile Contacts Integration (iPhone & Samsung/Android)
-    // Supports Web Contacts Picker API with Manual Fallback & Search
+    // Permission Prompt: "Allow All Contacts" vs "Choose Contact" vs "Manual"
     // ----------------------------------------------------
+    const contactPermissionModal = document.getElementById('contact-permission-modal');
+    const btnAllowAllContacts = document.getElementById('btn-allow-all-contacts');
+    const btnChooseContacts = document.getElementById('btn-choose-contacts');
+    const btnManualAddContact = document.getElementById('btn-manual-add-contact');
     const addContactModal = document.getElementById('add-contact-modal');
     const btnOpenContactModal = document.getElementById('btn-add-contact-modal-trigger');
     const btnDialerAddContact = document.getElementById('btn-dialer-add-contact');
@@ -1339,6 +1343,65 @@ document.addEventListener('DOMContentLoaded', () => {
     const devicePickerStatus = document.getElementById('device-picker-status');
     const contactsPermissionHint = document.getElementById('contacts-permission-hint');
     const btnDismissContactsHint = document.getElementById('btn-dismiss-contacts-hint');
+
+    // Close permission modal buttons
+    document.querySelectorAll('.close-permission-modal').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (contactPermissionModal) contactPermissionModal.classList.remove('active');
+        });
+    });
+
+    function openContactOptionsDialog() {
+        if (contactPermissionModal) {
+            contactPermissionModal.classList.add('active');
+        } else if (addContactModal) {
+            addContactModal.classList.add('active');
+        }
+    }
+
+    if (btnOpenContactModal) {
+        btnOpenContactModal.addEventListener('click', (e) => {
+            e.preventDefault();
+            openContactOptionsDialog();
+        });
+    }
+
+    if (btnDeviceContactsSync) {
+        btnDeviceContactsSync.addEventListener('click', (e) => {
+            e.preventDefault();
+            openContactOptionsDialog();
+        });
+    }
+
+    if (btnDialerAddContact) {
+        btnDialerAddContact.addEventListener('click', (e) => {
+            e.preventDefault();
+            openContactOptionsDialog();
+        });
+    }
+
+    if (btnManualAddContact) {
+        btnManualAddContact.addEventListener('click', () => {
+            if (contactPermissionModal) contactPermissionModal.classList.remove('active');
+            if (addContactModal) addContactModal.classList.add('active');
+        });
+    }
+
+    // Action 1: "Allow All Contacts"
+    if (btnAllowAllContacts) {
+        btnAllowAllContacts.addEventListener('click', async () => {
+            if (contactPermissionModal) contactPermissionModal.classList.remove('active');
+            await pickDeviceContacts({ multiple: true, isAll: true });
+        });
+    }
+
+    // Action 2: "Choose Contact"
+    if (btnChooseContacts) {
+        btnChooseContacts.addEventListener('click', async () => {
+            if (contactPermissionModal) contactPermissionModal.classList.remove('active');
+            await pickDeviceContacts({ multiple: false, isAll: false });
+        });
+    }
 
     const LOCAL_CONTACTS_KEY = 'ov_user_contacts_list';
 
@@ -1500,12 +1563,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Web Contacts Picker & Device Integration (Samsung, Android, iPhone)
-    async function pickDeviceContacts() {
+    async function pickDeviceContacts(options = { multiple: true, isAll: true }) {
+        const isMultiple = options.multiple !== false;
+
         // Standard Web Contacts Picker API (Chrome on Samsung / Android devices, progressive web apps)
         if (hasContactPicker) {
             try {
                 const props = ['name', 'tel'];
-                const opts = { multiple: true };
+                const opts = { multiple: isMultiple };
                 // Request user permission directly via native device dialog
                 const picked = await navigator.contacts.select(props, opts);
                 if (picked && picked.length > 0) {
@@ -1529,11 +1594,12 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (addedCount > 0) {
                         saveContactsToStorage(contactsList);
                         renderContacts(contactsSearchInput ? contactsSearchInput.value : '');
-                        showToast(`Successfully imported ${addedCount} contact${addedCount === 1 ? '' : 's'} from your phone!`, 'success');
+                        showToast(`Successfully added ${addedCount} contact${addedCount === 1 ? '' : 's'} from your device!`, 'success');
                     } else {
-                        showToast('Contacts selected were already saved.', 'info');
+                        showToast('Contacts selected were already in your list.', 'info');
                     }
                     if (addContactModal) addContactModal.classList.remove('active');
+                    if (contactPermissionModal) contactPermissionModal.classList.remove('active');
                     return;
                 }
             } catch (err) {
@@ -1543,10 +1609,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // iPhone / iOS Safari or devices where Web Contacts API is restricted:
         // Offer quick interactive prompt to enter or paste contact without manual navigation
-        const promptInput = window.prompt(
-            '📱 Import Contact:\nEnter the Contact Name & Phone number separated by a comma:\n(e.g. John Doe, +2348031234567 or 080...)',
-            ''
-        );
+        const promptTitle = options.isAll 
+            ? '📱 Import Contacts:\nEnter Contact Name & Phone number separated by a comma:\n(e.g. John Doe, +2348031234567 or 080...)'
+            : '👉 Choose Contact:\nEnter Contact Name & Phone number:\n(e.g. Mary Jane, 08123456789)';
+
+        const promptInput = window.prompt(promptTitle, '');
 
         if (promptInput) {
             const parts = promptInput.split(',');
@@ -1559,6 +1626,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     renderContacts(contactsSearchInput ? contactsSearchInput.value : '');
                     showToast(`Contact ${name} added!`, 'success');
                     if (addContactModal) addContactModal.classList.remove('active');
+                    if (contactPermissionModal) contactPermissionModal.classList.remove('active');
                     return;
                 }
             } else if (promptInput.trim()) {
@@ -1569,6 +1637,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 renderContacts(contactsSearchInput ? contactsSearchInput.value : '');
                 showToast(`Contact saved!`, 'success');
                 if (addContactModal) addContactModal.classList.remove('active');
+                if (contactPermissionModal) contactPermissionModal.classList.remove('active');
                 return;
             }
         }
@@ -1577,22 +1646,12 @@ document.addEventListener('DOMContentLoaded', () => {
         if (addContactModal) addContactModal.classList.add('active');
     }
 
-    if (btnDeviceContactsSync) {
-        btnDeviceContactsSync.addEventListener('click', pickDeviceContacts);
-    }
-
     if (btnModalPickContacts) {
         btnModalPickContacts.addEventListener('click', () => {
-            pickDeviceContacts();
+            if (addContactModal) addContactModal.classList.remove('active');
+            openContactOptionsDialog();
         });
     }
-
-    if (btnOpenContactModal) btnOpenContactModal.addEventListener('click', () => {
-        if (addContactModal) addContactModal.classList.add('active');
-    });
-    if (btnDialerAddContact) btnDialerAddContact.addEventListener('click', () => {
-        if (addContactModal) addContactModal.classList.add('active');
-    });
     if (btnCloseContactModal) btnCloseContactModal.addEventListener('click', () => {
         if (addContactModal) addContactModal.classList.remove('active');
     });

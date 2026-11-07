@@ -1332,7 +1332,43 @@
             </div>
         </div>
 
-        <!-- Add Contact Modal (Manual Entry + Device Import Fallback) -->
+        <!-- Contact Permission / Option Sheet Modal -->
+        <div class="app-modal-overlay" id="contact-permission-modal">
+            <div class="app-modal-card" style="text-align:center; padding:24px 20px;">
+                <div style="width:58px; height:58px; border-radius:50%; background:#eff6ff; color:#2563eb; font-size:1.8rem; display:flex; align-items:center; justify-content:center; margin:0 auto 12px; border:2px solid #bfdbfe;">
+                    📱
+                </div>
+                <div style="font-size:1.2rem; font-weight:800; color:var(--text-primary); margin-bottom:6px;">
+                    Access Device Contacts
+                </div>
+                <p style="font-size:0.85rem; color:var(--text-secondary); line-height:1.5; margin-bottom:20px;">
+                    Three Star needs your permission to read your phone contacts so you can call them directly with zero dialing errors.
+                </p>
+
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <!-- Option 1: Allow All Contacts -->
+                    <button type="button" id="btn-allow-all-contacts" class="btn-green-pill" style="padding:14px; font-size:0.95rem; font-weight:800; background:linear-gradient(135deg, #2563eb, #1d4ed8); display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <span>✅</span>
+                        <span>Allow All Contacts</span>
+                    </button>
+
+                    <!-- Option 2: Choose Contact -->
+                    <button type="button" id="btn-choose-contacts" class="btn-outline-pill" style="padding:13px; font-size:0.92rem; font-weight:700; border:2px solid #2563eb; color:#1d4ed8; background:#eff6ff; display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <span>👉</span>
+                        <span>Choose Contact</span>
+                    </button>
+
+                    <!-- Option 3: Manual Entry -->
+                    <button type="button" id="btn-manual-add-contact" class="btn-outline-pill" style="padding:11px; font-size:0.85rem; font-weight:600; border:1px solid var(--border-light); color:var(--text-secondary); background:#ffffff;">
+                        ✏️ Enter Manually
+                    </button>
+                </div>
+
+                <button type="button" class="modal-close-x close-permission-modal" style="top:14px; right:14px;">✕</button>
+            </div>
+        </div>
+
+        <!-- Add Contact Modal (Manual Entry Form) -->
         <div class="app-modal-overlay" id="add-contact-modal">
             <div class="app-modal-card">
                 <div class="modal-header-row">
@@ -1594,6 +1630,6 @@
     <div class="toast-wrap" id="toast-container"></div>
 
     <!-- JavaScript Application Logic -->
-    <script src="js/app.js?v=v12"></script>
+    <script src="js/app.js?v=v13"></script>
 </body>
 </html>
