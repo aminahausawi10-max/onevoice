@@ -2506,7 +2506,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (config.is_configured) {
                 badge.style.background = '#dcfce7';
                 badge.style.color = '#15803d';
-                badge.textContent = '🟢 Connected & Active';
+                badge.textContent = config.account_sid && config.account_sid.includes('DEMO') ? '🟢 Connected (Developer Sandbox)' : '🟢 Connected & Active';
             } else {
                 badge.style.background = '#fef3c7';
                 badge.style.color = '#b45309';
