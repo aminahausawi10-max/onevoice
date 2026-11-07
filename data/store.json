@@ -15,12 +15,12 @@
     "is_verified": true
   },
   "wallet": {
-    "balance": 0,
+    "balance": 450,
     "currency": "NGN"
   },
   "wallets": {
     "1": {
-      "balance": 0,
+      "balance": 450,
       "currency": "NGN"
     },
     "2": {
@@ -42,7 +42,10 @@
     "admin_bank_name": "MoMo PSB (MTN MoMo)",
     "admin_account_number": "9090809080",
     "admin_account_name": "Amina Ahmed Inuwa (Three Star Admin)",
-    "paystack_public_key": "pk_test_a8e259b3294c7b884d5df688172082b2024b176f"
+    "paystack_public_key": "pk_test_a8e259b3294c7b884d5df688172082b2024b176f",
+    "pressone_account_sid": "",
+    "pressone_auth_token": "",
+    "pressone_from_number": ""
   },
   "transactions": [],
   "wallet_ledger": [
@@ -115,6 +118,25 @@
       "narration": "Transfer to 08012345678 failed: Beneficiary phone not registered on Three Star",
       "status": "failed",
       "created_at": "10/15/2026, 10:45:00 PM"
+    },
+    {
+      "id": 5,
+      "user_id": 1,
+      "transaction_type": "bank_deposit",
+      "gross_amount": 500,
+      "platform_fee": 50,
+      "net_credited": 450,
+      "balance_before": 0,
+      "balance_after": 450,
+      "channel": "phone_account_deposit",
+      "recipient_phone_account": "+2348031234567",
+      "admin_momo_account": "9090809080 (MoMo PSB)",
+      "admin_momo_payout_ref": "MOMO-PAYOUT-1794039564347",
+      "provider_reference": "BANK-OPAY-UXF830LT",
+      "internal_reference": "OV-DEP-3LL3TQQ",
+      "narration": "Wallet Deposit to Account 8031234567 (Net credited ₦450.00)",
+      "status": "successful",
+      "created_at": "11/7/2026, 9:19:24 AM"
     }
   ],
   "platform_revenue_ledger": [
@@ -133,6 +155,22 @@
       "cumulative_platform_revenue": 1000,
       "settled_at": "10/11/2026, 10:08:41 AM",
       "created_at": "10/11/2026, 10:08:41 AM"
+    },
+    {
+      "id": 2,
+      "source_type": "deposit_share",
+      "source_reference": "OV-DEP-3LL3TQQ",
+      "user_id": 1,
+      "user_phone": "+2348031234567",
+      "user_name": "Super Admin",
+      "gross_deposit": 500,
+      "amount": 50,
+      "payout_destination": "MoMo PSB: 9090809080 (Amina Ahmed Inuwa)",
+      "payout_reference": "MOMO-PAYOUT-1794039564347",
+      "settlement_status": "dispatched_direct_to_momo",
+      "cumulative_platform_revenue": 1050,
+      "settled_at": "11/7/2026, 9:19:24 AM",
+      "created_at": "11/7/2026, 9:19:24 AM"
     }
   ],
   "call_logs": [],
@@ -219,5 +257,6 @@
       "created_at": "10/16/2026, 12:27:13 AM"
     }
   ],
-  "active_user_id": 1
+  "active_user_id": 1,
+  "active_calls": {}
 }

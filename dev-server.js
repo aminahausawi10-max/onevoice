@@ -5,6 +5,8 @@
  */
 
 const http = require('http');
+const https = require('https');
+const querystring = require('querystring');
 const fs = require('fs');
 const path = require('path');
 const url = require('url');
@@ -66,6 +68,194 @@ try {
 const otpSessions = new Map();
 const passwordResetSessions = new Map();
 
+function formatE164(phone) {
+    if (!phone) return '';
+    let cleaned = phone.toString().replace(/[^\d+]/g, '');
+    if (cleaned.startsWith('+')) return cleaned;
+    if (cleaned.startsWith('0') && cleaned.length === 11) {
+        return '+234' + cleaned.substring(1);
+    }
+    if (cleaned.length === 10) {
+        return '+234' + cleaned;
+    }
+    if (cleaned.startsWith('234') && cleaned.length >= 13) {
+        return '+' + cleaned;
+    }
+    return '+' + cleaned;
+}
+
+function getPressOneConfig(store) {
+    const s = (store && store.settings) || {};
+    return {
+        accountSid: (process.env.PRESSONE_ACCOUNT_SID || s.pressone_account_sid || '').trim(),
+        authToken: (process.env.PRESSONE_AUTH_TOKEN || s.pressone_auth_token || '').trim(),
+        fromNumber: (process.env.PRESSONE_FROM_NUMBER || s.pressone_from_number || '').trim(),
+        baseUrl: (process.env.PRESSONE_BASE_URL || 'https://api.signals.pressone.africa').trim()
+    };
+}
+
+function makePressOneCall({ accountSid, authToken, from, to, url, statusCallback, twiml }) {
+    return new Promise((resolve) => {
+        const postData = querystring.stringify({
+            To: to,
+            From: from,
+            ...(url ? { Url: url } : {}),
+            ...(twiml ? { Twiml: twiml } : {}),
+            ...(statusCallback ? {
+                StatusCallback: statusCallback,
+                StatusCallbackEvent: 'initiated,ringing,answered,completed',
+                StatusCallbackMethod: 'POST'
+            } : {})
+        });
+
+        const authHeader = 'Basic ' + Buffer.from(`${accountSid}:${authToken}`).toString('base64');
+        const req = https.request({
+            hostname: 'api.signals.pressone.africa',
+            port: 443,
+            path: `/2010-04-01/Accounts/${accountSid}/Calls.json`,
+            method: 'POST',
+            headers: {
+                'Authorization': authHeader,
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Length': Buffer.byteLength(postData)
+            }
+        }, (res) => {
+            let data = '';
+            res.on('data', chunk => { data += chunk; });
+            res.on('end', () => {
+                try {
+                    const parsed = JSON.parse(data);
+                    if (res.statusCode >= 200 && res.statusCode < 300) {
+                        resolve({ success: true, data: parsed, statusCode: res.statusCode });
+                    } else {
+                        resolve({ success: false, statusCode: res.statusCode, error: parsed.message || parsed.error_message || parsed });
+                    }
+                } catch (e) {
+                    resolve({ success: res.statusCode >= 200 && res.statusCode < 300, statusCode: res.statusCode, raw: data });
+                }
+            });
+        });
+
+        req.on('error', (err) => {
+            resolve({ success: false, error: err.message });
+        });
+
+        req.write(postData);
+        req.end();
+    });
+}
+
+function terminatePressOneCall({ accountSid, authToken, callSid }) {
+    return new Promise((resolve) => {
+        if (!accountSid || !authToken || !callSid) return resolve({ success: false, message: 'Missing parameters' });
+        const postData = querystring.stringify({ Status: 'completed' });
+        const authHeader = 'Basic ' + Buffer.from(`${accountSid}:${authToken}`).toString('base64');
+        const req = https.request({
+            hostname: 'api.signals.pressone.africa',
+            port: 443,
+            path: `/2010-04-01/Accounts/${accountSid}/Calls/${callSid}.json`,
+            method: 'POST',
+            headers: {
+                'Authorization': authHeader,
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Length': Buffer.byteLength(postData)
+            }
+        }, (res) => {
+            let data = '';
+            res.on('data', chunk => { data += chunk; });
+            res.on('end', () => {
+                try {
+                    const parsed = JSON.parse(data);
+                    resolve({ success: true, data: parsed });
+                } catch (e) {
+                    resolve({ success: true, raw: data });
+                }
+            });
+        });
+
+        req.on('error', (err) => {
+            resolve({ success: false, error: err.message });
+        });
+
+        req.write(postData);
+        req.end();
+    });
+}
+
+function finalizeCallRecord(activeCall, actualDurationSeconds, store) {
+    if (!activeCall) return { id: 0, cost: 0, carrier_cost: 0, platform_margin: 0 };
+    const duration = Math.max(0, parseInt(actualDurationSeconds || 0));
+    const retailRate = parseFloat(activeCall.retail_rate_per_min || (store.settings && store.settings.nigeria_call_rate_per_min) || 12.00);
+    const carrierRate = parseFloat(activeCall.carrier_cost_per_min || (store.settings && store.settings.carrier_wholesale_cost_per_min) || 8.50);
+
+    const cost = duration > 0 ? Math.max(0.20, Math.round(((duration / 60.0) * retailRate) * 100) / 100) : 0.00;
+    const carrierCost = duration > 0 ? Math.round(((duration / 60.0) * carrierRate) * 100) / 100 : 0.00;
+    const platformMargin = Math.max(0, Math.round((cost - carrierCost) * 100) / 100);
+
+    const userWallet = getUserWallet(activeCall.user_id, store);
+    const currBal = parseFloat(userWallet.balance || 0);
+    const newBal = Math.max(0, Math.round((currBal - cost) * 100) / 100);
+    userWallet.balance = newBal;
+    if (activeCall.user_id === 1) store.wallet.balance = newBal;
+
+    const callId = (store.call_logs || []).length + 1;
+    const callRecord = {
+        id: callId,
+        call_sid: activeCall.call_sid,
+        user_id: activeCall.user_id,
+        destination_number: activeCall.destination_number,
+        destination_country: activeCall.destination_country || 'Nigeria (All Networks)',
+        duration_seconds: duration,
+        retail_rate_per_min: retailRate,
+        cost: cost,
+        carrier_cost: carrierCost,
+        platform_margin: platformMargin,
+        status: (activeCall.status === 'completed' || duration > 0) ? 'completed' : (activeCall.status || 'completed'),
+        created_at: new Date().toLocaleString()
+    };
+
+    if (!store.call_logs) store.call_logs = [];
+    store.call_logs.push(callRecord);
+
+    if (cost > 0) {
+        const ref = 'OV-CALL-' + callId;
+        if (!store.wallet_ledger) store.wallet_ledger = [];
+        store.wallet_ledger.push({
+            id: store.wallet_ledger.length + 1,
+            user_id: activeCall.user_id,
+            transaction_type: 'call_charge',
+            gross_amount: cost,
+            platform_fee: 0.00,
+            net_credited: -cost,
+            balance_before: currBal,
+            balance_after: newBal,
+            channel: 'telephony_deduction',
+            internal_reference: ref,
+            narration: `Call to ${activeCall.destination_country || 'Nigeria'} (${duration}s) @ ₦${retailRate}/min`,
+            status: 'successful',
+            created_at: new Date().toLocaleString()
+        });
+
+        if (platformMargin > 0) {
+            if (!store.platform_revenue_ledger) store.platform_revenue_ledger = [];
+            const lastRev = store.platform_revenue_ledger.length > 0 ? store.platform_revenue_ledger[store.platform_revenue_ledger.length - 1].cumulative_platform_revenue : 0;
+            store.platform_revenue_ledger.push({
+                id: store.platform_revenue_ledger.length + 1,
+                source_type: 'telephony_margin',
+                source_reference: ref,
+                user_id: activeCall.user_id,
+                amount: platformMargin,
+                cumulative_platform_revenue: Math.round((lastRev + platformMargin) * 100) / 100,
+                settlement_status: 'settled',
+                settled_at: new Date().toLocaleString(),
+                created_at: new Date().toLocaleString()
+            });
+        }
+    }
+
+    return callRecord;
+}
+
 function getStore() {
     if (inMemoryStore) return inMemoryStore;
     let store = {};
@@ -89,9 +279,17 @@ function getStore() {
             admin_bank_name: "OPay (Paycom)",
             admin_account_number: "9090809080",
             admin_account_name: "Three Star / Amina Ahmed Inuwa",
-            paystack_public_key: "pk_test_a8e259b3294c7b884d5df688172082b2024b176f"
+            paystack_public_key: "pk_test_a8e259b3294c7b884d5df688172082b2024b176f",
+            pressone_account_sid: process.env.PRESSONE_ACCOUNT_SID || "",
+            pressone_auth_token: process.env.PRESSONE_AUTH_TOKEN || "",
+            pressone_from_number: process.env.PRESSONE_FROM_NUMBER || ""
         };
+    } else {
+        if (!store.settings.pressone_account_sid && process.env.PRESSONE_ACCOUNT_SID) store.settings.pressone_account_sid = process.env.PRESSONE_ACCOUNT_SID;
+        if (!store.settings.pressone_auth_token && process.env.PRESSONE_AUTH_TOKEN) store.settings.pressone_auth_token = process.env.PRESSONE_AUTH_TOKEN;
+        if (!store.settings.pressone_from_number && process.env.PRESSONE_FROM_NUMBER) store.settings.pressone_from_number = process.env.PRESSONE_FROM_NUMBER;
     }
+    if (!store.active_calls) store.active_calls = {};
 
     if (!store.user) {
         store.user = {
@@ -329,6 +527,8 @@ const requestHandler = (req, res) => {
     const isWebhook = cleanPath === '/api/webhook_payment' || reqCleanPath === '/api/webhook_payment';
     const isAdmin = cleanPath === '/api/admin' || reqCleanPath === '/api/admin';
     const isCalls = cleanPath === '/api/calls' || reqCleanPath === '/api/calls';
+    const isVoiceWebhook = cleanPath === '/api/voice_webhook' || reqCleanPath === '/api/voice_webhook';
+    const isVoiceStatus = cleanPath === '/api/voice_status' || reqCleanPath === '/api/voice_status';
     const isContacts = cleanPath === '/api/contacts' || reqCleanPath === '/api/contacts';
     const isSettings = cleanPath === '/api/settings' || reqCleanPath === '/api/settings';
     const isAuth = cleanPath === '/api/auth' || reqCleanPath === '/api/auth';
@@ -345,9 +545,13 @@ const requestHandler = (req, res) => {
             if (typeof req.body !== 'object' || Buffer.isBuffer(req.body)) {
                 try {
                     const str = Buffer.isBuffer(req.body) ? req.body.toString('utf8') : req.body.toString();
-                    parsed = str ? JSON.parse(str) : {};
+                    try {
+                        parsed = JSON.parse(str);
+                    } catch (e) {
+                        parsed = querystring.parse(str);
+                    }
                 } catch (e) {
-                    return sendJson({ success: false, message: 'Invalid JSON payload' }, 400);
+                    return sendJson({ success: false, message: 'Invalid payload' }, 400);
                 }
             }
             return callback(parsed);
@@ -356,10 +560,16 @@ const requestHandler = (req, res) => {
         req.on('data', chunk => { body += chunk; });
         req.on('end', () => {
             let parsed = {};
-            try {
-                parsed = body ? JSON.parse(body) : {};
-            } catch (err) {
-                return sendJson({ success: false, message: 'Invalid JSON payload' }, 400);
+            if (body) {
+                try {
+                    parsed = JSON.parse(body);
+                } catch (err) {
+                    try {
+                        parsed = querystring.parse(body);
+                    } catch (e) {
+                        return sendJson({ success: false, message: 'Invalid payload' }, 400);
+                    }
+                }
             }
             callback(parsed);
         });
@@ -759,7 +969,15 @@ const requestHandler = (req, res) => {
                     platform_fixed_fee: store.settings.platform_fixed_fee,
                     nigeria_call_rate_per_min: store.settings.nigeria_call_rate_per_min,
                     carrier_wholesale_cost_per_min: store.settings.carrier_wholesale_cost_per_min,
-                    virtual_bank_provider: store.settings.virtual_bank_provider
+                    virtual_bank_provider: store.settings.virtual_bank_provider,
+                    pressone: {
+                        is_configured: !!(getPressOneConfig(store).accountSid && getPressOneConfig(store).authToken && getPressOneConfig(store).fromNumber),
+                        account_sid: getPressOneConfig(store).accountSid,
+                        auth_token_preview: getPressOneConfig(store).authToken ? ('••••••••' + getPressOneConfig(store).authToken.slice(-4)) : '',
+                        has_auth_token: !!getPressOneConfig(store).authToken,
+                        from_number: getPressOneConfig(store).fromNumber,
+                        base_url: getPressOneConfig(store).baseUrl
+                    }
                 },
                 ledger: (store.wallet_ledger || []).slice().reverse(),
                 revenue_records: (store.platform_revenue_ledger || []).slice().reverse(),
@@ -773,7 +991,11 @@ const requestHandler = (req, res) => {
                 support_messages: (store.support_messages || []).slice(),
                 call_summary: {
                     total_calls: (store.call_logs || []).length,
-                    recent_calls: (store.call_logs || []).slice(-10).reverse()
+                    total_minutes: Math.round(((store.call_logs || []).reduce((acc, c) => acc + (parseInt(c.duration_seconds) || 0), 0) / 60) * 10) / 10,
+                    total_revenue: totalCallsCost,
+                    total_carrier_cost: Math.round(((store.call_logs || []).reduce((acc, c) => acc + (parseFloat(c.carrier_cost) || 0), 0)) * 100) / 100,
+                    total_margin: totalTelephonyMargin,
+                    recent_calls: (store.call_logs || []).slice(-30).reverse()
                 }
             });
         }
@@ -787,8 +1009,20 @@ const requestHandler = (req, res) => {
                     if (body.nigeria_call_rate_per_min !== undefined) {
                         store.settings.nigeria_call_rate_per_min = parseFloat(body.nigeria_call_rate_per_min);
                     }
+                    if (body.carrier_wholesale_cost_per_min !== undefined) {
+                        store.settings.carrier_wholesale_cost_per_min = parseFloat(body.carrier_wholesale_cost_per_min);
+                    }
+                    if (body.pressone_account_sid !== undefined) {
+                        store.settings.pressone_account_sid = body.pressone_account_sid.trim();
+                    }
+                    if (body.pressone_auth_token !== undefined && body.pressone_auth_token.trim() && !body.pressone_auth_token.includes('••••')) {
+                        store.settings.pressone_auth_token = body.pressone_auth_token.trim();
+                    }
+                    if (body.pressone_from_number !== undefined) {
+                        store.settings.pressone_from_number = body.pressone_from_number.trim();
+                    }
                     saveStore(store);
-                    return sendJson({ success: true, message: 'Settings updated!', settings: store.settings });
+                    return sendJson({ success: true, message: 'Settings updated successfully!', settings: store.settings });
                 }
 
                 if (body.action === 'reconcile_entry') {
@@ -845,98 +1079,315 @@ const requestHandler = (req, res) => {
         }
     }
 
-    // 5. API: Calls (Billing with Wholesale Cost & Margin in NGN)
+    // 5. API: Signals by PressOne Voice Webhook (OneML Call Flow)
+    if (isVoiceWebhook) {
+        res.writeHead(200, { 'Content-Type': 'application/xml; charset=utf-8' });
+        const store = getStore();
+        const bridgeTo = parsedUrl.query.bridge_to;
+        const callerId = parsedUrl.query.caller_id || (store.settings && store.settings.pressone_from_number) || '';
+        const outboundTo = parsedUrl.query.outbound_to;
+
+        if (bridgeTo) {
+            const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Say voice="alice">Connecting your call via Three Star network.</Say>
+    <Dial callerId="${callerId}" answerOnBridge="true" timeout="30">
+        <Number>${bridgeTo}</Number>
+    </Dial>
+</Response>`;
+            return res.end(xml);
+        }
+
+        const xml = `<?xml version="1.0" encoding="UTF-8"?>
+<Response>
+    <Say voice="alice">Thank you for calling Three Star Voice Network. Your call is being connected.</Say>
+</Response>`;
+        return res.end(xml);
+    }
+
+    // 5b. API: Signals by PressOne Status Callback Webhook
+    if (isVoiceStatus) {
+        return parseBody((body) => {
+            const sid = body.CallSid || body.call_sid;
+            const status = (body.CallStatus || body.call_status || body.status || '').toLowerCase();
+            const duration = parseInt(body.CallDuration || body.duration || 0);
+
+            const store = getStore();
+            if (store.active_calls && sid && store.active_calls[sid]) {
+                const active = store.active_calls[sid];
+                active.status = status;
+                if (status === 'in-progress' && !active.answered_at) {
+                    active.answered_at = new Date().toISOString();
+                }
+                if (['completed', 'busy', 'no-answer', 'failed', 'canceled'].includes(status)) {
+                    finalizeCallRecord(active, duration, store);
+                    delete store.active_calls[sid];
+                    saveStore(store);
+                }
+            }
+            return sendJson({ success: true, received: true, sid: sid, status: status });
+        });
+    }
+
+    // 5c. API: Calls (Telephony PSTN Outbound, In-Call Monitoring, Auto-Billing & History)
     if (isCalls) {
         const store = getStore();
         if (req.method === 'GET') {
             const activeUser = getActiveUser(req, store) || store.user;
+
+            // Check active call status query (polling from web client)
+            if (parsedUrl.query.active === 'true' || parsedUrl.query.call_sid) {
+                const sid = parsedUrl.query.call_sid;
+                const active = (sid && store.active_calls) ? store.active_calls[sid] : null;
+
+                if (!active) {
+                    const recentLog = (store.call_logs || []).slice().reverse().find(c => c.call_sid === sid);
+                    if (recentLog) {
+                        return sendJson({
+                            success: true,
+                            status: 'completed',
+                            duration_seconds: recentLog.duration_seconds,
+                            cost: recentLog.cost,
+                            call_log: recentLog
+                        });
+                    }
+                    return sendJson({ success: false, status: 'completed', message: 'No active call session.' });
+                }
+
+                const now = Date.now();
+                const startTs = active.answered_at ? new Date(active.answered_at).getTime() : new Date(active.started_at).getTime();
+                const elapsedSeconds = Math.max(0, Math.floor((now - startTs) / 1000));
+
+                // Auto-cutoff: user wallet balance run-out protection
+                if (elapsedSeconds >= active.max_duration_seconds) {
+                    const pConfig = getPressOneConfig(store);
+                    if (pConfig.accountSid && pConfig.authToken) {
+                        terminatePressOneCall({ accountSid: pConfig.accountSid, authToken: pConfig.authToken, callSid: sid }).catch(() => {});
+                    }
+                    active.status = 'completed';
+                    const finalized = finalizeCallRecord(active, elapsedSeconds, store);
+                    delete store.active_calls[sid];
+                    saveStore(store);
+                    return sendJson({
+                        success: true,
+                        status: 'completed',
+                        terminated_reason: 'insufficient_balance',
+                        duration_seconds: elapsedSeconds,
+                        cost: finalized.cost,
+                        new_balance: getUserWallet(active.user_id, store).balance,
+                        message: 'Call terminated automatically: Maximum time reached for available wallet balance.'
+                    });
+                }
+
+                return sendJson({
+                    success: true,
+                    call_sid: sid,
+                    status: active.status || 'in-progress',
+                    duration_seconds: active.answered_at ? elapsedSeconds : 0,
+                    destination: active.destination_number,
+                    max_duration_seconds: active.max_duration_seconds
+                });
+            }
+
             const userCalls = (store.call_logs || []).filter(c => !c.user_id || c.user_id === activeUser.id);
-            return sendJson({ success: true, calls: userCalls.slice(-20).reverse() });
+            return sendJson({ success: true, calls: userCalls.slice(-50).reverse() });
         }
+
         if (req.method === 'POST') {
-            return parseBody((body) => {
+            return parseBody(async (body) => {
                 const activeUser = getActiveUser(req, store) || store.user;
                 const userWallet = getUserWallet(activeUser.id, store);
+                const action = body.action;
+
+                // Action A: Start Outbound PSTN Call via Signals by PressOne
+                if (action === 'start_call') {
+                    const destNumber = (body.destination_number || '').trim();
+                    const destCountry = body.destination_country || 'Nigeria (All Networks)';
+                    const retailRate = parseFloat(body.rate_per_minute || (store.settings.nigeria_call_rate_per_min || 12.00));
+                    const carrierRate = parseFloat(store.settings.carrier_wholesale_cost_per_min || 8.50);
+                    const callMode = body.call_mode || 'direct';
+
+                    const currBal = parseFloat(userWallet.balance || 0);
+                    if (currBal < retailRate) {
+                        return sendJson({
+                            success: false,
+                            message: `Insufficient calling balance. Minimum ₦${retailRate.toFixed(2)} required to initiate a call.`
+                        }, 402);
+                    }
+
+                    const pConfig = getPressOneConfig(store);
+                    if (!pConfig.accountSid || !pConfig.authToken || !pConfig.fromNumber) {
+                        return sendJson({
+                            success: false,
+                            error_code: 'MISSING_PRESSONE_CONFIG',
+                            message: 'Signals by PressOne credentials are not configured. Please provide PRESSONE_ACCOUNT_SID, PRESSONE_AUTH_TOKEN, and PRESSONE_FROM_NUMBER in Admin Settings or .env to make real carrier calls.'
+                        }, 400);
+                    }
+
+                    const destE164 = formatE164(destNumber);
+                    if (!destE164 || destE164.length < 8) {
+                        return sendJson({ success: false, message: 'Invalid destination phone number.' }, 400);
+                    }
+
+                    const maxDurationSeconds = Math.max(30, Math.floor((currBal / retailRate) * 60));
+
+                    const host = req.headers['x-forwarded-host'] || req.headers.host || 'one-voice-orpin.vercel.app';
+                    const protocol = (req.headers['x-forwarded-proto'] || 'https');
+                    const appBaseUrl = process.env.APP_BASE_URL || `${protocol}://${host}`;
+                    const statusCallbackUrl = `${appBaseUrl}/api/voice_status`;
+                    const voiceWebhookUrl = `${appBaseUrl}/api/voice_webhook`;
+
+                    let targetCallTo = destE164;
+                    let targetUrl = `${voiceWebhookUrl}?outbound_to=${encodeURIComponent(destE164)}`;
+
+                    if (callMode === 'bridge' && activeUser.phone) {
+                        const userPhoneE164 = formatE164(activeUser.phone);
+                        if (userPhoneE164 && userPhoneE164.length >= 8) {
+                            targetCallTo = userPhoneE164;
+                            targetUrl = `${voiceWebhookUrl}?bridge_to=${encodeURIComponent(destE164)}&caller_id=${encodeURIComponent(pConfig.fromNumber)}`;
+                        }
+                    }
+
+                    try {
+                        const pressOneRes = await makePressOneCall({
+                            accountSid: pConfig.accountSid,
+                            authToken: pConfig.authToken,
+                            from: pConfig.fromNumber,
+                            to: targetCallTo,
+                            url: targetUrl,
+                            statusCallback: statusCallbackUrl
+                        });
+
+                        if (!pressOneRes.success) {
+                            return sendJson({
+                                success: false,
+                                message: 'PressOne Network Error: ' + (typeof pressOneRes.error === 'string' ? pressOneRes.error : JSON.stringify(pressOneRes.error)),
+                                details: pressOneRes
+                            }, 502);
+                        }
+
+                        const sid = pressOneRes.data && pressOneRes.data.sid ? pressOneRes.data.sid : ('CA-' + Date.now());
+                        const activeRecord = {
+                            call_sid: sid,
+                            user_id: activeUser.id,
+                            destination_number: destNumber,
+                            destination_country: destCountry,
+                            e164: destE164,
+                            caller_id: pConfig.fromNumber,
+                            call_mode: callMode,
+                            retail_rate_per_min: retailRate,
+                            carrier_cost_per_min: carrierRate,
+                            max_duration_seconds: maxDurationSeconds,
+                            status: (pressOneRes.data && pressOneRes.data.status) || 'queued',
+                            started_at: new Date().toISOString(),
+                            answered_at: null,
+                            duration_seconds: 0
+                        };
+
+                        if (!store.active_calls) store.active_calls = {};
+                        store.active_calls[sid] = activeRecord;
+                        saveStore(store);
+
+                        return sendJson({
+                            success: true,
+                            call_sid: sid,
+                            status: activeRecord.status,
+                            max_duration_seconds: maxDurationSeconds,
+                            destination_number: destNumber,
+                            destination_country: destCountry
+                        });
+                    } catch (err) {
+                        return sendJson({ success: false, message: 'Telephony gateway failed: ' + err.message }, 500);
+                    }
+                }
+
+                // Action B: End Call
+                if (action === 'end_call') {
+                    const sid = body.call_sid;
+                    const pConfig = getPressOneConfig(store);
+
+                    if (pConfig.accountSid && pConfig.authToken && sid && sid.startsWith('CA')) {
+                        try {
+                            await terminatePressOneCall({
+                                accountSid: pConfig.accountSid,
+                                authToken: pConfig.authToken,
+                                callSid: sid
+                            });
+                        } catch (e) {}
+                    }
+
+                    let active = store.active_calls ? store.active_calls[sid] : null;
+                    let duration = parseInt(body.duration_seconds || 0);
+
+                    if (active) {
+                        const now = Date.now();
+                        const start = active.answered_at ? new Date(active.answered_at).getTime() : new Date(active.started_at).getTime();
+                        duration = Math.max(duration, Math.floor((now - start) / 1000));
+                        active.status = 'completed';
+                        const finalized = finalizeCallRecord(active, duration, store);
+                        delete store.active_calls[sid];
+                        saveStore(store);
+
+                        return sendJson({
+                            success: true,
+                            call_sid: sid,
+                            status: 'completed',
+                            duration_seconds: duration,
+                            cost: finalized.cost,
+                            new_balance: getUserWallet(active.user_id, store).balance
+                        });
+                    }
+
+                    const retailRate = parseFloat(body.rate_per_minute || (store.settings.nigeria_call_rate_per_min || 12.00));
+                    const carrierRate = parseFloat(store.settings.carrier_wholesale_cost_per_min || 8.50);
+                    const dummyActive = {
+                        call_sid: sid || ('CA-' + Date.now()),
+                        user_id: activeUser.id,
+                        destination_number: body.destination_number || 'Unknown',
+                        destination_country: body.destination_country || 'Nigeria',
+                        retail_rate_per_min: retailRate,
+                        carrier_cost_per_min: carrierRate,
+                        status: 'completed'
+                    };
+                    const finalized = finalizeCallRecord(dummyActive, duration, store);
+                    saveStore(store);
+
+                    return sendJson({
+                        success: true,
+                        status: 'completed',
+                        duration_seconds: duration,
+                        cost: finalized.cost,
+                        new_balance: getUserWallet(activeUser.id, store).balance
+                    });
+                }
+
+                // Action C: Fallback Legacy Duration Deduction
                 const destNumber = body.destination_number || 'Unknown';
                 const destCountry = body.destination_country || 'Nigeria (All Networks)';
                 const duration = parseInt(body.duration_seconds || 0);
                 const retailRate = parseFloat(body.rate_per_minute || (store.settings.nigeria_call_rate_per_min || 12.00));
                 const carrierRate = parseFloat(store.settings.carrier_wholesale_cost_per_min || 8.50);
 
-                const cost = Math.max(0.20, Math.round(((duration / 60.0) * retailRate) * 100) / 100);
-                const carrierCost = Math.round(((duration / 60.0) * carrierRate) * 100) / 100;
-                const platformMargin = Math.max(0, Math.round((cost - carrierCost) * 100) / 100);
-
-                const currBal = parseFloat(userWallet.balance || 0);
-                if (currBal < cost) {
-                    return sendJson({ success: false, message: 'Insufficient wallet credit for call' }, 402);
-                }
-
-                const newBal = Math.round((currBal - cost) * 100) / 100;
-                userWallet.balance = newBal;
-                if (activeUser.id === 1) store.wallet.balance = newBal;
-
-                const callId = (store.call_logs || []).length + 1;
-                const callRecord = {
-                    id: callId,
+                const dummyActive = {
+                    call_sid: 'LEGACY-' + Date.now(),
                     user_id: activeUser.id,
                     destination_number: destNumber,
                     destination_country: destCountry,
-                    duration_seconds: duration,
                     retail_rate_per_min: retailRate,
-                    cost: cost,
-                    carrier_cost: carrierCost,
-                    platform_margin: platformMargin,
-                    status: 'completed',
-                    created_at: new Date().toLocaleString()
+                    carrier_cost_per_min: carrierRate,
+                    status: 'completed'
                 };
-                if (!store.call_logs) store.call_logs = [];
-                store.call_logs.push(callRecord);
-
-                const ref = 'OV-CALL-' + callId;
-                if (!store.wallet_ledger) store.wallet_ledger = [];
-                store.wallet_ledger.push({
-                    id: store.wallet_ledger.length + 1,
-                    user_id: activeUser.id,
-                    transaction_type: 'call_charge',
-                    gross_amount: cost,
-                    platform_fee: 0.00,
-                    net_credited: -cost,
-                    balance_before: currBal,
-                    balance_after: newBal,
-                    channel: 'telephony_deduction',
-                    internal_reference: ref,
-                    narration: `Call to ${destCountry} (${duration}s) @ ₦${retailRate}/min`,
-                    status: 'successful',
-                    created_at: new Date().toLocaleString()
-                });
-
-                if (platformMargin > 0) {
-                    if (!store.platform_revenue_ledger) store.platform_revenue_ledger = [];
-                    const lastRev = store.platform_revenue_ledger.length > 0 ? store.platform_revenue_ledger[store.platform_revenue_ledger.length - 1].cumulative_platform_revenue : 0;
-                    store.platform_revenue_ledger.push({
-                        id: store.platform_revenue_ledger.length + 1,
-                        source_type: 'telephony_margin',
-                        source_reference: ref,
-                        user_id: activeUser.id,
-                        amount: platformMargin,
-                        cumulative_platform_revenue: Math.round((lastRev + platformMargin) * 100) / 100,
-                        settlement_status: 'settled',
-                        settled_at: new Date().toLocaleString(),
-                        created_at: new Date().toLocaleString()
-                    });
-                }
-
+                const finalized = finalizeCallRecord(dummyActive, duration, store);
                 saveStore(store);
 
                 return sendJson({
                     success: true,
-                    call_id: callRecord.id,
+                    call_id: finalized.id,
                     duration_seconds: duration,
-                    cost: cost,
-                    carrier_cost: carrierCost,
-                    platform_margin: platformMargin,
-                    new_balance: newBal
+                    cost: finalized.cost,
+                    carrier_cost: finalized.carrier_cost,
+                    platform_margin: finalized.platform_margin,
+                    new_balance: getUserWallet(activeUser.id, store).balance
                 });
             });
         }

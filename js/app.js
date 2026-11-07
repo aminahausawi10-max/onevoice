@@ -287,6 +287,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (typeof renderContacts === 'function') {
                 renderContacts(contactsSearchInput ? contactsSearchInput.value : '');
             }
+        } else if (pageName === 'calls') {
+            loadCallHistory();
         }
 
         // Close drawer if open
@@ -1283,39 +1285,237 @@ document.addEventListener('DOMContentLoaded', () => {
     const overlayCountry = document.getElementById('overlay-country-name');
     const overlayTimer = document.getElementById('overlay-call-timer');
 
-    function startCall() {
-        if (userWalletBalance < 12.0) {
-            showToast('Insufficient calling balance. Please top up your wallet.', 'error');
+    const overlayStatus = document.getElementById('overlay-call-status');
+
+    let currentCallSid = null;
+    let callStatusPollInterval = null;
+
+    async function startCall() {
+        const dest = (currentDialNumber || '').trim();
+        if (!dest || dest === '+' || dest === '+234' || dest.replace(/[^\d]/g, '').length < 7) {
+            showToast('Please enter a valid telephone number to dial.', 'warning');
             return;
         }
 
-        if (overlayNumber) overlayNumber.textContent = currentDialNumber;
-        if (overlayCountry) overlayCountry.textContent = selectedCountry.country_name;
+        const callRate = (selectedCountry && selectedCountry.rate) ? selectedCountry.rate : 12.00;
+        if (userWalletBalance < callRate) {
+            showToast(`Insufficient calling balance. Minimum ₦${callRate.toFixed(2)} required. Please top up your wallet.`, 'error');
+            return;
+        }
+
+        if (btnMakeCall) {
+            btnMakeCall.disabled = true;
+            btnMakeCall.style.opacity = '0.6';
+        }
+
+        if (overlayNumber) overlayNumber.textContent = dest;
+        if (overlayCountry) overlayCountry.textContent = (selectedCountry && selectedCountry.country_name) ? selectedCountry.country_name : 'Nigeria';
+        if (overlayTimer) overlayTimer.textContent = '00:00';
+        if (overlayStatus) overlayStatus.textContent = 'Initiating carrier connection...';
         if (callingOverlay) callingOverlay.classList.add('active');
 
         activeCallDuration = 0;
-        if (overlayTimer) overlayTimer.textContent = '00:00';
 
-        clearInterval(callTimerInterval);
-        callTimerInterval = setInterval(() => {
-            activeCallDuration++;
-            const mins = String(Math.floor(activeCallDuration / 60)).padStart(2, '0');
-            const secs = String(activeCallDuration % 60).padStart(2, '0');
-            if (overlayTimer) overlayTimer.textContent = `${mins}:${secs}`;
+        try {
+            const resp = await fetch('api/calls.js', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + (currentUser ? currentUser.token : '')
+                },
+                body: JSON.stringify({
+                    action: 'start_call',
+                    destination_number: dest,
+                    destination_country: (selectedCountry && selectedCountry.country_name) ? selectedCountry.country_name : 'Nigeria',
+                    rate_per_minute: callRate
+                })
+            });
 
-            // Deduct rate every 60 seconds
-            if (activeCallDuration % 60 === 0) {
-                userWalletBalance = Math.max(0, userWalletBalance - (selectedCountry.rate || 12.0));
-                updateBalanceUI(userWalletBalance);
+            const data = await resp.json();
+
+            if (!resp.ok || !data.success) {
+                if (callingOverlay) callingOverlay.classList.remove('active');
+                if (btnMakeCall) {
+                    btnMakeCall.disabled = false;
+                    btnMakeCall.style.opacity = '1';
+                }
+
+                if (data.error_code === 'MISSING_PRESSONE_CONFIG') {
+                    showToast('Signals by PressOne credentials required. Admin can configure them in Admin Settings or .env', 'warning');
+                } else {
+                    showToast(data.message || 'Could not initiate carrier call.', 'error');
+                }
+                return;
             }
-        }, 1000);
+
+            currentCallSid = data.call_sid;
+            if (overlayStatus) overlayStatus.textContent = 'Dialing mobile network... 📶';
+
+            clearInterval(callTimerInterval);
+            clearInterval(callStatusPollInterval);
+
+            // Local smooth timer
+            callTimerInterval = setInterval(() => {
+                activeCallDuration++;
+                const mins = String(Math.floor(activeCallDuration / 60)).padStart(2, '0');
+                const secs = String(activeCallDuration % 60).padStart(2, '0');
+                if (overlayTimer) overlayTimer.textContent = `${mins}:${secs}`;
+            }, 1000);
+
+            // Server status synchronization & wallet protection
+            callStatusPollInterval = setInterval(async () => {
+                if (!currentCallSid) return;
+                try {
+                    const statusRes = await fetch(`api/calls.js?active=true&call_sid=${encodeURIComponent(currentCallSid)}`, {
+                        headers: { 'Authorization': 'Bearer ' + (currentUser ? currentUser.token : '') }
+                    });
+                    const sData = await statusRes.json();
+
+                    if (sData.success) {
+                        if (sData.status === 'ringing') {
+                            if (overlayStatus) overlayStatus.textContent = 'Ringing destination phone... 🔔';
+                        } else if (sData.status === 'in-progress') {
+                            if (overlayStatus) overlayStatus.textContent = 'Connected • HD Audio 📶';
+                        }
+
+                        if (sData.duration_seconds && sData.duration_seconds > activeCallDuration) {
+                            activeCallDuration = sData.duration_seconds;
+                        }
+
+                        // Check if call completed or terminated due to balance cutoff
+                        if (sData.status === 'completed' || sData.terminated_reason) {
+                            clearInterval(callStatusPollInterval);
+                            clearInterval(callTimerInterval);
+                            if (callingOverlay) callingOverlay.classList.remove('active');
+                            if (sData.terminated_reason === 'insufficient_balance') {
+                                showToast('Call ended automatically: Insufficient wallet balance.', 'warning');
+                            } else {
+                                showToast(`Call completed. Duration: ${activeCallDuration}s`, 'info');
+                            }
+                            currentCallSid = null;
+                            if (btnMakeCall) {
+                                btnMakeCall.disabled = false;
+                                btnMakeCall.style.opacity = '1';
+                            }
+                            loadWalletData();
+                            loadCallHistory();
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Status poll warning:', e);
+                }
+            }, 1200);
+
+        } catch (err) {
+            if (callingOverlay) callingOverlay.classList.remove('active');
+            if (btnMakeCall) {
+                btnMakeCall.disabled = false;
+                btnMakeCall.style.opacity = '1';
+            }
+            showToast('Telephony network error: ' + err.message, 'error');
+        }
     }
 
-    function endCall() {
+    async function endCall() {
         clearInterval(callTimerInterval);
-        if (callingOverlay) callingOverlay.classList.remove('active');
-        showToast(`Call ended. Duration: ${activeCallDuration}s`, 'info');
-        loadWalletData();
+        clearInterval(callStatusPollInterval);
+
+        if (overlayStatus) overlayStatus.textContent = 'Ending call...';
+
+        const sidToEnd = currentCallSid;
+        currentCallSid = null;
+
+        try {
+            const resp = await fetch('api/calls.js', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': 'Bearer ' + (currentUser ? currentUser.token : '')
+                },
+                body: JSON.stringify({
+                    action: 'end_call',
+                    call_sid: sidToEnd,
+                    duration_seconds: activeCallDuration,
+                    destination_number: currentDialNumber,
+                    destination_country: (selectedCountry && selectedCountry.country_name) ? selectedCountry.country_name : 'Nigeria',
+                    rate_per_minute: (selectedCountry && selectedCountry.rate) ? selectedCountry.rate : 12.00
+                })
+            });
+
+            const data = await resp.json();
+            if (callingOverlay) callingOverlay.classList.remove('active');
+            if (btnMakeCall) {
+                btnMakeCall.disabled = false;
+                btnMakeCall.style.opacity = '1';
+            }
+
+            const costStr = (data.cost !== undefined && data.cost > 0) ? ` • Deducted: ₦${parseFloat(data.cost).toFixed(2)}` : '';
+            showToast(`Call ended. Duration: ${data.duration_seconds || activeCallDuration}s${costStr}`, 'info');
+
+            loadWalletData();
+            loadCallHistory();
+        } catch (err) {
+            if (callingOverlay) callingOverlay.classList.remove('active');
+            if (btnMakeCall) {
+                btnMakeCall.disabled = false;
+                btnMakeCall.style.opacity = '1';
+            }
+            showToast(`Call ended. Duration: ${activeCallDuration}s`, 'info');
+            loadWalletData();
+            loadCallHistory();
+        }
+    }
+
+    async function loadCallHistory() {
+        const container = document.getElementById('calls-list-container');
+        if (!container) return;
+
+        try {
+            const resp = await fetch('api/calls.js', {
+                headers: { 'Authorization': 'Bearer ' + (currentUser ? currentUser.token : '') }
+            });
+            const data = await resp.json();
+
+            if (!data.success || !data.calls || data.calls.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align:center; padding:36px 16px; background:#ffffff; border-radius:16px; border:1px dashed #cbd5e1;">
+                        <div style="font-size:2.5rem; margin-bottom:8px;">📞</div>
+                        <div style="font-weight:700; color:#0f172a; margin-bottom:4px;">No Call Records Yet</div>
+                        <div style="font-size:0.82rem; color:#64748b;">Make a call using the keypad to connect with friends, family, and businesses across Nigeria.</div>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = data.calls.map(c => {
+                const dur = parseInt(c.duration_seconds || 0);
+                const mins = Math.floor(dur / 60);
+                const secs = dur % 60;
+                const durStr = dur > 0 ? (mins > 0 ? `${mins}m ${secs}s` : `${secs}s`) : '0s';
+                const cost = parseFloat(c.cost || 0).toFixed(2);
+                const isSuccess = c.status === 'completed' || dur > 0;
+
+                return `
+                    <div style="background:#ffffff; border:1px solid var(--border-light); border-radius:14px; padding:12px 14px; display:flex; align-items:center; justify-content:space-between; box-shadow:0 1px 4px rgba(0,0,0,0.03);">
+                        <div style="display:flex; align-items:center; gap:12px;">
+                            <div style="width:38px; height:38px; border-radius:50%; background:${isSuccess ? '#eff6ff' : '#fef2f2'}; color:${isSuccess ? '#1d4ed8' : '#ef4444'}; display:flex; align-items:center; justify-content:center; font-size:1.1rem;">
+                                ${isSuccess ? '📞' : '📵'}
+                            </div>
+                            <div>
+                                <div style="font-weight:800; font-size:0.92rem; color:#0f172a;">${escapeHtml(c.destination_number || 'Unknown')}</div>
+                                <div style="font-size:0.75rem; color:#64748b;">${escapeHtml(c.destination_country || 'Nigeria')} • ${escapeHtml(c.created_at || '')}</div>
+                            </div>
+                        </div>
+                        <div style="text-align:right;">
+                            <div style="font-weight:800; font-size:0.9rem; color:#ef4444;">-₦${cost}</div>
+                            <div style="font-size:0.75rem; color:#64748b; font-weight:600;">⏱️ ${durStr}</div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        } catch (err) {
+            console.error('Error loading call history:', err);
+        }
     }
 
     if (btnMakeCall) btnMakeCall.addEventListener('click', startCall);
@@ -2025,6 +2225,7 @@ document.addEventListener('DOMContentLoaded', () => {
         renderAdminStats();
         renderAdminUsers();
         renderAdminTransfers();
+        renderAdminTelephony();
         populateAdminChatUserDropdown();
         renderAdminChatStream();
     }
@@ -2035,12 +2236,14 @@ document.addEventListener('DOMContentLoaded', () => {
         const statProfit = document.getElementById('admin-stat-profit');
         const tabUserCount = document.getElementById('admin-tab-user-count');
         const tabTransferCount = document.getElementById('admin-tab-transfer-count');
+        const tabCallCount = document.getElementById('admin-tab-call-count');
         const tabMsgCount = document.getElementById('admin-tab-msg-count');
 
         const usersCount = (adminData.users || []).length;
         const totalDeposits = (adminData.metrics && adminData.metrics.total_gross_deposits) || 10000;
-        const totalProfit = (adminData.metrics && adminData.metrics.total_platform_revenue) || 1000;
+        const totalProfit = (adminData.metrics && adminData.metrics.net_platform_profit) || 1000;
         const ledgerCount = (adminData.ledger || []).length;
+        const callCount = (adminData.call_summary && adminData.call_summary.total_calls) || 0;
         const msgCount = (adminData.support_messages || []).length;
 
         if (statUsers) statUsers.textContent = usersCount;
@@ -2048,7 +2251,73 @@ document.addEventListener('DOMContentLoaded', () => {
         if (statProfit) statProfit.textContent = `₦${parseFloat(totalProfit).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
         if (tabUserCount) tabUserCount.textContent = usersCount;
         if (tabTransferCount) tabTransferCount.textContent = ledgerCount;
+        if (tabCallCount) tabCallCount.textContent = callCount;
         if (tabMsgCount) tabMsgCount.textContent = msgCount;
+    }
+
+    function renderAdminTelephony() {
+        const totalMins = document.getElementById('admin-telephony-total-mins');
+        const totalRev = document.getElementById('admin-telephony-total-rev');
+        const carrierCost = document.getElementById('admin-telephony-carrier-cost');
+        const margin = document.getElementById('admin-telephony-margin');
+        const badge = document.getElementById('admin-pressone-badge');
+        const sidInput = document.getElementById('admin-pressone-sid');
+        const tokenInput = document.getElementById('admin-pressone-token');
+        const fromInput = document.getElementById('admin-pressone-from');
+        const retailInput = document.getElementById('admin-call-retail-rate');
+        const carrierInput = document.getElementById('admin-call-carrier-rate');
+        const callsContainer = document.getElementById('admin-calls-list');
+
+        const summary = adminData.call_summary || {};
+        const config = (adminData.configuration && adminData.configuration.pressone) || {};
+
+        if (totalMins) totalMins.textContent = `${summary.total_minutes || 0} min`;
+        if (totalRev) totalRev.textContent = `₦${parseFloat(summary.total_revenue || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+        if (carrierCost) carrierCost.textContent = `₦${parseFloat(summary.total_carrier_cost || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+        if (margin) margin.textContent = `₦${parseFloat(summary.total_margin || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}`;
+
+        if (badge) {
+            if (config.is_configured) {
+                badge.style.background = '#dcfce7';
+                badge.style.color = '#15803d';
+                badge.textContent = '🟢 Connected & Active';
+            } else {
+                badge.style.background = '#fef3c7';
+                badge.style.color = '#b45309';
+                badge.textContent = '🟡 Setup Required';
+            }
+        }
+
+        if (sidInput && !sidInput.value) sidInput.value = config.account_sid || '';
+        if (fromInput && !fromInput.value) fromInput.value = config.from_number || '';
+        if (retailInput && !retailInput.value) retailInput.value = (adminData.configuration && adminData.configuration.nigeria_call_rate_per_min) || '12.00';
+        if (carrierInput && !carrierInput.value) carrierInput.value = (adminData.configuration && adminData.configuration.carrier_wholesale_cost_per_min) || '8.50';
+
+        if (callsContainer) {
+            const recentCalls = summary.recent_calls || [];
+            if (recentCalls.length === 0) {
+                callsContainer.innerHTML = '<div style="text-align:center; padding:20px; color:#94a3b8; font-size:0.85rem;">No carrier calls recorded yet.</div>';
+            } else {
+                callsContainer.innerHTML = recentCalls.map(c => {
+                    const dur = parseInt(c.duration_seconds || 0);
+                    const mins = Math.floor(dur / 60);
+                    const secs = dur % 60;
+                    const durStr = dur > 0 ? (mins > 0 ? `${mins}m ${secs}s` : `${secs}s`) : '0s';
+                    return `
+                        <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:10px 12px; display:flex; justify-content:space-between; align-items:center; font-size:0.82rem;">
+                            <div>
+                                <div style="font-weight:700; color:#0f172a;">${escapeHtml(c.destination_number || 'Unknown')} (${escapeHtml(c.destination_country || 'Nigeria')})</div>
+                                <div style="font-size:0.72rem; color:#64748b;">${escapeHtml(c.created_at || '')} • Ref: <code>${c.call_sid ? c.call_sid.substring(0, 16) + '...' : 'PSTN'}</code></div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="font-weight:800; color:#1d4ed8;">₦${parseFloat(c.cost || 0).toFixed(2)} <span style="font-size:0.7rem; color:#16a34a;">(+₦${parseFloat(c.platform_margin || 0).toFixed(2)} margin)</span></div>
+                                <div style="font-size:0.72rem; color:#64748b;">⏱️ ${durStr} • Wholesale: ₦${parseFloat(c.carrier_cost || 0).toFixed(2)}</div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            }
+        }
     }
 
     function renderAdminUsers() {
@@ -2435,8 +2704,45 @@ document.addEventListener('DOMContentLoaded', () => {
         stream.scrollTop = stream.scrollHeight;
     }
 
+    const formAdminPressOne = document.getElementById('form-admin-pressone');
+    if (formAdminPressOne) {
+        formAdminPressOne.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const sid = (document.getElementById('admin-pressone-sid')?.value || '').trim();
+            const token = (document.getElementById('admin-pressone-token')?.value || '').trim();
+            const from = (document.getElementById('admin-pressone-from')?.value || '').trim();
+            const retail = parseFloat(document.getElementById('admin-call-retail-rate')?.value || 12.0);
+            const carrier = parseFloat(document.getElementById('admin-call-carrier-rate')?.value || 8.5);
+
+            try {
+                const res = await fetch('api/admin.js', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        action: 'update_settings',
+                        pressone_account_sid: sid,
+                        pressone_auth_token: token,
+                        pressone_from_number: from,
+                        nigeria_call_rate_per_min: retail,
+                        carrier_wholesale_cost_per_min: carrier
+                    })
+                });
+                const d = await res.json();
+                if (d.success) {
+                    showToast('PressOne Telephony Settings saved successfully!', 'success');
+                    loadAdminPortalData(true);
+                } else {
+                    showToast(d.message || 'Failed to save settings', 'error');
+                }
+            } catch (err) {
+                showToast('Failed to save settings: ' + err.message, 'error');
+            }
+        });
+    }
+
     initSession();
     renderContacts();
     renderRates();
+    loadCallHistory();
     updateDialerDisplay();
 });
