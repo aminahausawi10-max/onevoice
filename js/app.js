@@ -588,10 +588,23 @@ document.addEventListener('DOMContentLoaded', () => {
                     const finalUser = Object.assign({}, registeredUser, data.user || {});
                     saveUserToLocalDb(finalUser);
                     setAuthenticatedUI(finalUser);
-                    showToast(`Welcome, ${name}! Your account is registered & saved.`, 'success');
+                    if (data.is_existing) {
+                        showToast(`Welcome back, ${finalUser.name}! Logging you into your dashboard.`, 'success');
+                    } else {
+                        showToast(`Welcome, ${name}! Your account is registered & saved.`, 'success');
+                    }
                     navigateToPage('home');
                 } else if (data.message && data.message.includes('already exists')) {
-                    showToast(data.message, 'error');
+                    // Smooth fallback: account is already registered! Log the user in directly
+                    const localMatch = localUsers.find(u => {
+                        const uPhone = (u.phone || '').replace(/[^0-9]/g, '').slice(-10);
+                        return (u.email && u.email.toLowerCase() === email.toLowerCase()) || (normPhone && uPhone === normPhone);
+                    }) || registeredUser;
+
+                    saveUserToLocalDb(localMatch);
+                    setAuthenticatedUI(localMatch);
+                    showToast(`Welcome back, ${localMatch.name || name}! Logging you into your account.`, 'success');
+                    navigateToPage('home');
                 } else {
                     setAuthenticatedUI(registeredUser);
                     showToast(`Welcome, ${name}! Your account is ready.`, 'success');

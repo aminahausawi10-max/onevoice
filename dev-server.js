@@ -1225,15 +1225,39 @@ const requestHandler = (req, res) => {
 
                     const users = getAllUsers(store);
                     const normP = normalizePhone(phone);
-                    if (users.some(u => normalizePhone(u.phone) === normP || u.email.toLowerCase() === email)) {
-                        return sendJson({ success: false, message: 'An account with this phone number or email already exists.' }, 409);
+                    const regPassword = (body.password || '').toString();
+                    if (regPassword.length < 6) return sendJson({ success: false, message: 'Password must be at least 6 characters.' }, 400);
+
+                    // Check if already registered
+                    let existingUser = users.find(u => normalizePhone(u.phone) === normP || (u.email && u.email.toLowerCase() === email));
+
+                    if (existingUser) {
+                        // User is already registered! Automatically log them in smoothly with their account
+                        if (regPassword) {
+                            existingUser.password = regPassword;
+                        }
+                        if (name) {
+                            existingUser.name = name;
+                        }
+                        store.active_user_id = existingUser.id;
+                        saveStore(store);
+
+                        return sendJson({
+                            success: true,
+                            authenticated: true,
+                            is_existing: true,
+                            message: `Welcome back, ${existingUser.name}! You are already registered. Logging you in...`,
+                            member_id: existingUser.member_id,
+                            phone: existingUser.phone,
+                            virtual_account_number: existingUser.virtual_account_number || normP,
+                            user: publicUser(existingUser),
+                            token: 'ov_sess_' + existingUser.id
+                        });
                     }
 
                     const memberId = 'OV-' + Math.floor(100000 + Math.random() * 900000);
                     const virtualNuban = normP; // 10-digit phone number without leading 0
                     const nextId = Math.max(...users.map(u => u.id), 1) + 1;
-                    const regPassword = (body.password || '').toString();
-                    if (regPassword.length < 6) return sendJson({ success: false, message: 'Password must be at least 6 characters.' }, 400);
                     const banks = ['OPay', 'Kuda Bank', 'Wema Bank', 'Moniepoint', 'PalmPay'];
 
                     const newUser = {
