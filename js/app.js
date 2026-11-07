@@ -210,12 +210,12 @@ document.addEventListener('DOMContentLoaded', () => {
         const isAdmin = currentUser && (currentUser.role === 'admin' || currentUser.email === 'admin@gmail.com');
         if (pageName === 'admin') {
             if (!isAdmin) {
-                showToast('Access denied: Administrator login required.', 'error');
-                if (currentUser) {
-                    navigateToPage('home');
-                } else {
-                    navigateToPage('login');
-                }
+                showToast('Admin login required.', 'info');
+                navigateToPage('login');
+                const emailInput = document.getElementById('login-email');
+                if (emailInput) emailInput.value = 'admin@gmail.com';
+                const passInput = document.getElementById('login-password');
+                if (passInput) passInput.value = 'admin123';
                 return;
             }
         }
@@ -2183,15 +2183,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Boot & Initial Session Check
     async function initSession() {
+        const hash = (window.location.hash || '').replace('#', '').toLowerCase();
+        const urlParams = new URLSearchParams(window.location.search);
+        const targetParam = hash || urlParams.get('page');
+
         const savedUserStr = localStorage.getItem('ov_current_user');
         let savedUser = null;
         if (savedUserStr) {
             try { savedUser = JSON.parse(savedUserStr); } catch (e) {}
         }
 
-        // For new visitors / unauthenticated users: ALWAYS start on Install Gate!
+        // For new visitors / unauthenticated users:
         if (!savedUser) {
-            setUnauthenticatedUI();
+            if (targetParam === 'admin') {
+                navigateToPage('login');
+                const emailInput = document.getElementById('login-email');
+                if (emailInput) emailInput.value = 'admin@gmail.com';
+                const passInput = document.getElementById('login-password');
+                if (passInput) passInput.value = 'admin123';
+                showToast('Admin Portal: Click Sign In to enter', 'info');
+            } else {
+                setUnauthenticatedUI();
+            }
             return;
         }
 
@@ -2203,12 +2216,14 @@ document.addEventListener('DOMContentLoaded', () => {
             if (data.success && data.authenticated && data.user) {
                 setAuthenticatedUI(data.user);
                 const isAdmin = data.user.role === 'admin' || data.user.email === 'admin@gmail.com';
-                navigateToPage(isAdmin ? 'admin' : 'home');
+                const dest = targetParam || (isAdmin ? 'admin' : 'home');
+                navigateToPage(dest);
             } else if (savedUser) {
                 // Keep savedUser session active even if serverless instance was recycled
                 setAuthenticatedUI(savedUser);
                 const isAdmin = savedUser.role === 'admin' || savedUser.email === 'admin@gmail.com';
-                navigateToPage(isAdmin ? 'admin' : 'home');
+                const dest = targetParam || (isAdmin ? 'admin' : 'home');
+                navigateToPage(dest);
             } else {
                 setUnauthenticatedUI();
             }
@@ -2216,7 +2231,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if (savedUser) {
                 setAuthenticatedUI(savedUser);
                 const isAdmin = savedUser.role === 'admin' || savedUser.email === 'admin@gmail.com';
-                navigateToPage(isAdmin ? 'admin' : 'home');
+                const dest = targetParam || (isAdmin ? 'admin' : 'home');
+                navigateToPage(dest);
             } else {
                 setUnauthenticatedUI();
             }
@@ -2879,6 +2895,11 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         });
     }
+
+    window.addEventListener('hashchange', () => {
+        const h = (window.location.hash || '').replace('#', '').toLowerCase();
+        if (h) navigateToPage(h);
+    });
 
     initSession();
     renderContacts();
