@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!isAdmin) {
                 showToast('Admin login required.', 'info');
                 navigateToPage('login');
-                const emailInput = document.getElementById('login-email');
+                const emailInput = document.getElementById('login-identifier') || document.getElementById('login-email');
                 if (emailInput) emailInput.value = 'admin@gmail.com';
                 const passInput = document.getElementById('login-password');
                 if (passInput) passInput.value = 'admin123';
@@ -2197,7 +2197,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (!savedUser) {
             if (targetParam === 'admin') {
                 navigateToPage('login');
-                const emailInput = document.getElementById('login-email');
+                const emailInput = document.getElementById('login-identifier') || document.getElementById('login-email');
                 if (emailInput) emailInput.value = 'admin@gmail.com';
                 const passInput = document.getElementById('login-password');
                 if (passInput) passInput.value = 'admin123';
